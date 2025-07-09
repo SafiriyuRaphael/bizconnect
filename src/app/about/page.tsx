@@ -240,7 +240,7 @@ export default function pages() {
         {/* Closing CTA */}
         <div className="text-center mt-16">
           <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
-            At BizConnect, we're committed to building a reliable, central
+            At BizConnect, we&apos;re committed to building a reliable, central
             platform where your transactions are simplified and your connections
             are strengthened.
           </p>

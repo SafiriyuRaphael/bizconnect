@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FormErrors, RegisterData } from '../../types';
 import { useRouter } from 'next/navigation';
+import { uploadCloudinary } from '@/lib/cloudinary/uploadClodinary';
 
 export default function useRegister() {
     const router = useRouter()
@@ -21,22 +22,25 @@ export default function useRegister() {
         dateOfBirth: "",
         agreedToTerms: false,
         userType: "customer" as "customer" | "business",
+        logo: null
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [errorModal, setErrorModal] = useState(false)
-    const [errorMessage, setErrorMessage] = useState("")
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [modalType, setModalType] = useState<"error" | "warning" | "info" | "success">("info")
+    const [modalMessage, setModalMessage] = useState("")
     const [isSubmitting, setIssubmitting] = useState(false)
 
     const onClose = () => {
-        setErrorModal(false)
+        setIsModalOpen(false)
     }
 
     const businessCategories = [
         { category: "Fashion & Clothing", value: "fashion" },
         { category: "Electronics & Tech", value: "electronics" },
         { category: "Beauty & Personal Care", value: "beauty" },
-        { category: "Home & Garden", value: "food" },
+        { category: "Home & Garden", value: "home" },
+        { category: "Food & Beverages", value: "food" },
         { category: "Health & Wellness", value: "health" },
         { category: "Automotive", value: "automotive" },
         { category: "Sports & Recreation", value: "sports" },
@@ -95,7 +99,7 @@ export default function useRegister() {
                 setErrors((prev) => ({ ...prev, logo: "Please upload an image file" }));
                 return;
             }
-            setLogoFile(file);
+            setLogoFile(file)
             setErrors((prev) => ({ ...prev, logo: "" }));
         }
     };
@@ -141,19 +145,27 @@ export default function useRegister() {
         e.preventDefault();
         if (validateForm()) {
             console.log("Form submitted:", formData);
-
+            const logo_url = await uploadCloudinary(logoFile)
+            const updatedFormData = { ...formData, logo: logo_url };
             const res = await fetch("/api/auth/register", {
                 method: "POST",
-                body: JSON.stringify(formData),
+                body: JSON.stringify(updatedFormData),
                 headers: { "Content-Type": "application/json" },
             });
-            // Handle registration logic here
+
+            // registration logic here
             if (res.ok) {
-                router.push("/auth/login")
+                setModalMessage("Registration successful! Redirecting you to the login page...");
+                setIsModalOpen(true)
+                setModalType("success")
+                setTimeout(() => {
+                    router.push("/auth/login")
+                }, 4000)
             } else {
                 const { error } = await res.json();
-                setErrorMessage(error)
-                setErrorModal(true)
+                setModalMessage(error)
+                setIsModalOpen(true)
+                setModalType("error")
             }
         }
         setIssubmitting(false)
@@ -167,6 +179,6 @@ export default function useRegister() {
         handleLogoUpload,
         logoFile,
         errors,
-        businessCategories, router, errorMessage, errorModal, onClose, isSubmitting
+        businessCategories, router, modalMessage, isModalOpen, onClose, isSubmitting, modalType
     }
 }

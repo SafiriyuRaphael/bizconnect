@@ -6,8 +6,6 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowLeft,
-  Eye,
-  EyeOff,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PasswordField } from "@/app/components/ui/PasswordField";
@@ -58,7 +56,7 @@ export default function ResetPassword() {
         body: JSON.stringify({ token, email }),
       });
       setIsValidToken(response.ok);
-    } catch (error) {
+    } catch (_) {
       setIsValidToken(false);
     }
   };
@@ -144,7 +142,7 @@ export default function ResetPassword() {
               "Failed to reset password. Please try again.",
           });
         }
-      } catch (error) {
+      } catch (_) {
         setErrors({
           general: "Network error. Please check your connection and try again.",
         });

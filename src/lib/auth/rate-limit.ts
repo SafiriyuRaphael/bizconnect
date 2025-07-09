@@ -7,7 +7,11 @@ export const limiter = new RateLimiter({
   fireImmediately: true
 });
 
-export async function checkRateLimit(ip: string): Promise<boolean> {
+// export async function checkRateLimit(ip: string): Promise<boolean> {
+//   const remainingTokens = await limiter.removeTokens(1);
+//   return remainingTokens < 0;
+// }
+export async function checkRateLimit(): Promise<boolean> {
   const remainingTokens = await limiter.removeTokens(1);
   return remainingTokens < 0;
 }

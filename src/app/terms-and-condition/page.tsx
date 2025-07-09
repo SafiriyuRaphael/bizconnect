@@ -51,7 +51,7 @@ export default function TermsAndConditions() {
               <p className="text-blue-800 leading-relaxed">
                 Welcome to BizConnect! These Terms and Conditions govern your
                 use of our platform. BizConnect helps you list, manage, and
-                transact, whether you're offering services or shopping for them.
+                transact, whether you&apos;re offering services or shopping for them.
                 By using BizConnect, you agree to be bound by these terms.
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function TermsAndConditions() {
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                   <p className="text-gray-800 text-sm mb-2">
                     <strong>Service Disclaimer:</strong> BizConnect is provided
-                    "as is" without warranties. We do not guarantee
+                    &quot;as is&quot; without warranties. We do not guarantee
                     uninterrupted service or the quality of listed services.
                   </p>
                   <p className="text-gray-800 text-sm mb-0">

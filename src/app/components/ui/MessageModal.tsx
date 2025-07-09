@@ -6,6 +6,7 @@ import {
   XCircle,
   Info,
   CheckCircle,
+  LucideIcon,
 } from "lucide-react";
 
 interface MessageModalProps {
@@ -22,7 +23,7 @@ interface MessageModalProps {
 }
 
 interface IconAndColors {
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   bgGradient: string;
   borderColor: string;
   iconBg: string;
@@ -33,7 +34,7 @@ interface IconAndColors {
   glowColor: string;
 }
 
-export default function EnhancedMessageModal({
+export default function MessageModal({
   isOpen,
   onClose,
   title = "Notification",
@@ -157,15 +158,18 @@ export default function EnhancedMessageModal({
 
   useEffect(() => {
     if (isOpen) {
-      const handler = (e: any) => handleKeyDown(e);
-      document.addEventListener("keydown", handler);
+      const handler = (e: KeyboardEvent<HTMLDivElement>) => handleKeyDown(e);
+      document.addEventListener("keydown", handler as unknown as EventListener);
       document.body.style.overflow = "hidden";
       return () => {
-        document.removeEventListener("keydown", handler);
+        document.removeEventListener(
+          "keydown",
+          handler as unknown as EventListener
+        );
         document.body.style.overflow = "unset";
       };
     }
-  }, [isOpen, closable]);
+  }, [isOpen, closable, handleKeyDown]);
 
   if (!isVisible) return null;
 
@@ -400,7 +404,7 @@ function ModalDemo() {
       </div>
 
       {/* Modals */}
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "error"}
         onClose={closeModal}
         type="error"
@@ -408,7 +412,7 @@ function ModalDemo() {
         message="We encountered an error while processing your request. Please check your connection and try again."
       />
 
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "warning"}
         onClose={closeModal}
         type="warning"
@@ -416,7 +420,7 @@ function ModalDemo() {
         message="This action may have unintended consequences. Please review your settings before proceeding."
       />
 
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "success"}
         onClose={closeModal}
         type="success"
@@ -424,7 +428,7 @@ function ModalDemo() {
         message="Your changes have been saved successfully. You can now continue with your workflow."
       />
 
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "info"}
         onClose={closeModal}
         type="info"
@@ -432,7 +436,7 @@ function ModalDemo() {
         message="We've updated our privacy policy. Please take a moment to review the changes that affect how we handle your data."
       />
 
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "autoClose"}
         onClose={closeModal}
         type="info"
@@ -442,7 +446,7 @@ function ModalDemo() {
         autoCloseDelay={3000}
       />
 
-      <EnhancedMessageModal
+      <MessageModal
         isOpen={activeModal === "withActions"}
         onClose={closeModal}
         type="warning"

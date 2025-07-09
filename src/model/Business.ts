@@ -1,6 +1,8 @@
 // models/Business.js
 import mongoose from 'mongoose';
 import User from './User';
+import { reviewSchema } from '@/schema/business-schema/ReviewSchema';
+
 
 const businessSchema = new mongoose.Schema({
   businessName: {
@@ -32,9 +34,27 @@ const businessSchema = new mongoose.Schema({
     trim: true,
     match: [/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/, 'Invalid URL'],
   },
-  logo: {
-    type: String, // Store path or URL
+  priceRange: {
+    min: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
+    max: {
+      type: Number,
+      default: 0,
+      required: true,
+    },
   },
+  deliveryTime: {
+    type: Number,
+    default: 0,
+  },
+  reviews: [reviewSchema],
+  verifiedBusiness: {
+    type: Boolean,
+    default: false
+  }
 });
 
 export const Business = mongoose.models.Business || User.discriminator('Business', businessSchema);

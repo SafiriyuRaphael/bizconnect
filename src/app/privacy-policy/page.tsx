@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
             {/* Introduction */}
             <div className="mb-8 p-6 bg-purple-50 rounded-xl border border-purple-200">
               <p className="text-purple-800 leading-relaxed">
-                At BizConnect, we're committed to protecting your privacy and
+                At BizConnect, we&apos;re committed to protecting your privacy and
                 ensuring transparency about how we collect, use, and safeguard
                 your personal information. This Privacy Policy explains our
                 practices regarding data collection and usage when you use our
@@ -171,7 +171,7 @@ export default function PrivacyPolicy() {
                   <p className="text-yellow-800 text-sm mb-0">
                     <strong>Legal Requirements:</strong> We may disclose
                     information when required by law or to protect our rights
-                    and users' safety.
+                    and users&apos; safety.
                   </p>
                 </div>
               </section>
@@ -297,7 +297,7 @@ export default function PrivacyPolicy() {
               {/* Section 7 */}
               <section className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  7. Children's Privacy
+                  7. Children&apos;s Privacy
                 </h2>
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                   <p className="text-purple-800 text-sm mb-0">
@@ -382,7 +382,7 @@ export default function PrivacyPolicy() {
                   Your Privacy Matters
                 </p>
                 <p className="text-purple-100">
-                  We're committed to protecting your personal information and
+                  We&apos;re committed to protecting your personal information and
                   being transparent about our data practices. Contact us anytime
                   with questions or concerns.
                 </p>

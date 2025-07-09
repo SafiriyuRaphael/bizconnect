@@ -6,7 +6,6 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowLeft,
-  User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { InputField } from "@/app/components/ui/InputField";
@@ -72,7 +71,7 @@ export default function ForgotPassword() {
               "Failed to send reset email. Please try again.",
           });
         }
-      } catch (error) {
+      } catch (_) {
         setErrors({
           general: "Network error. Please check your connection and try again.",
         });
@@ -104,7 +103,7 @@ export default function ForgotPassword() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
               Check Your Email
             </h1>
-            <p className="text-gray-600">We've sent a password reset link to</p>
+            <p className="text-gray-600">We&apos;ve sent a password reset link to</p>
             <p className="text-gray-800 font-medium">{email}</p>
           </div>
 
@@ -119,7 +118,7 @@ export default function ForgotPassword() {
                 </div>
 
                 <div className="text-sm text-gray-600">
-                  <p>Didn't receive the email? Check your spam folder or</p>
+                  <p>Didn&apos;t receive the email? Check your spam folder or</p>
                   <button
                     type="button"
                     onClick={handleResendEmail}
@@ -165,7 +164,7 @@ export default function ForgotPassword() {
             Forgot Password?
           </h1>
           <p className="text-gray-600">
-            No worries! Enter your email and we'll send you a reset link.
+            No worries! Enter your email and we&apos;ll send you a reset link.
           </p>
         </div>
 

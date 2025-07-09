@@ -6,11 +6,12 @@ import { Customer } from '@/model/Customer'
 import { Business } from '@/model/Business'
 import { RegisterData } from '../../../../../types'
 
+
 export async function POST(req: Request) {
     try {
         const data = await req.json()
 
-        const { email, password, username, phone, userType, businessCategory, businessName, businessDescription, fullName, agreedToTerms, businessAddress, dateOfBirth, gender, deliveryAddress, website, confirmPassword }:RegisterData = data
+        const { email, password, username, phone, userType, businessCategory, businessName, businessDescription, fullName, agreedToTerms, businessAddress, dateOfBirth, gender, deliveryAddress, website, confirmPassword, logo }: RegisterData = data
         console.log(userType);
 
         if (password !== confirmPassword) return NextResponse.json({ error: "Password mismatched" }, { status: 409 })
@@ -71,6 +72,8 @@ export async function POST(req: Request) {
                 businessAddress,
                 businessDescription,
                 website: website || "",
+                userType,
+                logo
             });
         }
 

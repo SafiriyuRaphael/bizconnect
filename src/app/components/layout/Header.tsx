@@ -1,15 +1,20 @@
 "use client";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import AuthButton from "../ui/AuthButton";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  useEffect(() => {}, [pathname]);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-md bg-white/95 border-b border-gray-200/50 shadow-lg shadow-black/10">
@@ -35,7 +40,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <ul className="flex gap-2 items-center">
-              {["Home", "About", "Categories"].map((item, index) => (
+              {["Home", "About"].map((item) => (
                 <li key={item}>
                   <Link
                     href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
@@ -52,22 +57,7 @@ export default function Navbar() {
             </ul>
 
             {/* Sign In Button */}
-            <Link
-              href="/auth/login"
-              className="relative px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 transition-all duration-300 group overflow-hidden border border-white/10"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Sign In
-                <ArrowRight
-                  size={16}
-                  className="group-hover:translate-x-1 transition-transform duration-300"
-                />
-              </span>
-              {/* Animated background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </Link>
+            <AuthButton />
           </nav>
 
           {/* Mobile Menu Button */}
@@ -105,7 +95,7 @@ export default function Navbar() {
         >
           <nav className="py-4 border-t border-gray-200">
             <ul className="space-y-2">
-              {["Home", "About", "Categories"].map((item, index) => (
+              {["Home", "About"].map((item) => (
                 <li key={item}>
                   <Link
                     href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
@@ -120,14 +110,7 @@ export default function Navbar() {
 
             {/* Mobile Sign In Button */}
             <div className="pt-4 mt-4 border-t border-gray-200">
-              <Link
-                href="/auth/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
-              >
-                Sign In
-                <ArrowRight size={16} />
-              </Link>
+              <AuthButton />
             </div>
           </nav>
         </div>

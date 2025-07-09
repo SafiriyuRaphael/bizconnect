@@ -1,5 +1,5 @@
 "use client";
-import { HomeIcon, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -24,13 +24,12 @@ export default function Home() {
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [headings.length]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 overflow-hidden pt-28">
       {/* Animated background elements */}
       <div className="absolute inset-0 bg-[url('/homepage.jpg')] bg-cover bg-center opacity-20 bg-blend-overlay"></div>
-
 
       {/* Main Content */}
       <main className="relative z-10 flex flex-col justify-center items-center min-h-[calc(100vh-100px)] text-center px-6">
@@ -66,7 +65,7 @@ export default function Home() {
             <span className="text-blue-400 font-semibold">list</span>,{" "}
             <span className="text-cyan-400 font-semibold">manage</span>, and{" "}
             <span className="text-green-400 font-semibold">transact</span>,
-            whether you're offering services or shopping for them.
+            whether you&apos;re offering services or shopping for them.
           </p>
 
           {/* CTA Button */}

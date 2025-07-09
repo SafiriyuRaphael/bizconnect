@@ -19,9 +19,9 @@ import { SelectField } from "@/app/components/ui/SelectField";
 import { FileUploadField } from "@/app/components/ui/FileUploadField";
 import { CheckboxField } from "@/app/components/ui/CheckBoxField";
 import { FormSection } from "@/app/components/ui/FormSection";
-import ErrorModal from "@/app/components/ui/ErrorModal";
 import Facebook from "../../../../public/icons/Facebook";
 import Google from "../../../../public/icons/Google";
+import MessageModal from "@/app/components/ui/MessageModal";
 
 export default function BizconnectRegister() {
   const {
@@ -35,10 +35,11 @@ export default function BizconnectRegister() {
     errors,
     businessCategories,
     router,
-    errorMessage,
-    errorModal,
+    modalMessage,
+    isModalOpen,
     onClose,
     isSubmitting,
+    modalType
   } = useRegister();
 
   // Transform business categories for SelectField
@@ -57,11 +58,11 @@ export default function BizconnectRegister() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 pt-20">
-      <ErrorModal
-        isOpen={errorModal}
+      <MessageModal
+        isOpen={isModalOpen}
         onClose={onClose}
-        message={errorMessage}
-        type="error"
+        message={modalMessage}
+        type={modalType}
         autoClose
         autoCloseDelay={4000}
       />
