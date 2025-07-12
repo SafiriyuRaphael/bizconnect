@@ -3,16 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
 import ProfileComponent from "../components/ProfileEditSystem";
-import getUserByUsername from "@/lib/profile/getUsersByUsername";
+import getAllUserId from "@/lib/profile/getAllUserId";
+import getUserById from "@/lib/profile/getUserById";
 
 type Params = {
-  params: Promise<{ username: string }>;
+  params: Promise<{ usersId: string }>;
 };
 
 export async function generateStaticParams() {
-  const usernames = await getAllUsername();
-  return usernames.usernames.map((username: string) => ({
-    username,
+  const data = await getAllUserId();
+  return data.usersId.map((id: string) => ({
+    usersId: id,
   }));
 }
 
@@ -23,13 +24,13 @@ export default async function ProfilePage({ params }: Params) {
     redirect("/auth/login");
   }
 
-  const username = (await params).username;
+  const userId = (await params).usersId;
 
-  if (session.user.username !== username) {
-    redirect("/unauthorized");
+  if (session.user.id !== userId) {
+    redirect("/auth/login");
   }
 
-  const user = await getUserByUsername(session.user.username);
+  const user = await getUserById(session.user.id);
 
   if (!user) {
     redirect("/not-found");

@@ -1,4 +1,5 @@
 import NextAuth, { DefaultSession } from "next-auth"
+import React from "react";
 
 declare module "next-auth" {
     interface Session {
@@ -92,11 +93,10 @@ interface AnyUser {
     };
     deliveryTime?: number;
     verifiedBusiness?: boolean;
-    reviews?: {
-        rating: number;
-        comment: string;
-    }[];
+    reviews?: BusinessReviewsProps[];
 }
+
+
 
 interface RegisterData {
     fullName: string;
@@ -149,10 +149,13 @@ interface BusinessPriceRangeProps {
 }
 
 interface BusinessReviewsProps {
+    rating: number;
+    comment: string;
+    username: string
+    displayPic: string
     userId: string
-    rating: number
-    comment: string
     createdAt: Date
+    helpful: number
 }
 
 interface BusinessQueryParams {
@@ -177,4 +180,29 @@ type BusinessCategory = {
 interface AllUsernames {
     usernames: string[]
     status: string
+}
+
+interface AllUsernames {
+    _id: string[]
+    status: string
+}
+
+interface PasswordModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (data: any) => void;
+    title?: string
+    variant?: "default" | "premium" | "success" | "warning" | "error";
+    size?: "sm" | "md" | "lg" | "xl";
+    showPattern?: boolean;
+    showGlow?: boolean;
+    blurIntensity?: "light" | "medium" | "heavy";
+}
+
+interface PasswordValidation {
+    minLength: boolean;
+    hasUppercase: boolean;
+    hasLowercase: boolean;
+    hasNumber: boolean;
+    hasSpecialChar: boolean;
 }

@@ -1,3 +1,4 @@
+import { BASEURL } from "@/constants/url";
 import { sendEmail } from "@/lib/auth/sendEmail";
 import User from "@/model/User";
 import { NextResponse } from "next/server";
@@ -24,9 +25,9 @@ export async function POST(req: Request) {
         await user.save();
 
         // (4) Simulate email
-        console.log(`👇 Send this link to user:\nhttp://localhost:3000/reset-password?token=${token}`);
+        console.log(`👇 Send this link to user:\n${BASEURL}/reset-password?token=${token}`);
 
-        const link = `http://localhost:3000/auth/reset-password?token=${token}&email=${email}`;
+        const link = `${BASEURL}/auth/reset-password?token=${token}&email=${email}`;
         const html = `
           <p>Yo 👋,</p>
           <p>Click the link below to reset your password. It expires in 30 mins.</p>

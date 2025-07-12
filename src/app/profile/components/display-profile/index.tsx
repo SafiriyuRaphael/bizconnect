@@ -168,7 +168,7 @@ export default function ProfileDisplay({ profile, userType }: Props) {
                   <InfoCard
                     icon={DollarSign}
                     label="Price Range"
-                    value={`$${profile.priceRange?.min} - $${profile.priceRange?.max}`}
+                    value={`₦${profile.priceRange?.min} - ₦${profile.priceRange?.max}`}
                   />
                   <InfoCard
                     icon={Clock}

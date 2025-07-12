@@ -6,7 +6,7 @@ export async function GET() {
     try {
         await connectToDatabase();
 
-        const users = await User.find({}, "username"); // get only usernames
+        const users = await User.find({ deleted: false }, "username"); 
         const usernames = users.map((user) => user.username);
 
         return NextResponse.json(

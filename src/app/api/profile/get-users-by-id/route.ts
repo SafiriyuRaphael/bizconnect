@@ -1,20 +1,24 @@
 
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import User from "@/model/User";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { username } = await req.json();
-        if (!username) {
+        const { _id } = await req.json();
+        if (!_id) {
             return NextResponse.json(
-                { error: "Username is required" },
+                { error: "user id is required" },
                 { status: 400 }
             );
         }
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
+        }
 
         await connectToDatabase();
-        const user = await User.findOne({ username, deleted: false }).lean();
+        const user = await User.findOne({ _id, deleted: false }).lean();
 
         if (!user) {
             return NextResponse.json(

@@ -45,7 +45,7 @@ export async function GET(req: Request) {
 
         filter["priceRange.min"] = { $lte: maxPrice }; // business min price less than filter max
         filter["priceRange.max"] = { $gte: minPrice }; // business max price more than filter min
-
+        filter.deleted = { $ne: true };
 
         // Sorting
         let sortOption: any = {};
@@ -99,7 +99,7 @@ export async function GET(req: Request) {
                     deliveryTime: 1,
                     verified: 1,
                     averageRating: 1,
-                    verifiedBusiness:1,
+                    verifiedBusiness: 1,
                 }
             }
         ]);

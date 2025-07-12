@@ -3,9 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CldImage } from "next-cloudinary";
-import Image from "next/image";
 import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
+import ProfileImage from "../layout/ProfileImage";
 
 export default function AuthButton() {
   const pathname = usePathname();
@@ -41,7 +40,7 @@ export default function AuthButton() {
   const logo = session.user.logo;
   const businessName = session.user.businessName;
   const name = session.user.name;
-  const username = session.user.username;
+  const userId = session.user.id;
 
   console.log("Session bruh:", session);
 
@@ -49,28 +48,12 @@ export default function AuthButton() {
   const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
 
   return (
-    <Link href={`/profile/${username}`}>
-      {logo ? (
-        <CldImage
-          alt={fallbackAlt}
-          src={logo}
-          width={40}
-          height={40}
-          className="rounded-full hover:scale-110 transition-transform duration-300"
-          crop={{
-            type: "thumb",
-            source: true,
-          }}
-        />
-      ) : (
-        <Image
-          src={fallbackSrc}
-          alt={fallbackAlt}
-          width={40}
-          height={40}
-          className="rounded-full hover:scale-110 transition-transform duration-300"
-        />
-      )}
+    <Link href={`/profile/${userId}`}>
+      <ProfileImage
+        fallbackAlt={fallbackAlt}
+        fallbackSrc={fallbackSrc}
+        logo={logo}
+      />
     </Link>
   );
 }

@@ -159,7 +159,7 @@ export default function useRegister() {
                 setIsModalOpen(true)
                 setModalType("success")
                 setTimeout(() => {
-                    router.push("/auth/login")
+                    router.push("/dashboard")
                 }, 4000)
             } else {
                 const { error } = await res.json();

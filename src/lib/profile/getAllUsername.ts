@@ -1,8 +1,8 @@
+import { BASEURL } from "@/constants/url";
 import { AllUsernames } from "../../../types";
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default async function getAllUsername() {
-    const res = await fetch(`${baseUrl}/api/profile/all-username`, {
+    const res = await fetch(`${BASEURL}/api/profile/all-username`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });

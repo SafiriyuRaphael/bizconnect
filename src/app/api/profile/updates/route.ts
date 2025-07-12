@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import User from "@/model/User";
+import { Business } from "@/model/Business";
+import { Customer } from "@/model/Customer";
 
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { username, updates } = body;
+        const { userId, updates } = body;
 
         const fieldErrors: Record<string, string> = {};
 
-        if (!username) {
-            fieldErrors.username = "Username is required";
+        if (!userId) {
+            fieldErrors.general = "user id is required";
         }
 
         if (!updates) {
@@ -35,7 +37,7 @@ export async function PUT(req: Request) {
 
         await connectToDatabase();
 
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ _id: userId });
         if (!existingUser) {
             return NextResponse.json({ errors: { username: "User not found" } }, { status: 404 });
         }
@@ -61,6 +63,7 @@ export async function PUT(req: Request) {
 
         const allowedFields = [
             "fullName",
+            "username",
             "email",
             "phone",
             "deliveryAddress",
@@ -75,14 +78,18 @@ export async function PUT(req: Request) {
             "logo"
         ];
 
+        const ModelToUse = existingUser.__t === "Business" ? Business
+            : existingUser.__t === "Customer" ? Customer
+                : User;
+
         const sanitizedUpdates = Object.fromEntries(
             Object.entries(updates).filter(([key]) =>
                 allowedFields.includes(key)
             )
         );
 
-        const updatedUser = await User.findOneAndUpdate(
-            { username },
+        const updatedUser = await ModelToUse.findOneAndUpdate(
+            { _id: userId },
             { $set: sanitizedUpdates },
             { new: true }
         ).lean();

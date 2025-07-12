@@ -4,22 +4,33 @@ import { Edit3, Star, Shield } from "lucide-react";
 import { AnyUser, ProfileData } from "../../../../types";
 import ProfileDisplay from "./display-profile";
 import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
-import Image from "next/image";
-import { CldImage } from "next-cloudinary";
 import { uploadCloudinary } from "@/lib/cloudinary/uploadClodinary";
 import EditProfile from "./edit-profile";
+import ProfileImage from "@/app/components/layout/ProfileImage";
+import MessageModal from "@/app/components/ui/MessageModal";
+import ChangePasswordModal from "@/app/components/modals/ChangePassword";
+import InputPasswordModal from "@/app/components/modals/InputPassword";
+import { signOut } from "next-auth/react";
 
 export default function ProfileComponent({ user }: { user: AnyUser }) {
   const [userType, setUserType] = useState("customer");
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({});
-
+  const [modalType, setIsModalType] = useState<
+    "error" | "warning" | "info" | "success"
+  >("success");
   const [message, setMessage] = useState("");
+  const [title, setTitle] = useState("");
   const [errors, setErrors] = useState<ProfileData>({});
+  const [autoClose, setAutoClose] = useState(true);
+  const [actions, setActions] = useState<React.JSX.Element | null>(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const openModal = (type: string) => setActiveModal(type);
+
+  const closeModal = () => setActiveModal(null);
 
   const [uploading, setUploading] = useState(false);
 
-  console.log(`this is user: ${JSON.stringify(user, null, 2)}`);
   const profile = user;
 
   useEffect(() => {
@@ -35,9 +46,6 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    {
-      message;
-    }
 
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -71,8 +79,8 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
           }),
         });
 
-        // optionally reload the page or update state
-        window.location.reload(); // or useRouter().refresh() if on App Router
+       
+        window.location.reload(); 
       }
     } catch (err) {
       console.error("Logo upload failed:", err);
@@ -86,10 +94,111 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   };
 
+  const actionButtons = (
+    <>
+      <button
+        onClick={closeModal}
+        className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        onClick={() => openModal("inputPassword")}
+        className="px-6 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
+      >
+        Confirm
+      </button>
+    </>
+  );
+
+  const handleDeleteModal = () => {
+    setAutoClose(false);
+    setTitle("Confirm Delete");
+    setIsModalType("warning");
+    setMessage(
+      "Are you sure you want to delete this item? This action cannot be undone."
+    );
+    setActions(actionButtons);
+    openModal("message");
+  };
+
+  const handleDeletePassword = async ({ password }: { password: string }) => {
+    const res = await fetch(`/api/profile/delete`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ password }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Delete failed");
+    }
+
+    signOut({ callbackUrl: "/auth/login" });
+  };
+
+  const handleChangePassword = async ({
+    currentPassword,
+    newPassword,
+  }: {
+    currentPassword: string;
+    newPassword: string;
+  }) => {
+    const res = await fetch(`/api/profile/change-password`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Delete failed");
+    }
+
+    setTimeout(() => {
+      setActions(null);
+      setAutoClose(true);
+      setTitle("Password Changed");
+      setIsModalType("success");
+      setMessage("Password Changed Successfully");
+      openModal("message");
+    }, 500);
+  };
+
   const fallbackAlt = profile.businessName || profile.fullName || "User";
   const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 pt-20">
+      <ChangePasswordModal
+        isOpen={activeModal === "changePassword"}
+        onClose={closeModal}
+        onSubmit={handleChangePassword}
+      />
+
+      <MessageModal
+        isOpen={activeModal === "message"}
+        onClose={closeModal}
+        message={message}
+        type={modalType}
+        autoClose={autoClose}
+        autoCloseDelay={5000}
+        showIcon
+        title={title}
+        actions={actions}
+      />
+
+      <InputPasswordModal
+        isOpen={activeModal === "inputPassword"}
+        onClose={closeModal}
+        onSubmit={handleDeletePassword}
+        blurIntensity="medium"
+        showGlow={false}
+        variant="warning"
+        size="md"
+        showPattern={false}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -106,27 +215,11 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                {profile.logo ? (
-                  <CldImage
-                    alt={fallbackAlt}
-                    src={profile.logo}
-                    width={40}
-                    height={40}
-                    className="rounded-full hover:scale-110 transition-transform duration-300"
-                    crop={{
-                      type: "thumb",
-                      source: true,
-                    }}
-                  />
-                ) : (
-                  <Image
-                    src={fallbackSrc}
-                    alt={fallbackAlt}
-                    width={40}
-                    height={40}
-                    className="rounded-full hover:scale-110 transition-transform duration-300"
-                  />
-                )}
+                <ProfileImage
+                  fallbackAlt={fallbackAlt}
+                  fallbackSrc={fallbackSrc}
+                  logo={profile.logo}
+                />
                 <div>
                   <h2 className="text-2xl font-bold">{profile.fullName}</h2>
                   <p className="text-blue-100">@{profile.username}</p>
@@ -187,6 +280,10 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
                 setMessage={setMessage}
                 user={user}
                 userType={userType}
+                openModal={openModal}
+                setIsModalType={setIsModalType}
+                setAutoClose={setAutoClose}
+                setActions={setActions}
               />
             ) : (
               // Display Mode
@@ -201,16 +298,25 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
             Account Actions
           </h3>
           <div className="flex flex-wrap gap-3">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => openModal("changePassword")}
+            >
               Change Password
             </button>
-            <button className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-              Download Data
+            <button
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            >
+              Log Out
             </button>
             <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-              Privacy Settings
+              Download Data
             </button>
-            <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              onClick={handleDeleteModal}
+            >
               Delete Account
             </button>
           </div>

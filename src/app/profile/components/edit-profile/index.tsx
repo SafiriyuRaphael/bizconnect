@@ -2,6 +2,7 @@ import { Save } from "lucide-react";
 import React, { useState } from "react";
 import { AnyUser, ProfileData } from "../../../../../types";
 import { BUSINESSCATEGORIES } from "@/constants/business";
+import { BASEURL } from "@/constants/url";
 
 type Props = {
   setFormData: (value: React.SetStateAction<ProfileData>) => void;
@@ -12,6 +13,12 @@ type Props = {
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   errors: ProfileData;
   user: AnyUser;
+  openModal: (type: string) => void;
+  setIsModalType: React.Dispatch<
+    React.SetStateAction<"success" | "error" | "warning" | "info">
+  >;
+  setAutoClose: React.Dispatch<React.SetStateAction<boolean>>;
+  setActions: React.Dispatch<React.SetStateAction<React.JSX.Element | null>>;
 };
 
 export default function EditProfile({
@@ -23,6 +30,10 @@ export default function EditProfile({
   setMessage,
   userType,
   user,
+  setIsModalType,
+  openModal,
+  setAutoClose,
+  setActions,
 }: Props) {
   const [loading, setLoading] = useState(false);
 
@@ -67,37 +78,52 @@ export default function EditProfile({
 
   const validateForm = () => {
     const newErrors: ProfileData = {};
-
-    // Common validations
-    if (!formData.fullName?.trim()) {
-      newErrors.fullName = "Full name is required";
+    if (formData.phone) {
+      // Common validations
+      if (!formData.fullName?.trim()) {
+        newErrors.fullName = "Full name is required";
+      }
     }
 
-    if (!formData.email?.trim()) {
-      newErrors.email = "Email is required";
-    } else if (
-      !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-    ) {
-      newErrors.email = "Invalid email format";
+    if (formData.email) {
+      if (!formData.email?.trim()) {
+        newErrors.email = "Email is required";
+      } else if (
+        !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
+      ) {
+        newErrors.email = "Invalid email format";
+      }
     }
 
-    if (!formData.phone?.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^[\+]?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number";
+    if (formData.username) {
+      if (!formData.username?.trim()) {
+        newErrors.username = "Username is required";
+      } else if (!/^[a-zA-Z0-9_-]+$/.test(formData.username)) {
+        newErrors.username =
+          "Username can only contain letters, numbers, underscores (_) and hyphens (-)";
+      } else if (formData.username.length < 4) {
+        newErrors.username = "Username must be at least 3 characters";
+      }
     }
 
+    if (formData.phone) {
+      if (formData.phone && !formData.phone?.trim()) {
+        newErrors.phone = "Phone number is required";
+      } else if (!/^[\+]?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
+        newErrors.phone = "Invalid phone number";
+      }
+    }
     // Business-specific validations
     if (userType === "business") {
-      if (!formData.businessName?.trim()) {
+      if (formData.businessName && !formData.businessName?.trim()) {
         newErrors.businessName = "Business name is required";
       }
 
-      if (!formData.businessCategory) {
+      if (formData.businessCategory && !formData.businessCategory) {
         newErrors.businessCategory = "Business category is required";
       }
 
-      if (!formData.businessAddress?.trim()) {
+      if (formData.businessAddress && !formData.businessAddress?.trim()) {
         newErrors.businessAddress = "Business address is required";
       }
 
@@ -143,22 +169,28 @@ export default function EditProfile({
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleCancel = () => {
+    setEditMode(false);
+    setFormData({});
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setLoading(true);
     setMessage("");
-    setErrors({}); // clear existing errors
+    setErrors({});
 
     try {
-      const res = await fetch("http://localhost:3000/api/profile/updates", {
+      const res = await fetch(`${BASEURL}/api/profile/updates`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: user.username,
+          userId: user._id,
           updates: formData,
         }),
       });
@@ -167,30 +199,36 @@ export default function EditProfile({
 
       if (!res.ok) {
         if (data.errors) {
-          setErrors(data.errors); // this updates individual field errors
+          setErrors(data.errors);
         } else {
           setMessage("Something went wrong updating profile");
         }
         return;
       }
 
-      setEditMode(false);
       setMessage("Profile updated successfully ✅");
+      setIsModalType("success");
+      setAutoClose(true);
+      setActions(null);
+      openModal("message");
+      setTimeout(() => {
+        setEditMode(false);
+      }, 5000);
+      handleCancel();
+      window.location.reload();
     } catch (error) {
       console.error("Update failed:", error);
       setMessage("Something went wrong updating profile ❌");
+      setIsModalType("error");
+      setAutoClose(true);
+      setActions(null);
+      openModal("message");
     } finally {
       setLoading(false);
     }
   };
 
   // Cancel edit mode
-  const handleCancel = () => {
-    setEditMode(false);
-    setFormData({});
-    setErrors({});
-    setMessage("");
-  };
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
@@ -201,7 +239,7 @@ export default function EditProfile({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name *
+              Full Name
             </label>
             <input
               type="text"
@@ -267,11 +305,10 @@ export default function EditProfile({
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
               placeholder="Username"
-              disabled
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Username cannot be changed
-            </p>
+            {errors?.username && (
+              <p className="mt-1 text-sm text-red-600">{errors?.username}</p>
+            )}
           </div>
         </div>
       </div>

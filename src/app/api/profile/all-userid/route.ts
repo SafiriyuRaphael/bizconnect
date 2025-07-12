@@ -1,34 +1,20 @@
-
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import User from "@/model/User";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function GET() {
     try {
-        const { username } = await req.json();
-        if (!username) {
-            return NextResponse.json(
-                { error: "Username is required" },
-                { status: 400 }
-            );
-        }
-
         await connectToDatabase();
-        const user = await User.findOne({ username, deleted: false }).lean();
 
-        if (!user) {
-            return NextResponse.json(
-                { error: "User not found" },
-                { status: 404 }
-            );
-        }
+        const users = await User.find({ deleted: false }, "_id");
+        const usersId = users.map((user) => user._id);
 
         return NextResponse.json(
-            { user, status: "success" },
+            { usersId, status: "success" },
             { status: 200 }
         );
     } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching userId:", err);
 
         return NextResponse.json(
             {
