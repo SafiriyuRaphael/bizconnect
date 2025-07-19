@@ -1,7 +1,6 @@
 import {
   CheckCircle,
   Clock,
-  DollarSign,
   Heart,
   MapPin,
   MessageCircle,
@@ -18,12 +17,14 @@ type Props = {
   service: AllBusinessProps;
   setSelectedServices: React.Dispatch<React.SetStateAction<string[]>>;
   selectedServices: string[];
+  handleChat: (businessId: string) => void;
 };
 
 export default function ServiceCard({
   service,
   setSelectedServices,
   selectedServices,
+  handleChat,
 }: Props) {
   const toggleFavorite = (serviceId: string) => {
     setSelectedServices((prev) =>
@@ -168,7 +169,10 @@ export default function ServiceCard({
 
           {/* Action Buttons */}
           <div className="flex gap-2 justify-end">
-            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            <button
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              onClick={() => handleChat(_id)}
+            >
               <MessageCircle className="w-4 h-4" />
             </button>
             <button

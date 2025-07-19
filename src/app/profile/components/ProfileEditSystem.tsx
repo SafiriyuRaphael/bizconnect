@@ -13,7 +13,6 @@ import InputPasswordModal from "@/app/components/modals/InputPassword";
 import { signOut } from "next-auth/react";
 
 export default function ProfileComponent({ user }: { user: AnyUser }) {
-  const [userType, setUserType] = useState("customer");
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({});
   const [modalType, setIsModalType] = useState<
@@ -30,16 +29,7 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
   const closeModal = () => setActiveModal(null);
 
   const [uploading, setUploading] = useState(false);
-
-  const profile = user;
-
-  useEffect(() => {
-    setUserType(profile.userType);
-    setEditMode(false);
-    setFormData({});
-    setErrors({});
-    setMessage("");
-  }, [profile.userType]);
+  const [profile, setProfile] = useState(user);
 
   // Initialize form data when entering edit mode
 
@@ -65,25 +55,31 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
 
     try {
       setUploading(true);
+      console.log(profile);
 
       const logo_url = await uploadCloudinary(file);
 
       if (logo_url) {
         // hit your API to save the new logo
-        await fetch("/api/profile/updates", {
+        const res = await fetch("/api/profile/updates", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: profile.username,
-            updates: { logo: logo_url },
+            userId: profile._id,
+            updates: { logo: logo_url.imageUrl },
           }),
         });
 
-       
-        window.location.reload(); 
+        const data: { user: AnyUser; status: string } = await res.json();
+
+        if (data?.user) {
+          setProfile(data.user);
+        } else {
+          setErrors({ logo: "failed to upload picture" });
+        }
       }
     } catch (err) {
-      console.error("Logo upload failed:", err);
+      setErrors({ logo: "failed to upload picture" });
     } finally {
       setUploading(false);
     }
@@ -167,7 +163,7 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
     }, 500);
   };
 
-  const fallbackAlt = profile.businessName || profile.fullName || "User";
+  const fallbackAlt = profile?.businessName || profile?.fullName || "User";
   const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 pt-20">
@@ -218,7 +214,7 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
                 <ProfileImage
                   fallbackAlt={fallbackAlt}
                   fallbackSrc={fallbackSrc}
-                  logo={profile.logo}
+                  logo={profile?.logo}
                 />
                 <div>
                   <h2 className="text-2xl font-bold">{profile.fullName}</h2>
@@ -230,12 +226,13 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
                         <span className="text-sm">Verified</span>
                       </div>
                     )}
-                    {userType === "business" && profile.verifiedBusiness && (
-                      <div className="flex items-center space-x-1 text-yellow-200">
-                        <Star className="w-4 h-4" />
-                        <span className="text-sm">Verified Business</span>
-                      </div>
-                    )}
+                    {profile.userType === "business" &&
+                      profile.verifiedBusiness && (
+                        <div className="flex items-center space-x-1 text-yellow-200">
+                          <Star className="w-4 h-4" />
+                          <span className="text-sm">Verified Business</span>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -279,15 +276,16 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
                 setFormData={setFormData}
                 setMessage={setMessage}
                 user={user}
-                userType={userType}
+                userType={profile.userType}
                 openModal={openModal}
                 setIsModalType={setIsModalType}
                 setAutoClose={setAutoClose}
                 setActions={setActions}
+                setProfile={setProfile}
               />
             ) : (
               // Display Mode
-              <ProfileDisplay profile={profile} userType={userType} />
+              <ProfileDisplay profile={profile} userType={profile.userType} />
             )}
           </div>
         </div>

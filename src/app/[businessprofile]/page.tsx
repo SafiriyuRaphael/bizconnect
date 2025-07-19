@@ -9,12 +9,14 @@ type Params = {
   params: Promise<{ businessprofile: string }>;
 };
 
-export async function generateStaticParams() {
-  const usernames = await getAllUsername();
-  return usernames.usernames.map((username: string) => ({
-    username,
-  }));
-}
+export const dynamic = 'force-dynamic'; 
+
+// export async function generateStaticParams() {
+//   const usernames = await getAllUsername();
+//   return usernames.usernames.map((username: string) => ({
+//     username,
+//   }));
+// }
 
 export default async function page({ params }: Params) {
   const session = await getServerSession(authOptions);
@@ -35,5 +37,5 @@ export default async function page({ params }: Params) {
     redirect("/not-found");
   }
 
-  return <UsersProfile user={user} reviewId={session.user.id} />;
+  return <UsersProfile user={user} session={session.user} />;
 }

@@ -146,7 +146,7 @@ export default function useRegister() {
         if (validateForm()) {
             console.log("Form submitted:", formData);
             const logo_url = await uploadCloudinary(logoFile)
-            const updatedFormData = { ...formData, logo: logo_url };
+            const updatedFormData = { ...formData, logo: logo_url?.imageUrl };
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 body: JSON.stringify(updatedFormData),
@@ -159,7 +159,7 @@ export default function useRegister() {
                 setIsModalOpen(true)
                 setModalType("success")
                 setTimeout(() => {
-                    router.push("/dashboard")
+                    router.push("/auth/login")
                 }, 4000)
             } else {
                 const { error } = await res.json();

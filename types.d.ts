@@ -1,4 +1,8 @@
 import NextAuth, { DefaultSession } from "next-auth"
+import type { NextApiResponse } from 'next';
+import { Server as HTTPServer } from 'http';
+import { Socket } from 'net';
+import { Server as IOServer } from 'socket.io';
 import React from "react";
 
 declare module "next-auth" {
@@ -34,6 +38,30 @@ declare module "next-auth/jwt" {
     }
 }
 
+
+interface SessionUser {
+    id: string;
+    role: string;
+    username?: string;
+    picture?: string | null;
+    businessName?: string;
+    name?: string | null;
+    email?: string | null;
+    logo?: string | null
+}
+
+
+// types/socket.ts
+
+
+export interface NextApiResponseWithSocket extends NextApiResponse {
+    socket: Socket & {
+        server: HTTPServer & {
+            io?: IOServer;
+        };
+    };
+}
+
 interface FormErrors {
     [key: string]: string;
 }
@@ -62,6 +90,7 @@ type ProfileData = {
     };
     deliveryTime?: number;
     logo?: string
+    displayPics?: BusinessDisplayPicsProps[]
 };
 
 
@@ -94,6 +123,7 @@ interface AnyUser {
     deliveryTime?: number;
     verifiedBusiness?: boolean;
     reviews?: BusinessReviewsProps[];
+    displayPics?: BusinessDisplayPicsProps[]
 }
 
 
@@ -116,6 +146,7 @@ interface RegisterData {
     agreedToTerms: boolean;
     userType: "customer" | "business";
     logo: string | null
+    displayPics?: BusinessDisplayPicsProps[]
 }
 
 interface AllBusinessData {
@@ -140,7 +171,14 @@ interface AllBusinessProps {
     priceRange: BusinessPriceRangeProps;
     deliveryTime: number;
     verified: boolean
+    displayPics?: BusinessDisplayPicsProps[]
     averageRating: number
+}
+interface BusinessDisplayPicsProps {
+    url: string
+    name: string
+    uploadedAt: Date
+    public_id: string;
 }
 
 interface BusinessPriceRangeProps {
@@ -149,14 +187,25 @@ interface BusinessPriceRangeProps {
 }
 
 interface BusinessReviewsProps {
+    _id?: string
     rating: number;
     comment: string;
-    username: string
+    username?: string
     displayPic: string
     userId: string
-    createdAt: Date
-    helpful: number
+    createdAt?: Date
+    helpful?: BusinessReviewHelpfulProps
+    fullName?: string | null
 }
+
+interface BusinessReviewHelpfulProps {
+    count: number;
+    voters: string[]
+}
+
+type AddReviewProps = BusinessReviewsProps & {
+    businessId: string;
+};
 
 interface BusinessQueryParams {
     category?: string;
@@ -205,4 +254,17 @@ interface PasswordValidation {
     hasLowercase: boolean;
     hasNumber: boolean;
     hasSpecialChar: boolean;
+}
+
+interface Contact {
+    id: string;
+    name: string;
+    company: string;
+    lastMessage: string;
+    timestamp: string; // ISO timestamp
+    displayTime: string; // Formatted time for display
+    avatar: string;
+    online: boolean;
+    unread: number;
+    username: string
 }

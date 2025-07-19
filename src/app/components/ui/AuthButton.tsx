@@ -1,17 +1,19 @@
 "use client";
 import { ArrowRight } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
 import ProfileImage from "../layout/ProfileImage";
+import { Session } from "next-auth";
 
-export default function AuthButton() {
+interface Props {
+  isLoggedIn: boolean;
+  session: Session | null;
+}
+
+export default function AuthButton({ isLoggedIn, session }: Props) {
   const pathname = usePathname();
-  const { data: session } = useSession();
-
   const isLoginPage = pathname === "/auth/login";
-  const isLoggedIn = !!session?.user;
 
   const generateDefaultLogoDataUrl = (name: string): string => {
     const svg = generateDefaultLogo(name);
@@ -37,10 +39,10 @@ export default function AuthButton() {
     );
   }
 
-  const logo = session.user.logo;
-  const businessName = session.user.businessName;
-  const name = session.user.name;
-  const userId = session.user.id;
+  const logo = session?.user.logo;
+  const businessName = session?.user.businessName;
+  const name = session?.user.name;
+  const userId = session?.user.id;
 
   console.log("Session bruh:", session);
 

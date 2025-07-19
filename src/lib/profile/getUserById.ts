@@ -3,7 +3,7 @@ import { AnyUser } from "../../../types";
 
 export default async function getUserById(_id: string) {
     try {
-        const res = await fetch(`${BASEURL}/api/profile/get-users-by-id`, {
+        const res = await fetch(`/api/profile/get-users-by-id`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ _id }),

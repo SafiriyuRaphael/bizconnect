@@ -2,7 +2,7 @@ import { Save } from "lucide-react";
 import React, { useState } from "react";
 import { AnyUser, ProfileData } from "../../../../../types";
 import { BUSINESSCATEGORIES } from "@/constants/business";
-import { BASEURL } from "@/constants/url";
+// import { BASEURL } from "@/constants/url";
 
 type Props = {
   setFormData: (value: React.SetStateAction<ProfileData>) => void;
@@ -19,6 +19,7 @@ type Props = {
   >;
   setAutoClose: React.Dispatch<React.SetStateAction<boolean>>;
   setActions: React.Dispatch<React.SetStateAction<React.JSX.Element | null>>;
+  setProfile: React.Dispatch<React.SetStateAction<AnyUser>>;
 };
 
 export default function EditProfile({
@@ -34,6 +35,7 @@ export default function EditProfile({
   openModal,
   setAutoClose,
   setActions,
+  setProfile,
 }: Props) {
   const [loading, setLoading] = useState(false);
 
@@ -184,7 +186,7 @@ export default function EditProfile({
     setErrors({});
 
     try {
-      const res = await fetch(`${BASEURL}/api/profile/updates`, {
+      const res = await fetch(`/api/profile/updates`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -195,9 +197,8 @@ export default function EditProfile({
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
+        const data = await res.json();
         if (data.errors) {
           setErrors(data.errors);
         } else {
@@ -206,16 +207,21 @@ export default function EditProfile({
         return;
       }
 
+      const data: { user: AnyUser; status: string } = await res.json();
+
+      if (data?.user) {
+        setProfile(data.user);
+      } else {
+        setMessage("Something went wrong updating profile");
+      }
+
       setMessage("Profile updated successfully ✅");
       setIsModalType("success");
       setAutoClose(true);
       setActions(null);
       openModal("message");
-      setTimeout(() => {
-        setEditMode(false);
-      }, 5000);
+      setEditMode(false);
       handleCancel();
-      window.location.reload();
     } catch (error) {
       console.error("Update failed:", error);
       setMessage("Something went wrong updating profile ❌");

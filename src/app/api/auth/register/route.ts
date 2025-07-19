@@ -5,6 +5,8 @@ import { hash } from 'bcrypt'
 import { Customer } from '@/model/Customer'
 import { Business } from '@/model/Business'
 import { RegisterData } from '../../../../../types'
+import Message from '@/model/Message'
+import mongoose from 'mongoose'
 
 
 export async function POST(req: Request) {
@@ -76,6 +78,23 @@ export async function POST(req: Request) {
                 logo
             });
         }
+
+        // Send welcome message from a system user (e.g., admin with fixed ID)
+        const systemUserId = "687647bbc0511928b3c87d70";
+
+        const businessWelcome = `Welcome to BizCon — the hub where businesses connect, grow, and thrive. Showcase your brand, engage with customers, and discover meaningful partnerships tailored to your niche. Get started by completing your profile and uploading your first product or service.`;
+
+        const customerWelcome = `Welcome to BizCon — your platform for discovering trusted local businesses and services. Connect directly with verified providers, explore top-rated offerings, and enjoy a seamless communication experience. Start by updating your profile and finding what matters most to you.`;
+
+        const content = userType === 'business' ? businessWelcome : customerWelcome;
+
+        const welcomeMessage = new Message({
+            sender: new mongoose.Types.ObjectId(systemUserId),
+            recipient: user._id,
+            content,
+            isSeen: false,
+        });
+        await welcomeMessage.save();
 
         return NextResponse.json({ msg: "User created", user: { fullName, email, username, userType }, status: "success" })
     }

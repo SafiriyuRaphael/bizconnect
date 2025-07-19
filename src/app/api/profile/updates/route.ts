@@ -74,6 +74,7 @@ export async function PUT(req: Request) {
             "businessAddress",
             "businessDescription",
             "website",
+            "deliveryTime",
             "priceRange",
             "logo"
         ];

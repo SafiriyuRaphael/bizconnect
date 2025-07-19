@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 import User from './User';
 import { reviewSchema } from '@/schema/business-schema/ReviewSchema';
+import { displayPicSchema } from '@/schema/displaypics/DisplayPicsSchema';
 
 
 const businessSchema = new mongoose.Schema({
@@ -51,6 +52,10 @@ const businessSchema = new mongoose.Schema({
     default: 0,
   },
   reviews: [reviewSchema],
+  displayPics: {
+    type: [displayPicSchema],
+    default: [],
+  },
   verifiedBusiness: {
     type: Boolean,
     default: false

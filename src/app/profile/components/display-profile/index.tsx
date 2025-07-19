@@ -4,6 +4,7 @@ import InfoCard from "./InfoCard";
 import {
   Building2,
   Calendar,
+  Camera,
   Clock,
   DollarSign,
   Globe,
@@ -16,7 +17,8 @@ import {
 } from "lucide-react";
 import RatingDisplay from "./RatingDisplay";
 import VerificationBadge from "./VerificationBadge";
-import { AnyUser } from "../../../../../types";
+import { AnyUser, BusinessDisplayPicsProps } from "../../../../../types";
+import DisplayPictureSection from "./DisplayPictureSection";
 
 type Props = {
   profile: AnyUser;
@@ -24,6 +26,15 @@ type Props = {
 };
 
 export default function ProfileDisplay({ profile, userType }: Props) {
+  const [businessPictures, setBusinessPictures] = useState(
+    profile.displayPics || []
+  );
+
+
+  const handleUpdatePictures = (pictures: BusinessDisplayPicsProps[]) => {
+    setBusinessPictures(pictures);
+  };
+
   const [expandedSections, setExpandedSections] = useState({
     basic: true,
     personal: true,
@@ -123,6 +134,17 @@ export default function ProfileDisplay({ profile, userType }: Props) {
 
             {expandedSections.business && (
               <div className="mt-6 space-y-6 animate-fadeIn">
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Camera className="w-5 h-5" />
+                    Business Display Pictures
+                  </h4>
+                  <DisplayPictureSection
+                    pictures={businessPictures}
+                    onUpdatePictures={handleUpdatePictures}
+                    businessId={profile._id}
+                  />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoCard
                     icon={Building2}

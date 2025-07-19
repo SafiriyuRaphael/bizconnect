@@ -32,11 +32,12 @@ export default function BizConnectBuyerPage() {
     setCurrentPage,
     setSelectedCategory,
     selectedRating,
+    handleChat,
   } = useDashboard();
   // Filter sidebar component
 
   return (
-    <div className="min-h-screen pt-16 sm:pt-20 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
@@ -224,6 +225,7 @@ export default function BizConnectBuyerPage() {
             >
               {filteredBusinesses.map((service) => (
                 <ServiceCard
+                  handleChat={handleChat}
                   key={service._id}
                   service={service}
                   setSelectedServices={setSelectedServices}

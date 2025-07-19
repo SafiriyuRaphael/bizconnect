@@ -3,7 +3,7 @@ import { AnyUser } from "../../../types";
 
 export default async function getUserByUsername(username: string) {
     try {
-        const res = await fetch(`${BASEURL}/api/profile/get-users-by-username`, {
+        const res = await fetch(`/api/profile/get-users-by-username`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username }),

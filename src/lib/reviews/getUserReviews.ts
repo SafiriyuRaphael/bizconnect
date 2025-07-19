@@ -2,7 +2,7 @@ import { BASEURL } from '@/constants/url';
 import { BusinessReviewsProps } from '../../../types';
 
 export default async function getUserReviews({ businessId, userId }: { businessId: string; userId: string }) {
-    const res = await fetch(`${BASEURL}/api/reviews/get-user-review`, {
+    const res = await fetch(`/api/reviews/get-user-review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessId, userId }),
@@ -16,6 +16,6 @@ export default async function getUserReviews({ businessId, userId }: { businessI
         return null
     }
 
-    if (!res.ok) throw new Error("Failed to fetch users Id");
+    if (!res.ok) throw new Error("Failed to fetch user review");
 
 }

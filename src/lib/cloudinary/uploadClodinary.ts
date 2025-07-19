@@ -21,6 +21,6 @@ export const uploadCloudinary = async (file: File | null) => {
 
     const data = await res.json();
     const imageUrl = data.secure_url
-
-    return imageUrl
+    const image = { imageUrl, public_id: data.public_id }
+    return image
 };

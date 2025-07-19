@@ -1,4 +1,3 @@
-import getAllUsername from "@/lib/profile/getAllUsername";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
@@ -10,12 +9,15 @@ type Params = {
   params: Promise<{ usersId: string }>;
 };
 
-export async function generateStaticParams() {
-  const data = await getAllUserId();
-  return data.usersId.map((id: string) => ({
-    usersId: id,
-  }));
-}
+
+
+// export async function generateStaticParams() {
+//   const data = await getAllUserId();
+//   return data.usersId.map((id: string) => ({
+//     usersId: id,
+//   }));
+// }
+export const dynamic = 'force-dynamic'; 
 
 export default async function ProfilePage({ params }: Params) {
   const session = await getServerSession(authOptions);
@@ -27,7 +29,7 @@ export default async function ProfilePage({ params }: Params) {
   const userId = (await params).usersId;
 
   if (session.user.id !== userId) {
-    redirect("/auth/login");
+    redirect("/unauthorized");
   }
 
   const user = await getUserById(session.user.id);
