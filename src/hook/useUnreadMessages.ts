@@ -80,7 +80,7 @@ export function useUnreadMessages() {
     useEffect(() => {
         if (!session?.user.id) return;
 
-        socketRef.current = io(process.env.NEXT_PUBLIC_API_URL || BASEURL);
+        socketRef.current = io(process.env.NEXT_PUBLIC_API_URL);
         socketRef.current.emit("register", session.user.id);
 
         // Fetch user status
