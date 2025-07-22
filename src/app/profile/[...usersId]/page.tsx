@@ -2,14 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
 import ProfileComponent from "../components/ProfileEditSystem";
-import getAllUserId from "@/lib/profile/getAllUserId";
 import getUserById from "@/lib/profile/getUserById";
+import BizConVerification from "../components/verify";
 
 type Params = {
-  params: Promise<{ usersId: string }>;
+  params: Promise<{ usersId: string[] }>;
 };
-
-
 
 // export async function generateStaticParams() {
 //   const data = await getAllUserId();
@@ -17,7 +15,7 @@ type Params = {
 //     usersId: id,
 //   }));
 // }
-export const dynamic = 'force-dynamic'; 
+export const dynamic = "force-dynamic";
 
 export default async function ProfilePage({ params }: Params) {
   const session = await getServerSession(authOptions);
@@ -26,7 +24,8 @@ export default async function ProfilePage({ params }: Params) {
     redirect("/auth/login");
   }
 
-  const userId = (await params).usersId;
+  const userId = (await params).usersId[0];
+  const maybeAction = (await params).usersId[1];
 
   if (session.user.id !== userId) {
     redirect("/unauthorized");
@@ -36,6 +35,10 @@ export default async function ProfilePage({ params }: Params) {
 
   if (!user) {
     redirect("/not-found");
+  }
+
+  if (maybeAction === "verify" && user.userType==="business") {
+    return <BizConVerification/>;
   }
 
   return <ProfileComponent user={user} />;

@@ -3,39 +3,40 @@ import { Menu, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AuthButton from "../ui/AuthButton";
 import { useSession } from "next-auth/react";
 import { useUnreadMessages } from "@/hook/useUnreadMessages";
 
 export default function Navbar() {
-  const {unreadMessages}= useUnreadMessages()
+  const { unreadMessages } = useUnreadMessages();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   const { data: session } = useSession();
 
-
-
   const navItems = [
-    { name: "Home", href: "/" },
+    { name: "Home", href: "/home" },
     { name: "About", href: "/about" },
   ];
 
   const isLoggedIn = !!session?.user;
 
   return (
-    <header className="sticky top-0 left-0 w-full z-50 backdrop-blur-md bg-white/95 border-b border-gray-200/50 shadow-lg shadow-black/10">
+    <header
+      className={`sticky top-0 left-0 w-full z-50 backdrop-blur-md bg-white/95 border-b border-gray-200/50 shadow-lg shadow-black/10 ${
+        session?.user.userRole === "admin" ? "hidden" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo Section */}
           <Link href="/" className="flex items-center group cursor-pointer">
-            <div className="size-10 sm:size-12 lg:size-14 rounded-xl group-hover:scale-110 transition-all duration-300 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40">
+            {/* <div className="size-10 sm:size-12 lg:size-14 rounded-xl group-hover:scale-110 transition-all duration-300 shadow-lg shadow-blue-500/20 group-hover:shadow-blue-500/40">
               <Image
                 src="/bizcon.png"
                 alt="BizConnect Logo"
@@ -44,7 +45,7 @@ export default function Navbar() {
                 className="object-contain w-full h-full rounded-xl"
                 priority
               />
-            </div>
+            </div> */}
             <span className="ml-2 sm:ml-3 text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-600 bg-clip-text text-transparent group-hover:from-cyan-500 group-hover:to-blue-500 transition-all duration-300">
               BizConnect
             </span>
@@ -111,7 +112,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             {/* Mobile Messages Button */}
             <Link
-              href="/messages"
+              href="/chat"
               className={`relative p-2 text-gray-700 hover:text-gray-900 transition-colors duration-300 rounded-lg hover:bg-gray-100 ${
                 !isLoggedIn ? "hidden" : ""
               }`}

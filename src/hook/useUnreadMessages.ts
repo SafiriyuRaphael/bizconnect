@@ -2,7 +2,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
-import { BASEURL } from "@/constants/url";
 import { Contact } from "../../types";
 
 function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
@@ -17,20 +16,7 @@ export function useUnreadMessages() {
     const { data: session } = useSession();
     const [unreadMessages, setUnreadMessages] = useState(0);
     const [contacts, setContacts] = useState<Contact[]>([]);
-    const [isUserOnline, setIsUserOnline] = useState(false);
     const socketRef = useRef<Socket | null>(null);
-
-    const handleUserStatus = useCallback(
-        debounce(({ userId, online }: { userId: string; online: boolean }) => {
-            console.log(`User status update: ${userId} is ${online ? "online" : "offline"}`);
-            setContacts((prev) =>
-                prev.map((contact) =>
-                    contact.id === userId ? { ...contact, online } : contact
-                )
-            );
-        }, 1000),
-        []
-    );
 
     const fetchContacts = async () => {
         try {
@@ -63,19 +49,6 @@ export function useUnreadMessages() {
         }
     };
 
-    const fetchUnreadCount = async () => {
-        try {
-            const res = await fetch(`/api/chat/unread?userId=${session?.user.id}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-            if (!res.ok) throw new Error("Failed to fetch unread count");
-            const { unread } = await res.json();
-            setUnreadMessages(unread);
-        } catch (error) {
-            console.error("Error fetching unread count:", error);
-        }
-    };
 
     useEffect(() => {
         if (!session?.user.id) return;
@@ -83,22 +56,6 @@ export function useUnreadMessages() {
         socketRef.current = io(process.env.NEXT_PUBLIC_API_URL);
         socketRef.current.emit("register", session.user.id);
 
-        // Fetch user status
-        const fetchUserStatus = async () => {
-            try {
-                const res = await fetch(`/api/user/status`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                });
-                if (!res.ok) throw new Error("Failed to fetch user status");
-                const { online } = await res.json();
-                setIsUserOnline(online);
-            } catch (error) {
-                console.error("Error fetching user status:", error);
-            }
-        };
-
-        fetchUserStatus();
         fetchContacts();
 
         socketRef.current.on("newMessage", (message: any) => {
@@ -160,15 +117,13 @@ export function useUnreadMessages() {
             }
         });
 
-        socketRef.current.on("userStatus", handleUserStatus);
-
         return () => {
             socketRef.current?.off("newMessage");
             socketRef.current?.off("messageSeen");
-            socketRef.current?.off("userStatus", handleUserStatus);
+
             socketRef.current?.disconnect();
         };
-    }, [session?.user.id, handleUserStatus]);
+    }, [session?.user.id]);
 
-    return { unreadMessages, contacts, isUserOnline };
+    return { unreadMessages, contacts };
 }

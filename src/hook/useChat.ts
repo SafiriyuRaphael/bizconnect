@@ -97,17 +97,23 @@ export default function useChat() {
     [activeChat]
   );
 
+  const stopRingtone = () => {
+    if (ringtoneRef.current) {
+      console.log("Stopping ringtone");
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+    }
+  };
 
   useEffect(() => {
     ringtoneRef.current = new Audio("/ringtones/ringtone-012-149904.mp3");
     ringtoneRef.current.loop = true;
     return () => {
-      if (ringtoneRef.current) {
-        ringtoneRef.current.pause();
-        ringtoneRef.current = null;
-      }
+      stopRingtone();
+      ringtoneRef.current = null;
     };
   }, []);
+
 
   const sendCallMessage = async (
     status: Message["callDetails"]["status"],
@@ -134,10 +140,7 @@ export default function useChat() {
   const handleAcceptCall = useCallback(
     async (from: string, offer: any, callType: "audio" | "video") => {
       try {
-        if (ringtoneRef.current) {
-          ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0;
-        }
+        stopRingtone()
         setReceiving(false);
         setCallStatus("ringing");
         setCallType(callType);
@@ -259,10 +262,7 @@ export default function useChat() {
       setCallStatus("rejected");
       setCallType(null);
       sendCallMessage("rejected", callType);
-      if (ringtoneRef.current) {
-        ringtoneRef.current.pause();
-        ringtoneRef.current.currentTime = 0;
-      }
+      stopRingtone()
       setReceiving(false);
       setCaller({ name: "", avatar: "", callType: null });
     },
@@ -274,12 +274,12 @@ export default function useChat() {
       setError("Cannot start call: No active chat or user");
       return;
     }
-    if (!activeChat.online) {
-      // setError(`${activeChat.name || "User"} is offline. Please try again later.`);
-      setCallStatus("unavailable");
-      await sendCallMessage("unavailable", type);
-      return;
-    }
+    // if (!activeChat.online) {
+    //   // setError(`${activeChat.name || "User"} is offline. Please try again later.`);
+    //   setCallStatus("unavailable");
+    //   await sendCallMessage("unavailable", type);
+    //   return;
+    // }
 
     try {
       setCallStatus("ringing");
@@ -377,13 +377,15 @@ export default function useChat() {
         setCallStatus("ended");
         setCallType(null);
         sendCallMessage("ended", type);
-      }, 60000);
+      }, 120000);
+
+      socketRef.current?.on("call-queued", ({ to, callType }) => {
+        console.log(`Recipient ${to} is offline, call queued`);
+        setError(`${contacts.find((c) => c.id === to)?.name || "User"} is offline, waiting for them to come online...`);
+      });
 
       socketRef.current?.on("call-unavailable", async ({ to, callType }) => {
-        if (ringtoneRef.current) {
-          ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0;
-        }
+        stopRingtone()
         setReceiving(false)
         clearTimeout(callTimeout);
         console.log(`Recipient ${to} is offline for ${callType} call`);
@@ -411,10 +413,7 @@ export default function useChat() {
       });
 
       socketRef.current?.on("call-rejected", () => {
-        if (ringtoneRef.current) {
-          ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0;
-        }
+        stopRingtone()
         setReceiving(false)
         clearTimeout(callTimeout);
         console.log("Call was rejected");
@@ -465,10 +464,11 @@ export default function useChat() {
     setCallType(null);
     setReceiving(false);
     setCaller({ name: "", avatar: "", callType: null });
+    stopRingtone()
   };
 
-  useEffect(() => {
 
+  useEffect(() => {
     const fetchContactsAndRecipient = async () => {
       try {
         const res = await fetch(`/api/chat/contacts`, {
@@ -541,7 +541,6 @@ export default function useChat() {
         setError("Failed to load contacts");
       }
     };
-
     fetchContactsAndRecipient();
   }, [session?.user.id, searchParams])
 
@@ -726,17 +725,16 @@ export default function useChat() {
       }
       setCaller({ name: callerName, avatar: callerLogo, callType });
       setReceiving(true);
+
       // Store offer and from for later use
+      (socketRef.current as any).callData = { from, offer, callType };
+
       socketRef.current?.once("call-cancelled", () => {
+        console.log("Call cancelled by caller, setting receiving to false");
+        stopRingtone()
         setReceiving(false);
         setCaller({ name: "", avatar: "", callType: null });
-        if (ringtoneRef.current) {
-          ringtoneRef.current.pause();
-          ringtoneRef.current.currentTime = 0;
-        }
       });
-      // Pass offer and from to modal via state or context if needed
-      (socketRef.current as any).callData = { from, offer, callType };
     });
 
     socketRef.current.on("ice-candidate", async ({ candidate }) => {
@@ -774,10 +772,7 @@ export default function useChat() {
     });
 
     socketRef.current.on("call-ended", () => {
-      if (ringtoneRef.current) {
-        ringtoneRef.current.pause();
-        ringtoneRef.current.currentTime = 0;
-      }
+      stopRingtone()
       setReceiving(false)
       console.log("Call ended by remote user");
       if (peerConnectionRef.current) {

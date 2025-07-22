@@ -30,7 +30,6 @@ export default function ProfileDisplay({ profile, userType }: Props) {
     profile.displayPics || []
   );
 
-
   const handleUpdatePictures = (pictures: BusinessDisplayPicsProps[]) => {
     setBusinessPictures(pictures);
   };
@@ -220,8 +219,9 @@ export default function ProfileDisplay({ profile, userType }: Props) {
           />
 
           {expandedSections.account && (
-            <div className="mt-6 space-y-4 animate-fadeIn">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mt-6 space-y-6 animate-fadeIn">
+              {/* Member Since - Always full width */}
+              <div className="w-full">
                 <InfoCard
                   icon={Calendar}
                   label="Member Since"
@@ -238,10 +238,17 @@ export default function ProfileDisplay({ profile, userType }: Props) {
                       : "N/A"
                   }
                 />
-                <div className="flex items-center justify-center">
-                  <VerificationBadge verified={profile.verified} />
-                </div>
               </div>
+
+              {/* Verification Badge - Separate section for business users */}
+              {userType === "business" && (
+                <div className="w-full">
+                  <VerificationBadge
+                    verified={profile.verifiedBusiness}
+                    userId={profile._id}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

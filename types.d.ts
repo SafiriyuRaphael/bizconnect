@@ -13,6 +13,7 @@ declare module "next-auth" {
             username?: string;
             logo?: string | null;
             businessName?: string;
+            userRole: "user" | "admin"
 
         } & DefaultSession["user"]
     }
@@ -23,6 +24,7 @@ declare module "next-auth" {
         username?: string;
         logo?: string | null;
         businessName?: string;
+        userRole: "user" | "admin"
     }
 }
 
@@ -35,6 +37,7 @@ declare module "next-auth/jwt" {
         businessName?: string;
         name?: string | null;
         email?: string | null;
+        userRole: "user" | "admin"
     }
 }
 
@@ -48,6 +51,7 @@ interface SessionUser {
     name?: string | null;
     email?: string | null;
     logo?: string | null
+    userRole: string
 }
 
 
@@ -267,4 +271,37 @@ interface Contact {
     online: boolean;
     unread: number;
     username: string
+}
+
+
+export type IdDocumentType = {
+    idUrl: string;
+    public_id: string;
+    idType: "driver_license" | "national_id_card" | "voters_card" | "international_passport";
+};
+
+export interface VerificationType {
+    _id?: string;
+    userId?: string;
+    fullName: string;
+    businessName: string;
+    businessAddress: string;
+    businessPhone: string;
+    documentUrl?: string;
+    selfieUrl?: string;
+    idDocument: IdDocumentType;
+    businessLogo?: string;
+    status?: "pending" | "approved" | "rejected";
+    reason?: string;
+    submittedAt?: Date;
+    verifiedAt?: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+interface VerificationStatusProps {
+    status: "pending" | "approved" | "rejected"
+    submittedAt: Date
+    verifiedAt?: Date
+    reason?: string
 }

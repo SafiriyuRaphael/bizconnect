@@ -163,6 +163,7 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
     }, 500);
   };
 
+
   const fallbackAlt = profile?.businessName || profile?.fullName || "User";
   const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
   return (
