@@ -31,6 +31,8 @@ import {
   MessageSquare,
   StarIcon,
   ImageIcon,
+  Clipboard,
+  ClipboardCheck,
 } from "lucide-react";
 import {
   AnyUser,
@@ -47,6 +49,7 @@ import Image from "next/image";
 import { CldImage } from "next-cloudinary";
 import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
 import toggleUserHelpful from "@/lib/reviews/toggleUserHelpful";
+import { BASEURL } from "@/constants/url";
 
 const UsersProfile = ({
   user,
@@ -60,7 +63,9 @@ const UsersProfile = ({
   >("success");
   const [message, setMessage] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [comments, setComments] = useState<BusinessReviewsProps[]>([]);
+  const [comments, setComments] = useState<BusinessReviewsProps[]>(
+    user.reviews || []
+  );
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,9 +74,9 @@ const UsersProfile = ({
     null
   );
   const [isMobile, setIsMobile] = useState(false);
-  const [businessGallery, setBusinessGallery] = useState<
-    BusinessDisplayPicsProps[]
-  >(user.displayPics || []);
+  const [openFullGallery, setOpenFullGallery] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isToggleHelpful, setIsToggleHelpful] = useState(false);
 
   const router = useRouter();
 
@@ -81,7 +86,7 @@ const UsersProfile = ({
   };
 
   // Check if user can rate (only for business profiles)
-  const canRate = user.userType === "business" && session.id !== user._id;
+  const canRate = session.id !== user._id;
 
   // Calculate average rating
   const averageRating =
@@ -107,7 +112,7 @@ const UsersProfile = ({
     const businessName = session.businessName;
     const name = session.name;
     try {
-      await addReview({
+      const newReviews = await addReview({
         businessId: user._id,
         userId: session.id,
         displayPic: session?.logo || "",
@@ -116,8 +121,7 @@ const UsersProfile = ({
         comment: newComment,
         fullName: businessName || name,
       });
-      router.refresh();
-      window.location.reload();
+      setComments(newReviews?.reviews || []);
       setIsModalType("success");
       setMessage("Review posted successfully!");
       setOpenModal(true);
@@ -139,21 +143,30 @@ const UsersProfile = ({
     reviewId: string;
     userId: string;
   }) => {
-    const helpfulToggle = await toggleUserHelpful({
-      reviewId,
-      userId,
-      businessId,
-    });
-    setComments((prev) =>
-      prev.map((comment) =>
-        comment.userId === reviewId
-          ? {
-              ...comment,
-              helpful: helpfulToggle?.helpful,
-            }
-          : comment
-      )
-    );
+    setIsToggleHelpful(true);
+    try {
+      const helpfulToggle = await toggleUserHelpful({
+        reviewId,
+        userId,
+        businessId,
+      });
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === reviewId
+            ? {
+                ...comment,
+                helpful: helpfulToggle?.helpful,
+              }
+            : comment
+        )
+      );
+    } catch (err) {
+      setIsModalType("error");
+      setMessage("Failed to toggle helpful");
+      setOpenModal(true);
+    } finally {
+      setIsToggleHelpful(false);
+    }
   };
 
   const openImageModal = (index: number) => {
@@ -167,7 +180,8 @@ const UsersProfile = ({
   const nextImage = () => {
     if (
       selectedImageIndex !== null &&
-      selectedImageIndex < businessGallery.length - 1
+      user.displayPics &&
+      selectedImageIndex < user.displayPics.length - 1
     ) {
       setSelectedImageIndex(selectedImageIndex + 1);
     }
@@ -176,6 +190,44 @@ const UsersProfile = ({
   const prevImage = () => {
     if (selectedImageIndex !== null && selectedImageIndex > 0) {
       setSelectedImageIndex(selectedImageIndex - 1);
+    }
+  };
+
+  const handleDirection = (address: string | undefined) => {
+    if (!address) return;
+    const encodedAddress = encodeURIComponent(address);
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+    window.open(mapsUrl, "_blank");
+  };
+
+  const handleChatClick = () => {
+    router.push(`/chat?recipientId=${user._id}`);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${user.businessName ?? user.fullName}'s Profile`,
+          text: `Check out ${user.businessName ?? user.fullName}'s profile`,
+          url: `${BASEURL}/${user.username}`,
+        });
+        console.log("Shared successfully");
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      alert("Sharing not supported in your browser 😢");
+    }
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${BASEURL}/${user.username}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      alert("Failed to copy link");
     }
   };
 
@@ -271,7 +323,7 @@ const UsersProfile = ({
       />
 
       {/* Image Modal */}
-      {selectedImageIndex !== null && (
+      {selectedImageIndex !== null && user.displayPics && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
           <div className="relative max-w-4xl max-h-full">
             <button
@@ -282,12 +334,12 @@ const UsersProfile = ({
             </button>
 
             <img
-              src={businessGallery[selectedImageIndex].url}
+              src={user.displayPics[selectedImageIndex].url}
               alt={`Business image ${selectedImageIndex + 1}`}
               className="max-w-full max-h-full object-contain"
             />
 
-            {businessGallery.length > 1 && (
+            {user.displayPics.length > 1 && (
               <>
                 <button
                   onClick={prevImage}
@@ -298,7 +350,7 @@ const UsersProfile = ({
                 </button>
                 <button
                   onClick={nextImage}
-                  disabled={selectedImageIndex === businessGallery.length - 1}
+                  disabled={selectedImageIndex === user.displayPics.length - 1}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 disabled:opacity-50"
                 >
                   <ChevronRight className="w-8 h-8" />
@@ -307,7 +359,7 @@ const UsersProfile = ({
             )}
 
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
-              {selectedImageIndex + 1} / {businessGallery.length}
+              {selectedImageIndex + 1} / {user.displayPics.length}
             </div>
           </div>
         </div>
@@ -367,7 +419,10 @@ const UsersProfile = ({
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
-              <button className="flex-1 sm:flex-initial bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+              <button
+                className="flex-1 sm:flex-initial bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                onClick={handleChatClick}
+              >
                 <MessageCircle className="w-4 h-4 inline mr-2" />
                 {isMobile ? "Message" : "Send Message"}
               </button>
@@ -389,31 +444,46 @@ const UsersProfile = ({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Business Gallery */}
-            {user.userType === "business" && businessGallery.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Gallery</h2>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    View all ({businessGallery.length})
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {businessGallery.slice(0, 6).map((image, index) => (
-                    <div key={index} className="relative group cursor-pointer">
-                      <img
-                        src={image.url}
-                        alt={`Business image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-                        onClick={() => openImageModal(index)}
-                      />
-                      <div className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            {user.userType === "business" &&
+              user.displayPics &&
+              user.displayPics.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Gallery
+                    </h2>
+                    {user.displayPics.length > 6 && (
+                      <button
+                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        onClick={() => setOpenFullGallery(!openFullGallery)}
+                      >
+                        View all ({user.displayPics.length})
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {user.displayPics.slice(0, 6).map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative group cursor-pointer"
+                      >
+                        <img
+                          src={image.url}
+                          alt={`Business image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                          onClick={() => openImageModal(index)}
+                        />
+                        <div
+                          className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center"
+                          onClick={() => openImageModal(index)}
+                        >
+                          <ImageIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* About Section */}
             <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
@@ -644,6 +714,7 @@ const UsersProfile = ({
                                     })
                                   }
                                   className="text-gray-500 hover:text-red-600 flex items-center space-x-1 transition-colors"
+                                  disabled={isToggleHelpful}
                                 >
                                   <Heart
                                     className={`w-4 h-4 ${
@@ -682,26 +753,58 @@ const UsersProfile = ({
                 Quick Actions
               </h3>
               <div className="space-y-3">
-                <button className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+                <button
+                  className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                  onClick={handleChatClick}
+                >
                   <MessageSquare className="w-5 h-5" />
                   <span>Send Message</span>
                 </button>
                 {user.userType === "business" && (
                   <>
-                    <button className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2">
+                    <button
+                      className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+                      onClick={handleChatClick}
+                    >
                       <PhoneCall className="w-5 h-5" />
                       <span>Call Business</span>
                     </button>
-                    <button className="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2">
+                    <button
+                      className="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"
+                      onClick={() =>
+                        handleDirection(
+                          user.businessAddress || user.deliveryAddress
+                        )
+                      }
+                    >
                       <MapIcon className="w-5 h-5" />
                       <span>Get Directions</span>
                     </button>
                   </>
                 )}
-                <button className="w-full border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
-                  <Share2 className="w-5 h-5" />
-                  <span>Share Profile</span>
-                </button>
+                {isMobile ? (
+                  <button
+                    className="w-full border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="w-5 h-5" />
+                    <span>Share Profile</span>
+                  </button>
+                ) : (
+                  <button
+                    className="w-full border border-gray-300 text-gray-700 p-3 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
+                    onClick={handleCopy}
+                  >
+                    {!copied ? (
+                      <Clipboard className="w-5 h-5" />
+                    ) : (
+                      <ClipboardCheck className="w-5 h-5" />
+                    )}
+                    <span>
+                      {!copied ? "Copy Profile Link" : "Profile Link Copied"}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 

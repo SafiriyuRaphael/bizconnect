@@ -63,11 +63,15 @@ export async function POST(req: Request) {
         }
 
 
-        
+
 
         await business.save();
 
-        return NextResponse.json({ message: "Review saved", status: "success" }, { status: 200 });
+        return NextResponse.json({
+            message: "Review saved",
+            status: "success",
+            reviews: business.reviews,
+        }, { status: 200 });
     } catch (err) {
         return NextResponse.json({ error: "Server error", details: err }, { status: 500 });
     }

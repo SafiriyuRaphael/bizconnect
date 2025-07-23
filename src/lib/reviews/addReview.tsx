@@ -1,5 +1,4 @@
-import { AddReviewProps } from "../../../types";
-import { BASEURL } from "@/constants/url";
+import { AddReviewProps, BusinessReviewsProps } from "../../../types";
 
 export default async function addReview({
   businessId,
@@ -25,7 +24,11 @@ export default async function addReview({
   });
 
   if (res.ok) {
-    const data: { message: string; status: string } = await res.json();
+    const data: {
+      message: string;
+      status: string;
+      reviews: BusinessReviewsProps[];
+    } = await res.json();
     return data;
   }
 

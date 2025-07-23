@@ -79,25 +79,27 @@ export default function HomePage() {
                     className="group-hover:translate-x-2 transition-transform duration-300"
                   />
                 </Link>
-                <button className="group px-10 py-5 bg-white border-2 border-gray-900 text-gray-900 text-xl font-bold rounded-2xl hover:bg-gray-900 hover:text-white transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
+                {/* <button className="group px-10 py-5 bg-white border-2 border-gray-900 text-gray-900 text-xl font-bold rounded-2xl hover:bg-gray-900 hover:text-white transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                   <PlayCircle
                     size={24}
                     className="group-hover:scale-110 transition-transform duration-300"
                   />
                   Watch Demo
-                </button>
+                </button> */}
               </div>
 
               {/* Trust Signals */}
               <div className="flex items-center gap-8">
                 <div>
-                  <div className="text-3xl font-black text-gray-900">50K+</div>
+                  <div className="text-3xl font-black text-gray-900">5K+</div>
                   <div className="text-gray-600 font-semibold">
                     Active Users
                   </div>
                 </div>
                 <div>
-                  <div className="text-3xl font-black text-gray-900">₦2B+</div>
+                  <div className="text-3xl font-black text-gray-900">
+                    ₦100k+
+                  </div>
                   <div className="text-gray-600 font-semibold">
                     Transactions
                   </div>
@@ -185,7 +187,7 @@ export default function HomePage() {
       </section>
 
       {/* Social Proof - Logo Wall */}
-      <section className="bg-gray-50 py-16 px-6">
+      {/* <section className="bg-gray-50 py-16 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-gray-600 font-semibold mb-8 text-lg">
             Trusted by leading Nigerian businesses
@@ -203,7 +205,7 @@ export default function HomePage() {
             )}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Features - Problem/Solution */}
       <section className="bg-white py-24 px-6">
@@ -372,12 +374,12 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               {
-                number: "50,000+",
+                number: "5000+",
                 label: "Active Users",
                 icon: <Users size={32} />,
               },
               {
-                number: "₦2B+",
+                number: "₦100k+",
                 label: "Transaction Volume",
                 icon: <TrendingUp size={32} />,
               },
@@ -512,13 +514,13 @@ export default function HomePage() {
                 className="group-hover:translate-x-3 transition-transform duration-300"
               />
             </Link>
-            <Link
+            {/* <Link
               href="/demo"
               className="px-12 py-6 bg-white/10 backdrop-blur-xl border-2 border-white/30 text-white text-2xl font-black rounded-2xl hover:bg-white/20 transform hover:scale-110 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
             >
               <PlayCircle size={28} />
               Watch Demo
-            </Link>
+            </Link> */}
           </div>
 
           <div className="text-center">
