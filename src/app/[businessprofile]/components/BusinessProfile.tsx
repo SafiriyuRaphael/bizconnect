@@ -457,31 +457,57 @@ const UsersProfile = ({
                         className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                         onClick={() => setOpenFullGallery(!openFullGallery)}
                       >
-                        View all ({user.displayPics.length})
+                        {!openFullGallery
+                          ? `View all (${user.displayPics.length})`
+                          : "View less"}
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {user.displayPics.slice(0, 6).map((image, index) => (
-                      <div
-                        key={index}
-                        className="relative group cursor-pointer"
-                      >
-                        <img
-                          src={image.url}
-                          alt={`Business image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-                          onClick={() => openImageModal(index)}
-                        />
+                  {!openFullGallery ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {user.displayPics.slice(0, 6).map((image, index) => (
                         <div
-                          className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center"
-                          onClick={() => openImageModal(index)}
+                          key={index}
+                          className="relative group cursor-pointer"
                         >
-                          <ImageIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <img
+                            src={image.url}
+                            alt={`Business image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                            onClick={() => openImageModal(index)}
+                          />
+                          <div
+                            className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center"
+                            onClick={() => openImageModal(index)}
+                          >
+                            <ImageIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {user.displayPics.map((image, index) => (
+                        <div
+                          key={index}
+                          className="relative group cursor-pointer"
+                        >
+                          <img
+                            src={image.url}
+                            alt={`Business image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+                            onClick={() => openImageModal(index)}
+                          />
+                          <div
+                            className="absolute inset-0  bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-lg flex items-center justify-center"
+                            onClick={() => openImageModal(index)}
+                          >
+                            <ImageIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
