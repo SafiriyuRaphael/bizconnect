@@ -173,7 +173,6 @@ export default function useEditProfile(
       ...prev,
       [name]: value,
     }));
-
     // Clear error for this field
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
