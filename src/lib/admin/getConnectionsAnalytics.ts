@@ -7,7 +7,7 @@ export default async function getConnectionsAnalytics() {
       headers: {
         "Content-Type": "application/json",
       },
-      cache: "no-store",
+      // cache: "no-store",
     });
 
     if (!res.ok) {
@@ -16,12 +16,7 @@ export default async function getConnectionsAnalytics() {
 
     const data = await res.json();
 
-    return {
-      totalConnections: data.totalConnections,
-      thisWeekConnections: data.thisWeekConnections,
-      lastWeekConnections: data.lastWeekConnections,
-      percentageIncrease: data.percentageIncrease,
-    };
+    return data
   } catch (err: any) {
     console.error("getConnectionsAnalytics error:", err.message || err);
     throw new Error("Something went wrong while fetching connections analytics.");

@@ -20,7 +20,7 @@ export default async function getAllBusiness(params: BusinessQueryParams = {}) {
             headers: {
                 "Content-Type": "application/json",
             },
-            cache: "no-store",
+            // cache: "no-store",
         }
     );
 

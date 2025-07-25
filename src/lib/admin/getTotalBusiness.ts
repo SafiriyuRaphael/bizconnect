@@ -7,7 +7,7 @@ export default async function getTotalBusiness() {
             headers: {
                 "Content-Type": "application/json",
             },
-            cache: "no-store",
+            // cache: "no-store",
         });
         if (!res.ok) {
             throw new Error("failed to get total business");

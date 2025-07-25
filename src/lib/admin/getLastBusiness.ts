@@ -8,7 +8,7 @@ export default async function getLastBusinessUser() {
       headers: {
         "Content-Type": "application/json",
       },
-      cache: "no-store",
+      // cache: "no-store",
     });
 
     if (!res.ok) {
