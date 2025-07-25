@@ -5,235 +5,37 @@ import { BUSINESSCATEGORIES } from "@/constants/business";
 // import { BASEURL } from "@/constants/url";
 
 type Props = {
-  setFormData: (value: React.SetStateAction<ProfileData>) => void;
   formData: ProfileData;
   userType: string;
-  setErrors: React.Dispatch<React.SetStateAction<ProfileData>>;
-  setMessage: React.Dispatch<React.SetStateAction<string>>;
-  setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   errors: ProfileData;
-  user: AnyUser;
-  openModal: (type: string) => void;
-  setIsModalType: React.Dispatch<
-    React.SetStateAction<"success" | "error" | "warning" | "info">
-  >;
-  setAutoClose: React.Dispatch<React.SetStateAction<boolean>>;
-  setActions: React.Dispatch<React.SetStateAction<React.JSX.Element | null>>;
-  setProfile: React.Dispatch<React.SetStateAction<AnyUser>>;
-};
-
-export default function EditProfile({
-  errors,
-  formData,
-  setEditMode,
-  setErrors,
-  setFormData,
-  setMessage,
-  userType,
-  user,
-  setIsModalType,
-  openModal,
-  setAutoClose,
-  setActions,
-  setProfile,
-}: Props) {
-  const [loading, setLoading] = useState(false);
-
-  const handleInputChange = (
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  handleInputChange: (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
-  ) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear error for this field
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  // Handle nested object changes (like priceRange)
-  const handleNestedChange = <
+  ) => void;
+  handleNestedChange: <
     Parent extends keyof ProfileData,
     Field extends keyof NonNullable<ProfileData[Parent]>
   >(
     parent: Parent,
     field: Field,
     value: NonNullable<ProfileData[Parent]>[Field]
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [parent]: {
-        ...(prev[parent] as object),
-        [field]: value,
-      },
-    }));
-  };
+  ) => void;
+  handleCancel: () => void;
+  loading: boolean;
+};
 
-  const validateForm = () => {
-    const newErrors: ProfileData = {};
-    if (formData.phone) {
-      // Common validations
-      if (!formData.fullName?.trim()) {
-        newErrors.fullName = "Full name is required";
-      }
-    }
-
-    if (formData.email) {
-      if (!formData.email?.trim()) {
-        newErrors.email = "Email is required";
-      } else if (
-        !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-      ) {
-        newErrors.email = "Invalid email format";
-      }
-    }
-
-    if (formData.username) {
-      if (!formData.username?.trim()) {
-        newErrors.username = "Username is required";
-      } else if (!/^[a-zA-Z0-9_-]+$/.test(formData.username)) {
-        newErrors.username =
-          "Username can only contain letters, numbers, underscores (_) and hyphens (-)";
-      } else if (formData.username.length < 4) {
-        newErrors.username = "Username must be at least 3 characters";
-      }
-    }
-
-    if (formData.phone) {
-      if (formData.phone && !formData.phone?.trim()) {
-        newErrors.phone = "Phone number is required";
-      } else if (!/^[\+]?[\d\s\-\(\)]{10,}$/.test(formData.phone)) {
-        newErrors.phone = "Invalid phone number";
-      }
-    }
-    // Business-specific validations
-    if (userType === "business") {
-      if (formData.businessName && !formData.businessName?.trim()) {
-        newErrors.businessName = "Business name is required";
-      }
-
-      if (formData.businessCategory && !formData.businessCategory) {
-        newErrors.businessCategory = "Business category is required";
-      }
-
-      if (formData.businessAddress && !formData.businessAddress?.trim()) {
-        newErrors.businessAddress = "Business address is required";
-      }
-
-      if (
-        formData.website &&
-        !/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(
-          formData.website
-        )
-      ) {
-        newErrors.website = "Invalid website URL";
-      }
-
-      if (
-        formData.priceRange?.min != null &&
-        Number(formData.priceRange.min) < 0
-      ) {
-        newErrors.priceRange = {
-          min: "Minimum price cannot be negative",
-          max: newErrors.priceRange?.max ?? "",
-        };
-      }
-
-      if (
-        formData.priceRange?.max != null &&
-        formData.priceRange?.min != null &&
-        formData.priceRange.max < formData.priceRange.min
-      ) {
-        newErrors.priceRange = {
-          min: newErrors.priceRange?.min ?? "",
-          max: "Maximum price must be greater than minimum",
-        };
-      }
-    }
-
-    // Customer-specific validations
-    if (userType === "customer") {
-      if (formData.dateOfBirth && new Date(formData.dateOfBirth) > new Date()) {
-        newErrors.dateOfBirth = "Date of birth cannot be in the future";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleCancel = () => {
-    setEditMode(false);
-    setFormData({});
-    setErrors({});
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setMessage("");
-    setErrors({});
-
-    try {
-      const res = await fetch(`/api/profile/updates`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user._id,
-          updates: formData,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        if (data.errors) {
-          setErrors(data.errors);
-        } else {
-          setMessage("Something went wrong updating profile");
-        }
-        return;
-      }
-
-      const data: { user: AnyUser; status: string } = await res.json();
-
-      if (data?.user) {
-        setProfile(data.user);
-      } else {
-        setMessage("Something went wrong updating profile");
-      }
-
-      setMessage("Profile updated successfully ✅");
-      setIsModalType("success");
-      setAutoClose(true);
-      setActions(null);
-      openModal("message");
-      setEditMode(false);
-      handleCancel();
-    } catch (error) {
-      console.error("Update failed:", error);
-      setMessage("Something went wrong updating profile ❌");
-      setIsModalType("error");
-      setAutoClose(true);
-      setActions(null);
-      openModal("message");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function EditProfile({
+  errors,
+  formData,
+  userType,
+  handleCancel,
+  handleInputChange,
+  handleNestedChange,
+  handleSubmit,
+  loading,
+}: Props) {
   // Cancel edit mode
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

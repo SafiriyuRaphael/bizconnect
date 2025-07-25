@@ -4,7 +4,12 @@ import getAllBusiness from "@/lib/business/getAllBusiness";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function useDashboard() {
+type FetchBusinessesFn = (params: BusinessQueryParams) => Promise<{
+  entrepreneurs: AllBusinessProps[];
+  total: number;
+}>;
+
+export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness) {
   const { data: session } = useSession();
   const router = useRouter()
   // State management
@@ -34,7 +39,7 @@ export default function useDashboard() {
       setError(null);
 
       try {
-        const data = await getAllBusiness(params);
+        const data = await fetcher(params);
         console.log(data);
 
         if (params.page === 1) {
@@ -53,7 +58,7 @@ export default function useDashboard() {
         setLoading(false);
       }
     },
-    []
+    [fetcher]
   );
 
   // Effect to fetch data when filters change

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Business } from '@/model/Business';
+import Message from '@/model/Message'; 
+import { Verification } from '@/model/Verification';
 
 export async function GET(req: Request) {
     try {
@@ -17,68 +19,40 @@ export async function GET(req: Request) {
         const limit = parseInt(searchParams.get('limit') || "10");
         const skip = (page - 1) * limit;
 
-        // Build filter
         const filter: any = {};
 
-        if (category && category !== "all") {
-            filter.businessCategory = category;
-        }
-
-        if (deliveryTime && deliveryTime !== 0) {
-            filter.deliveryTime = deliveryTime;
-        }
-
+        if (category && category !== "all") filter.businessCategory = category;
+        if (deliveryTime && deliveryTime !== 0) filter.deliveryTime = deliveryTime;
         if (search) {
             filter.$or = [
                 { businessName: { $regex: search, $options: "i" } },
                 { username: { $regex: search, $options: "i" } }
             ];
         }
+        if (!isNaN(rating) && rating > 0) filter["reviews.rating"] = { $gte: rating };
 
-        if (!isNaN(rating) && rating > 0) {
-            filter["reviews.rating"] = { $gte: rating };
-        }
-
-        // Add price range filtering if query includes it
         const minPrice = parseFloat(searchParams.get("minPrice") || "0");
         const maxPrice = parseFloat(searchParams.get("maxPrice") || "1000000");
 
-        filter["priceRange.min"] = { $lte: maxPrice }; // business min price less than filter max
-        filter["priceRange.max"] = { $gte: minPrice }; // business max price more than filter min
+        filter["priceRange.min"] = { $lte: maxPrice };
+        filter["priceRange.max"] = { $gte: minPrice };
         filter.deleted = { $ne: true };
 
-        // Sorting
         let sortOption: any = {};
         switch (sort) {
-            case "newest":
-                sortOption.createdAt = -1;
-                break;
-            case "rating":
-                sortOption["averageRating"] = -1; // We'll calculate this later
-                break;
-            case "price-low":
-                sortOption["priceRange.min"] = 1; // Must convert priceRange to number
-                break;
-            case "price-high":
-                sortOption["priceRange.max"] = -1;
-                break;
-            case "best":
-                sortOption.relevance = -1;
-                break;
-            default:
-                sortOption.createdAt = -1;
+            case "newest": sortOption.createdAt = -1; break;
+            case "rating": sortOption["averageRating"] = -1; break;
+            case "price-low": sortOption["priceRange.min"] = 1; break;
+            case "price-high": sortOption["priceRange.max"] = -1; break;
+            case "best": sortOption.relevance = -1; break;
+            default: sortOption.createdAt = -1;
         }
 
         const total = await Business.countDocuments(filter);
 
-        // Pipeline to calculate rating & price for sorting
         const entrepreneurs = await Business.aggregate([
             { $match: filter },
-            {
-                $addFields: {
-                    averageRating: { $avg: "$reviews.rating" },
-                }
-            },
+            { $addFields: { averageRating: { $avg: "$reviews.rating" } } },
             { $sort: sortOption },
             { $skip: skip },
             { $limit: limit },
@@ -100,14 +74,44 @@ export async function GET(req: Request) {
                     verified: 1,
                     averageRating: 1,
                     verifiedBusiness: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                    displayPics: 1,
                 }
             }
         ]);
 
-        return NextResponse.json({ entrepreneurs, status: "success", total }, { status: 200 });
+        const enriched = await Promise.all(entrepreneurs.map(async (biz) => {
+            const contactAgg = await Message.aggregate([
+                { $match: { $or: [{ sender: biz._id }, { recipient: biz._id }] } },
+                {
+                    $group: {
+                        _id: null,
+                        contacts: {
+                            $addToSet: {
+                                $cond: [
+                                    { $ne: ["$sender", biz._id] },
+                                    "$sender",
+                                    "$recipient"
+                                ]
+                            }
+                        }
+                    }
+                },
+                { $project: { count: { $size: "$contacts" } } }
+            ]);
+
+            const contactCount = contactAgg[0]?.count || 0;
+
+            const verification = await Verification.findOne({ userId: biz._id });
+
+
+
+            return {
+                ...biz,
+                contactCount,
+                verificationStatus: verification?.status ?? "unverified"
+            };
+        }));
+
+        return NextResponse.json({ entrepreneurs: enriched, status: "success", total }, { status: 200 });
 
     } catch (error) {
         console.error('Entrepreneur error:', error);
@@ -122,4 +126,3 @@ export async function GET(req: Request) {
         );
     }
 }
-

@@ -33,6 +33,8 @@ import {
   ImageIcon,
   Clipboard,
   ClipboardCheck,
+  Currency,
+  Banknote,
 } from "lucide-react";
 import {
   AnyUser,
@@ -429,6 +431,10 @@ const UsersProfile = ({
               <button className="flex-1 sm:flex-initial border border-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm">
                 <Heart className="w-4 h-4 inline mr-2" />
                 {isMobile ? "Save" : "Add to Favorite"}
+              </button>
+              <button className="flex-1 sm:flex-initial border border-green-300 text-green-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-green-50 transition-colors text-sm" onClick={()=> router.push("/payments")}>
+                <Banknote className="w-4 h-4 inline mr-2" />
+                {isMobile ? "Make payment" : "Make payment"}
               </button>
               <button className="border border-red-300 text-red-600 px-3 sm:px-4 py-2 rounded-lg hover:bg-red-50 transition-colors text-sm">
                 <FlagTriangleRight className="w-4 h-4 inline mr-2" />

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     try {
         const data = await req.json()
 
-        const { email, password, username, phone, userType, businessCategory, businessName, businessDescription, fullName, agreedToTerms, businessAddress, dateOfBirth, gender, deliveryAddress, website, confirmPassword, logo }: RegisterData = data
+        const { email, password, username, phone, userType, businessCategory, businessName, businessDescription, fullName, agreedToTerms, businessAddress, dateOfBirth, gender, deliveryAddress, website, confirmPassword, logo, deliveryTime, displayPics, priceRange }: RegisterData = data
         console.log(userType);
 
         if (password !== confirmPassword) return NextResponse.json({ error: "Password mismatched" }, { status: 409 })
@@ -75,7 +75,8 @@ export async function POST(req: Request) {
                 businessDescription,
                 website: website || "",
                 userType,
-                logo
+                logo,
+                deliveryTime, displayPics, priceRange
             });
         }
 

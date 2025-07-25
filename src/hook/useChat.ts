@@ -47,8 +47,6 @@ interface Message {
   avatar: string;
 }
 
-
-
 export default function useChat() {
   const { data: session } = useSession();
   const router = useRouter();

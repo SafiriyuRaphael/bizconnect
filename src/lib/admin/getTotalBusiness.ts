@@ -1,6 +1,8 @@
-export default async function totalBusiness() {
+import { BASEURL } from "@/constants/url";
+
+export default async function getTotalBusiness() {
     try {
-        const res = await fetch(`/api/admin/total-business`, {
+        const res = await fetch(`${BASEURL}/api/admin/total-business`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -11,7 +13,7 @@ export default async function totalBusiness() {
             throw new Error("failed to get total business");
         }
 
-        const data: { count: number; formattedChange: string } = await res.json();
+        const data: { count: number; change: string } = await res.json();
         return data;
 
 

@@ -11,161 +11,41 @@ import MessageModal from "@/app/components/ui/MessageModal";
 import ChangePasswordModal from "@/app/components/modals/ChangePassword";
 import InputPasswordModal from "@/app/components/modals/InputPassword";
 import { signOut } from "next-auth/react";
+import useEditProfile from "@/hook/useEditProfile";
 
 export default function ProfileComponent({ user }: { user: AnyUser }) {
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState<ProfileData>({});
-  const [modalType, setIsModalType] = useState<
-    "error" | "warning" | "info" | "success"
-  >("success");
-  const [message, setMessage] = useState("");
-  const [title, setTitle] = useState("");
-  const [errors, setErrors] = useState<ProfileData>({});
-  const [autoClose, setAutoClose] = useState(true);
-  const [actions, setActions] = useState<React.JSX.Element | null>(null);
-  const [activeModal, setActiveModal] = useState<string | null>(null);
-  const openModal = (type: string) => setActiveModal(type);
+  const {
+    activeModal,
+    closeModal,
+    handleChangePassword,
+    message,
+    modalType,
+    autoClose,
+    title,
+    actions,
+    handleDeleteModal,
+    fallbackAlt,
+    fallbackSrc,
+    profile,
+    editMode,
+    setEditMode,
+    uploading,
+    errors,
+    formData,
+    openModal,
+    handleDeletePassword,
+    handleLogoUpload,
+    setFormData,
+    setIsModalType,
+    handleSubmit,
+    handleInputChange,
+    handleNestedChange,
+    handleCancel,
+    loading,
+  } = useEditProfile(user);
 
-  const closeModal = () => setActiveModal(null);
+  if (!profile) return;
 
-  const [uploading, setUploading] = useState(false);
-  const [profile, setProfile] = useState(user);
-
-  // Initialize form data when entering edit mode
-
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        setErrors((prev) => ({
-          ...prev,
-          logo: "File size must be less than 5MB",
-        }));
-        return;
-      }
-      if (!file.type.startsWith("image/")) {
-        setErrors((prev) => ({ ...prev, logo: "Please upload an image file" }));
-        return;
-      }
-      setErrors((prev) => ({ ...prev, logo: "" }));
-    }
-
-    try {
-      setUploading(true);
-      console.log(profile);
-
-      const logo_url = await uploadCloudinary(file);
-
-      if (logo_url) {
-        // hit your API to save the new logo
-        const res = await fetch("/api/profile/updates", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: profile._id,
-            updates: { logo: logo_url.imageUrl },
-          }),
-        });
-
-        const data: { user: AnyUser; status: string } = await res.json();
-
-        if (data?.user) {
-          setProfile(data.user);
-        } else {
-          setErrors({ logo: "failed to upload picture" });
-        }
-      }
-    } catch (err) {
-      setErrors({ logo: "failed to upload picture" });
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const generateDefaultLogoDataUrl = (name: string): string => {
-    const svg = generateDefaultLogo(name);
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
-
-  const actionButtons = (
-    <>
-      <button
-        onClick={closeModal}
-        className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => openModal("inputPassword")}
-        className="px-6 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200"
-      >
-        Confirm
-      </button>
-    </>
-  );
-
-  const handleDeleteModal = () => {
-    setAutoClose(false);
-    setTitle("Confirm Delete");
-    setIsModalType("warning");
-    setMessage(
-      "Are you sure you want to delete this item? This action cannot be undone."
-    );
-    setActions(actionButtons);
-    openModal("message");
-  };
-
-  const handleDeletePassword = async ({ password }: { password: string }) => {
-    const res = await fetch(`/api/profile/delete`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ password }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Delete failed");
-    }
-
-    signOut({ callbackUrl: "/auth/login" });
-  };
-
-  const handleChangePassword = async ({
-    currentPassword,
-    newPassword,
-  }: {
-    currentPassword: string;
-    newPassword: string;
-  }) => {
-    const res = await fetch(`/api/profile/change-password`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Delete failed");
-    }
-
-    setTimeout(() => {
-      setActions(null);
-      setAutoClose(true);
-      setTitle("Password Changed");
-      setIsModalType("success");
-      setMessage("Password Changed Successfully");
-      openModal("message");
-    }, 500);
-  };
-
-
-  const fallbackAlt = profile?.businessName || profile?.fullName || "User";
-  const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 pt-20">
       <ChangePasswordModal
@@ -270,19 +150,14 @@ export default function ProfileComponent({ user }: { user: AnyUser }) {
             {editMode ? (
               // Edit Form
               <EditProfile
+                handleCancel={handleCancel}
+                handleInputChange={handleInputChange}
+                handleNestedChange={handleNestedChange}
+                handleSubmit={handleSubmit}
+                loading={loading}
                 errors={errors}
                 formData={formData}
-                setEditMode={setEditMode}
-                setErrors={setErrors}
-                setFormData={setFormData}
-                setMessage={setMessage}
-                user={user}
                 userType={profile.userType}
-                openModal={openModal}
-                setIsModalType={setIsModalType}
-                setAutoClose={setAutoClose}
-                setActions={setActions}
-                setProfile={setProfile}
               />
             ) : (
               // Display Mode

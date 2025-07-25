@@ -14,7 +14,7 @@ export default async function getAllBusiness(params: BusinessQueryParams = {}) {
     if (params.minPrice) query.set("minPrice", params.minPrice.toString());
 
     const res = await fetch(
-        `/api/business/all-business?${query.toString()}`,
+        `/api/admin/all-business?${query.toString()}`,
         {
             method: "GET",
             headers: {

@@ -132,7 +132,7 @@ interface AnyUser {
 
 
 
-interface RegisterData {
+type RegisterData = {
     fullName: string;
     businessName: string;
     email: string;
@@ -151,12 +151,22 @@ interface RegisterData {
     userType: "customer" | "business";
     logo: string | null
     displayPics?: BusinessDisplayPicsProps[]
+    deliveryTime: string
+    priceRange?: {
+        min: number | string;
+        max: number | string;
+    };
 }
 
 interface AllBusinessData {
-    entrepreneurs: AllBusinessProps[]
+    entrepreneurs: AllBusinessProps[] | AdminAllBusinessProps[]
     status: string
     total: number
+}
+
+type AdminAllBusinessProps = AllBusinessProps & {
+    contactCount: number
+    verificationStatus: string
 }
 
 interface AllBusinessProps {
@@ -177,7 +187,14 @@ interface AllBusinessProps {
     verified: boolean
     displayPics?: BusinessDisplayPicsProps[]
     averageRating: number
+    verifiedBusiness: boolean
+    contactCount?: number
+    verificationStatus?: string
+    updatedAt: Date
+    createdAt: Date
+    userType: "business" | "user"
 }
+
 interface BusinessDisplayPicsProps {
     url: string
     name: string

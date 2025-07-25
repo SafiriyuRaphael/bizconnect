@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { FormErrors, RegisterData } from '../../types';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { uploadCloudinary } from '@/lib/cloudinary/uploadClodinary';
 
 export default function useRegister() {
     const router = useRouter()
+    const pathname = usePathname()
     const [formData, setFormData] = useState<RegisterData>({
         fullName: "",
         businessName: "",
@@ -22,7 +23,8 @@ export default function useRegister() {
         dateOfBirth: "",
         agreedToTerms: false,
         userType: "customer" as "customer" | "business",
-        logo: null
+        logo: null,
+        deliveryTime: "",
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -63,6 +65,23 @@ export default function useRegister() {
 
     const validatePassword = (password: string): boolean => {
         return password.length >= 8;
+    };
+
+    const handleNestedChange = <
+        Parent extends keyof RegisterData,
+        Field extends keyof NonNullable<RegisterData[Parent]>
+    >(
+        parent: Parent,
+        field: Field,
+        value: NonNullable<RegisterData[Parent]>[Field]
+    ) => {
+        setFormData((prev) => ({
+            ...prev,
+            [parent]: {
+                ...(prev[parent] as object),
+                [field]: value,
+            },
+        }));
     };
 
     const handleInputChange = (
@@ -134,6 +153,20 @@ export default function useRegister() {
             newErrors.confirmPassword = "Passwords do not match";
         if (!formData.agreedToTerms)
             newErrors.agreedToTerms = "You must agree to the terms and conditions";
+        if (
+            formData.priceRange?.min != null &&
+            Number(formData.priceRange.min) < 0
+        ) {
+            newErrors.priceRange = "Minimum price cannot be negative"
+        }
+
+        if (
+            formData.priceRange?.max != null &&
+            formData.priceRange?.min != null &&
+            formData.priceRange.max < formData.priceRange.min
+        ) {
+            newErrors.priceRange = "Maximum price must be greater than minimum"
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -143,8 +176,8 @@ export default function useRegister() {
     const handleSubmit = async (e: React.FormEvent) => {
         setIssubmitting(true)
         e.preventDefault();
+        // console.log("Form submitted:", formData);
         if (validateForm()) {
-            console.log("Form submitted:", formData);
             const logo_url = await uploadCloudinary(logoFile)
             const updatedFormData = { ...formData, logo: logo_url?.imageUrl };
             const res = await fetch("/api/auth/register", {
@@ -155,12 +188,22 @@ export default function useRegister() {
 
             // registration logic here
             if (res.ok) {
-                setModalMessage("Registration successful! Redirecting you to the login page...");
-                setIsModalOpen(true)
-                setModalType("success")
-                setTimeout(() => {
-                    router.push("/auth/login")
-                }, 4000)
+
+                if (pathname.includes("/auth/register")) {
+                    setModalMessage("Registration successful! Redirecting you to the login page...");
+                    setIsModalOpen(true)
+                    setModalType("success")
+                    setTimeout(() => {
+                        router.push("/auth/login")
+                    }, 4000)
+
+                } else {
+                    setModalMessage("Registration successful!");
+                    setIsModalOpen(true)
+                    setModalType("success")
+
+                }
+
             } else {
                 const { error } = await res.json();
                 setModalMessage(error)
@@ -179,6 +222,6 @@ export default function useRegister() {
         handleLogoUpload,
         logoFile,
         errors,
-        businessCategories, router, modalMessage, isModalOpen, onClose, isSubmitting, modalType
+        businessCategories, router, modalMessage, isModalOpen, onClose, isSubmitting, modalType, handleNestedChange, setFormData
     }
 }

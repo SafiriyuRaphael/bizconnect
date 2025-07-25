@@ -62,9 +62,6 @@ export async function POST(req: Request) {
             });
         }
 
-
-
-
         await business.save();
 
         return NextResponse.json({
