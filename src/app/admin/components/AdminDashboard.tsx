@@ -139,15 +139,15 @@ const AdminDashboard = ({
     }
   }, [session?.user?.id]);
 
-  setInterval(async () => {
-    const allBusinesses = await getTotalBusiness();
-    setAllBusinessesCount(allBusinesses);
-    const ConnectionsAnalytics = await getConnectionsAnalytics();
-    setConnectionsAnalytics(ConnectionsAnalytics);
+  // setInterval(async () => {
+  //   const allBusinesses = await getTotalBusiness();
+  //   setAllBusinessesCount(allBusinesses);
+  //   const ConnectionsAnalytics = await getConnectionsAnalytics();
+  //   setConnectionsAnalytics(ConnectionsAnalytics);
 
-    const lastBusiness = await getLastBusinessUser();
-    setnewBusiness(lastBusiness);
-  }, 5000);
+  //   const lastBusiness = await getLastBusinessUser();
+  //   setnewBusiness(lastBusiness);
+  // }, 5000);
 
   const addActivity = (
     type: "registration" | "call" | "connection",
