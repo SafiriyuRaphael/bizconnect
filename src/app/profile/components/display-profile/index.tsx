@@ -17,11 +17,15 @@ import {
 } from "lucide-react";
 import RatingDisplay from "./RatingDisplay";
 import VerificationBadge from "./VerificationBadge";
-import { AnyUser, BusinessDisplayPicsProps } from "../../../../../types";
+import {
+  AllBusinessProps,
+  AnyUser,
+  BusinessDisplayPicsProps,
+} from "../../../../../types";
 import DisplayPictureSection from "./DisplayPictureSection";
 
 type Props = {
-  profile: AnyUser;
+  profile: AnyUser | any;
   userType: string;
 };
 
@@ -43,8 +47,10 @@ export default function ProfileDisplay({ profile, userType }: Props) {
 
   const averageRating = profile.reviews?.length
     ? (
-        profile.reviews.reduce((sum, review) => sum + review.rating, 0) /
-        profile.reviews.length
+        profile.reviews.reduce(
+          (sum: any, review: any) => sum + review.rating,
+          0
+        ) / profile.reviews.length
       ).toFixed(1)
     : "0.0";
   return (

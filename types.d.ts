@@ -193,6 +193,7 @@ interface AllBusinessProps {
     updatedAt: Date
     createdAt: Date
     userType: "business" | "user"
+    
 }
 
 interface BusinessDisplayPicsProps {
