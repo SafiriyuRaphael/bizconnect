@@ -1,4 +1,4 @@
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import React, { useState } from 'react'
 import { FormErrors } from '../../types';
 import { useRouter } from 'next/navigation';
@@ -77,7 +77,6 @@ export default function useLogin() {
                     redirect: false,
                 };
 
-                console.log("Login attempt:", loginData);
 
                 const res = await signIn("credentials", {
                     emailOrUsername: loginData.emailOrUsername,
@@ -88,7 +87,13 @@ export default function useLogin() {
                 if (res?.error) {
                     setErrors({ general: res.error || "Invalid credentials" });
                 } else if (res?.ok) {
-                    router.push("/dashboard");
+                    const session = await getSession();
+
+                    if (session?.user?.userRole === "admin") {
+                        router.push("/admin");
+                    } else {
+                        router.push("/marketplace");
+                    }
                 }
             } catch (_) {
                 setErrors({ general: "Network error. Please check your connection." });

@@ -1,5 +1,4 @@
 "use client";
-import React, { useEffect, useState } from "react";
 import {
   Star,
   Send,
@@ -12,15 +11,11 @@ import {
   Shield,
   Clock,
   DollarSign,
-  Edit,
   Heart,
   Flag,
   Edit2,
   MessageCircle,
   FlagTriangleRight,
-  ChevronLeft,
-  ChevronRight,
-  X,
   Share2,
   ExternalLink,
   Users,
@@ -33,25 +28,30 @@ import {
   ImageIcon,
   Clipboard,
   ClipboardCheck,
-  Currency,
   Banknote,
+  Package,
+  ShoppingCart,
+  Tag,
+  CheckCircle,
+  XCircle,
+  Eye,
+  ShoppingBag,
+  Currency,
+  CreditCard,
 } from "lucide-react";
-import {
-  AnyUser,
-  BusinessDisplayPicsProps,
-  BusinessReviewsProps,
-  SessionUser,
-} from "../../../../types";
-import getUserReviews from "@/lib/reviews/getUserReviews";
-import addReview from "@/lib/reviews/addReview";
-import MessageModal from "@/app/components/ui/MessageModal";
-import { useRouter } from "next/navigation";
-import getBusinessReviews from "@/lib/reviews/getBusinessReviews";
+import { AnyUser, SessionUser } from "../../../../types";
 import Image from "next/image";
 import { CldImage } from "next-cloudinary";
-import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
-import toggleUserHelpful from "@/lib/reviews/toggleUserHelpful";
-import { BASEURL } from "@/constants/url";
+import ImageModal from "@/app/components/modals/ImageModal";
+import formatDate from "@/lib/static/formatDate";
+import useUserDashBoard from "@/hook/useUserDashBoard";
+import useProductsApi from "@/hook/useProductsApi";
+import { useProductStore } from "@/store/useProductsStore";
+import { useEffect } from "react";
+import Loader from "@/app/components/ui/Loader";
+import formatPrice from "@/lib/business/formatPrice";
+
+
 
 const UsersProfile = ({
   user,
@@ -60,311 +60,68 @@ const UsersProfile = ({
   user: AnyUser;
   session: SessionUser;
 }) => {
-  const [modalType, setIsModalType] = useState<
-    "error" | "warning" | "info" | "success"
-  >("success");
-  const [message, setMessage] = useState("");
-  const [openModal, setOpenModal] = useState(false);
-  const [comments, setComments] = useState<BusinessReviewsProps[]>(
-    user.reviews || []
-  );
-  const [newComment, setNewComment] = useState("");
-  const [newRating, setNewRating] = useState(5);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isEditable, setIsEditable] = useState<boolean>(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
-  );
-  const [isMobile, setIsMobile] = useState(false);
-  const [openFullGallery, setOpenFullGallery] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [isToggleHelpful, setIsToggleHelpful] = useState(false);
-
-  const router = useRouter();
-
-  const generateDefaultLogoDataUrl = (name: string): string => {
-    const svg = generateDefaultLogo(name);
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
-
-  // Check if user can rate (only for business profiles)
-  const canRate = session.id !== user._id;
-
-  // Calculate average rating
-  const averageRating =
-    comments.length > 0
-      ? comments.reduce((acc, comment) => acc + comment.rating, 0) /
-        comments.length
-      : 0;
-
-  // Handle responsive design
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const handleSubmitComment = async () => {
-    if (!newComment.trim() || !canRate) return;
-
-    setIsSubmitting(true);
-    const businessName = session.businessName;
-    const name = session.name;
-    try {
-      const newReviews = await addReview({
-        businessId: user._id,
-        userId: session.id,
-        displayPic: session?.logo || "",
-        username: session?.username,
-        rating: newRating,
-        comment: newComment,
-        fullName: businessName || name,
-      });
-      setComments(newReviews?.reviews || []);
-      setIsModalType("success");
-      setMessage("Review posted successfully!");
-      setOpenModal(true);
-    } catch (err) {
-      setIsModalType("error");
-      setMessage("Failed to post review");
-      setOpenModal(true);
-    } finally {
-      setIsSubmitting(false);
+    if (user?._id) {
+      useProductStore.getState().setUserId(user._id);
     }
-  };
+  }, [user?._id]);
 
-  const handleToggleHelpful = async ({
-    businessId,
-    reviewId,
-    userId,
-  }: {
-    businessId: string;
-    reviewId: string;
-    userId: string;
-  }) => {
-    setIsToggleHelpful(true);
-    try {
-      const helpfulToggle = await toggleUserHelpful({
-        reviewId,
-        userId,
-        businessId,
-      });
-      setComments((prev) =>
-        prev.map((comment) =>
-          comment._id === reviewId
-            ? {
-                ...comment,
-                helpful: helpfulToggle?.helpful,
-              }
-            : comment
-        )
-      );
-    } catch (err) {
-      setIsModalType("error");
-      setMessage("Failed to toggle helpful");
-      setOpenModal(true);
-    } finally {
-      setIsToggleHelpful(false);
-    }
-  };
+  const {
+    selectedImageIndex,
+    generateDefaultLogoDataUrl,
+    renderStars,
+    averageRating,
+    comments,
+    handleChatClick,
+    isMobile,
+    router,
+    setOpenFullGallery,
+    openFullGallery,
+    openImageModal,
+    isEditable,
+    canRate,
+    renderRatingInput,
+    setNewComment,
+    newComment,
+    handleSubmitComment,
+    isSubmitting,
+    setIsEditable,
+    handleToggleHelpful,
+    isToggleHelpful,
+    handleShare,
+    handleCopy,
+    copied,
+    getRatingColor,
+    handleDirection,
+    setSelectedImageIndex,
+  } = useUserDashBoard({ user, session });
 
-  const openImageModal = (index: number) => {
-    setSelectedImageIndex(index);
-  };
+  const { fetchedItems, isFetchingItems } = useProductsApi();
 
-  const closeImageModal = () => {
-    setSelectedImageIndex(null);
-  };
-
-  const nextImage = () => {
-    if (
-      selectedImageIndex !== null &&
-      user.displayPics &&
-      selectedImageIndex < user.displayPics.length - 1
-    ) {
-      setSelectedImageIndex(selectedImageIndex + 1);
-    }
-  };
-
-  const prevImage = () => {
-    if (selectedImageIndex !== null && selectedImageIndex > 0) {
-      setSelectedImageIndex(selectedImageIndex - 1);
-    }
-  };
-
-  const handleDirection = (address: string | undefined) => {
-    if (!address) return;
-    const encodedAddress = encodeURIComponent(address);
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
-    window.open(mapsUrl, "_blank");
-  };
-
-  const handleChatClick = () => {
-    router.push(`/chat?recipientId=${user._id}`);
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${user.businessName ?? user.fullName}'s Profile`,
-          text: `Check out ${user.businessName ?? user.fullName}'s profile`,
-          url: `${BASEURL}/${user.username}`,
-        });
-        console.log("Shared successfully");
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
-    } else {
-      alert("Sharing not supported in your browser 😢");
-    }
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(`${BASEURL}/${user.username}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      alert("Failed to copy link");
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (canRate) {
-          const userReview = await getUserReviews({
-            businessId: user._id,
-            userId: session.id,
-          });
-
-          if (userReview) {
-            setIsEditable(false);
-            setNewRating(userReview?.review.rating);
-            setNewComment(userReview?.review.comment);
-          } else {
-            setIsEditable(true);
-          }
-        }
-
-        if (user.userType === "business") {
-          const reviews = await getBusinessReviews({
-            businessId: user._id,
-          });
-          setComments(reviews?.reviews || []);
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    })();
-  }, []);
-
-  const formatDate = (dateString: any) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const renderStars = (rating: number, size: string = "w-4 h-4") => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`${size} ${
-          i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
-        }`}
-      />
-    ));
-  };
-
-  const renderRatingInput = () => {
-    if (!canRate) return null;
-
-    return (
-      <div className="flex items-center space-x-1">
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star
-            key={i}
-            className={`w-6 h-6 cursor-pointer transition-colors ${
-              i < newRating
-                ? "text-yellow-400 fill-current"
-                : "text-gray-300 hover:text-yellow-300"
-            }`}
-            onClick={() => (isEditable ? setNewRating(i + 1) : null)}
-          />
-        ))}
-        <span className="ml-3 text-sm font-medium text-gray-700">
-          ({newRating}/5)
-        </span>
-      </div>
+  // Items section handlers
+  const handleMakePayment = (item: any) => {
+    // Navigate to payment page with item details
+    router.push(
+      `/payments?itemId=${item._id}&userId=${user._id}&amount=${item.price}`
     );
   };
 
-  const getRatingColor = (rating: number) => {
-    if (rating >= 4.5) return "text-green-600";
-    if (rating >= 3.5) return "text-yellow-600";
-    if (rating >= 2.5) return "text-orange-600";
-    return "text-red-600";
+  const handleViewItem = (itemId?: string) => {
+    if (!itemId) return;
+    router.push(`/items/${itemId}`);
   };
+
+ 
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MessageModal
-        isOpen={openModal}
-        onClose={() => setOpenModal(false)}
-        message={message}
-        type={modalType}
-        autoClose
-        autoCloseDelay={5000}
-        showIcon
-      />
-
       {/* Image Modal */}
       {selectedImageIndex !== null && user.displayPics && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
-          <div className="relative max-w-4xl max-h-full">
-            <button
-              onClick={closeImageModal}
-              className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
-            >
-              <X className="w-8 h-8" />
-            </button>
-
-            <img
-              src={user.displayPics[selectedImageIndex].url}
-              alt={`Business image ${selectedImageIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
-            />
-
-            {user.displayPics.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  disabled={selectedImageIndex === 0}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 disabled:opacity-50"
-                >
-                  <ChevronLeft className="w-8 h-8" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  disabled={selectedImageIndex === user.displayPics.length - 1}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 disabled:opacity-50"
-                >
-                  <ChevronRight className="w-8 h-8" />
-                </button>
-              </>
-            )}
-
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm">
-              {selectedImageIndex + 1} / {user.displayPics.length}
-            </div>
-          </div>
-        </div>
+        <ImageModal
+          displayPics={user.displayPics}
+          selectedImageIndex={selectedImageIndex}
+          setSelectedImageIndex={setSelectedImageIndex}
+        />
       )}
 
       {/* Header */}
@@ -432,7 +189,10 @@ const UsersProfile = ({
                 <Heart className="w-4 h-4 inline mr-2" />
                 {isMobile ? "Save" : "Add to Favorite"}
               </button>
-              <button className="flex-1 sm:flex-initial border border-green-300 text-green-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-green-50 transition-colors text-sm" onClick={()=> router.push("/payments")}>
+              <button
+                className="flex-1 sm:flex-initial border border-green-300 text-green-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-green-50 transition-colors text-sm"
+                onClick={() => router.push("/payments")}
+              >
                 <Banknote className="w-4 h-4 inline mr-2" />
                 {isMobile ? "Make payment" : "Make payment"}
               </button>
@@ -449,6 +209,186 @@ const UsersProfile = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Business Items Section - Only for businesses */}
+            {user.userType === "business" && !isFetchingItems && (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                    <Package className="w-6 h-6 mr-2 text-blue-600" />
+                    Products & Services
+                  </h2>
+                  <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+                    {fetchedItems?.stats.activeItems} Available
+                  </span>
+                </div>
+
+                {fetchedItems?.stats.totalItems === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 text-lg">No items listed yet</p>
+                    <p className="text-gray-400 text-sm">
+                      This business hasn't added any products or services.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {fetchedItems?.items.map((item) => (
+                      <div
+                        key={item._id}
+                        className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow duration-300 relative"
+                      >
+                        {/* Item Status Badge */}
+                        <div className="absolute top-4 right-4">
+                          {item.isAvailable ? (
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Available
+                            </span>
+                          ) : (
+                            <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center">
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Unavailable
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Item Image */}
+                        {item.media && item.media.length > 0 ? (
+                          <div className="mb-4">
+                            <img
+                              src={item.media[0].url}
+                              alt={item.title}
+                              className="w-full h-48 object-cover rounded-lg"
+                            />
+                          </div>
+                        ) : (
+                          <div className="mb-4">
+                            <img
+                              src="fallbackproduct.png"
+                              alt={item.title}
+                              className="w-full h-48 object-cover rounded-lg"
+                            />
+                          </div>
+                        )}
+
+                        {/* Item Type Badge */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full flex items-center ${
+                              item.type === "product"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
+                            {item.type === "product" ? (
+                              <ShoppingBag className="w-3 h-3 mr-1" />
+                            ) : (
+                              <Users className="w-3 h-3 mr-1" />
+                            )}
+                            {item.type === "product" ? "Product" : "Service"}
+                          </span>
+                          {item.useEscrow && (
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center">
+                              <Shield className="w-3 h-3 mr-1" />
+                              Escrow
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Item Title and Description */}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                          {item.description}
+                        </p>
+
+                        {/* Tags */}
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {item.tags.slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full flex items-center"
+                              >
+                                <Tag className="w-2.5 h-2.5 mr-1" />
+                                {tag}
+                              </span>
+                            ))}
+                            {item.tags.length > 3 && (
+                              <span className="text-gray-500 text-xs">
+                                +{item.tags.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Price and Delivery Info */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-2xl font-bold text-green-600">
+                            {formatPrice(Number(item.price))}
+                          </div>
+                          {item.deliveryTime && (
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Clock className="w-4 h-4 mr-1" />
+                              {item.deliveryTime} day
+                              {Number(item.deliveryTime) !== 1 ? "s" : ""}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleViewItem(item._id)}
+                            className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center"
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            View Details
+                          </button>
+                          {item.isAvailable && item.useEscrow && (
+                            <button
+                              onClick={() => handleMakePayment(item)}
+                              className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm flex items-center justify-center"
+                            >
+                              {item.type == "product" ? (
+                                <>
+                                  <ShoppingCart className="w-4 h-4 mr-2" />
+                                  <span>Buy Now</span>
+                                </>
+                              ) : (
+                                <>
+                                  {" "}
+                                  <CreditCard />
+                                  <span>Buy Now</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                          {item.isAvailable && !item.useEscrow && (
+                            <button
+                              onClick={handleChatClick}
+                              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center justify-center"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              Contact
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {user.userType === "business" && isFetchingItems && (
+              <Loader
+                size="lg"
+                text="Checking business items"
+                variant="pulse"
+              />
+            )}
+
             {/* Business Gallery */}
             {user.userType === "business" &&
               user.displayPics &&
@@ -534,7 +474,7 @@ const UsersProfile = ({
                 <div className="flex items-center space-x-3 text-gray-600">
                   <Calendar className="w-5 h-5 text-purple-600" />
                   <span className="text-sm sm:text-base">
-                    Joined {formatDate(user.createdAt)}
+                    Joined {formatDate(user.createdAt, true)}
                   </span>
                 </div>
                 {user.userType === "business" && (
@@ -730,7 +670,7 @@ const UsersProfile = ({
                                   </div>
                                 </div>
                                 <span className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-0">
-                                  {formatDate(comment.createdAt)}
+                                  {formatDate(comment.createdAt, true)}
                                 </span>
                               </div>
                               <p className="text-gray-700 mb-3 text-sm sm:text-base leading-relaxed">
@@ -840,6 +780,71 @@ const UsersProfile = ({
               </div>
             </div>
 
+            {/* Items Quick Stats - Only for businesses with items */}
+            {user.userType === "business" &&
+              fetchedItems?.stats?.totalItems && (
+                <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Items Overview
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 flex items-center">
+                        <Package className="w-4 h-4 mr-2 text-blue-500" />
+                        Total Items
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {fetchedItems?.stats.totalItems}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                        Available
+                      </span>
+                      <span className="font-semibold text-green-600">
+                        {fetchedItems?.stats.activeItems}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 flex items-center">
+                        <ShoppingBag className="w-4 h-4 mr-2 text-purple-500" />
+                        Products
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {
+                          fetchedItems?.items.filter(
+                            (item) => item.type === "product"
+                          ).length
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 flex items-center">
+                        <Users className="w-4 h-4 mr-2 text-orange-500" />
+                        Services
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {
+                          fetchedItems?.items.filter(
+                            (item) => item.type === "service"
+                          ).length
+                        }
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 flex items-center">
+                        <Shield className="w-4 h-4 mr-2 text-green-500" />
+                        With Escrow
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {fetchedItems?.stats.escrowEnabled}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             {/* Statistics */}
             <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -880,7 +885,7 @@ const UsersProfile = ({
                     Member Since
                   </span>
                   <span className="font-semibold text-gray-900">
-                    {formatDate(user.createdAt)}
+                    {formatDate(user.createdAt, true)}
                   </span>
                 </div>
                 {user.userType === "business" && (

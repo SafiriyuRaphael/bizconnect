@@ -1,7 +1,8 @@
 import { VerificationStatusProps } from '../../../types';
 
-export default async function getVerificationStatus(userId: string) {
+export default async function getVerificationStatus(userId?: string) {
     try {
+        if (!userId) return
         const res = await fetch(`/api/business/verification-status?userId=${userId}`);
         if (res.ok) {
             const data: VerificationStatusProps = await res.json();

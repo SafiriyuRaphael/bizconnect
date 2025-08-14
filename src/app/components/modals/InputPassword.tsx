@@ -1,12 +1,11 @@
+"use client";
 import React, { useState } from "react";
 import Modals from "./Modals";
 import PasswordInput from "../ui/PasswordInput";
 import { PasswordModalProps } from "../../../../types";
+import { useEditProfileStore } from "@/store/useEditProfileStore";
 
 export default function InputPasswordModal({
-  isOpen,
-  onClose,
-  onSubmit,
   title = "",
   variant,
   size,
@@ -14,6 +13,8 @@ export default function InputPasswordModal({
   showGlow,
   blurIntensity,
 }: PasswordModalProps) {
+  const { activeModal, closeModal, handleDeletePassword } =
+    useEditProfileStore();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +27,9 @@ export default function InputPasswordModal({
 
     setIsLoading(true);
     try {
-      await onSubmit({ password });
+      await handleDeletePassword({ password });
       setPassword("");
-      onClose();
+      closeModal();
     } catch (error) {
       setError(
         error instanceof Error
@@ -42,8 +43,8 @@ export default function InputPasswordModal({
   };
   return (
     <Modals
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={activeModal === "inputPassword"}
+      onClose={closeModal}
       title={title}
       blurIntensity={blurIntensity}
       showGlow={showGlow}
@@ -66,7 +67,7 @@ export default function InputPasswordModal({
         <div className="flex gap-3 pt-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeModal}
             className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Cancel

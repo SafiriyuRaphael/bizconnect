@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/dashboard',
+        destination: '/marketplace',
         permanent: true, // 308 Permanent Redirect (SEO-friendly)
       },
     ];

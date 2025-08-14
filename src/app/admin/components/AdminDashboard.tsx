@@ -23,18 +23,7 @@ import { AnyUser } from "../../../../types";
 import getConnectionsAnalytics from "@/lib/admin/getConnectionsAnalytics";
 import getTotalBusiness from "@/lib/admin/getTotalBusiness";
 import getLastBusinessUser from "@/lib/admin/getLastBusiness";
-
-type ConnectionsMade = {
-  from: string;
-  to: string;
-};
-
-type Status = {
-  chatService: string;
-  voiceCalls: string;
-  videoCalls: string;
-  database: string;
-};
+import { useSocketStore } from "@/store/useSocketStore";
 
 type Props = {
   allBusinesses: {
@@ -56,10 +45,18 @@ const AdminDashboard = ({
   lastBusiness,
 }: Props) => {
   const { data: session } = useSession();
-  const socketRef = useRef<Socket | null>(null);
-  const [activeUsers, setActiveUsers] = useState(0);
-  const [activeCalls, setActiveCalls] = useState(0);
-  const [status, setStatus] = useState<Status | null>(null);
+  const {
+    activeCalls,
+    activeUsers,
+    activeChat,
+    status,
+    addActivity,
+    recentActivities,
+  } = useSocketStore();
+  // const socketRef = useRef<Socket | null>(null);
+  // const [activeUsers, setActiveUsers] = useState(0);
+  // const [activeCalls, setActiveCalls] = useState(0);
+  // const [status, setStatus] = useState<Status | null>(null);
   const [BusinessesCount, setAllBusinessesCount] = useState<{
     count: number;
     change: string;
@@ -71,98 +68,6 @@ const AdminDashboard = ({
     percentageIncrease: any;
   }>(ConnectionsAnalytics);
   const [newBusiness, setnewBusiness] = useState<AnyUser>(lastBusiness);
-
-  const [recentActivities, setRecentActivities] = useState<
-    Array<{
-      id: string;
-      type: "registration" | "call" | "connection";
-      message: string;
-      timestamp: Date;
-      color: string;
-    }>
-  >([]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      socketRef.current = io(process.env.NEXT_PUBLIC_API_URL);
-      socketRef.current.emit("register", session?.user?.id);
-
-      socketRef.current.on("active-users", (data: string[]) => {
-        console.log("🔥 Active Users: ", data);
-        setActiveUsers(data.length);
-      });
-
-      socketRef.current.on(
-        "activeCalls",
-        (data: { total: number; calls: ConnectionsMade[] }) => {
-          setActiveCalls(data.total);
-        }
-      );
-
-      socketRef.current.on("call-initiated", (data: { callerName: string }) => {
-        addActivity(
-          "call",
-          `${data.callerName} initiated a video call`,
-          "bg-blue-500"
-        );
-      });
-
-      socketRef.current.on("newConnection", async (data: ConnectionsMade) => {
-        console.log("Chat sent: ", data);
-        if (data) {
-          const receiver = await getUserById(data.to);
-          const caller = await getUserById(data.from);
-          const from = receiver?.businessName || receiver?.fullName;
-          const to = caller?.businessName || caller?.fullName;
-
-          addActivity(
-            "connection",
-            `New Connection made between ${from} and ${to}`,
-            "bg-purple-500"
-          );
-        }
-      });
-
-      const statusInterval = setInterval(() => {
-        socketRef.current?.emit("check-status");
-      }, 5000);
-
-      socketRef.current.on("status-update", (data: Status) => {
-        console.log("📡 Service Status:", data);
-        setStatus(data);
-      });
-
-      return () => {
-        clearInterval(statusInterval);
-        socketRef.current?.disconnect();
-      };
-    }
-  }, [session?.user?.id]);
-
-  // setInterval(async () => {
-  //   const allBusinesses = await getTotalBusiness();
-  //   setAllBusinessesCount(allBusinesses);
-  //   const ConnectionsAnalytics = await getConnectionsAnalytics();
-  //   setConnectionsAnalytics(ConnectionsAnalytics);
-
-  //   const lastBusiness = await getLastBusinessUser();
-  //   setnewBusiness(lastBusiness);
-  // }, 5000);
-
-  const addActivity = (
-    type: "registration" | "call" | "connection",
-    message: string,
-    color: string
-  ) => {
-    const newActivity = {
-      id: Date.now().toString(),
-      type,
-      message,
-      timestamp: new Date(),
-      color,
-    };
-    setRecentActivities((prev) => [newActivity, ...prev.slice(0, 4)]);
-  };
 
   // Add initial business registration activity
   useEffect(() => {
@@ -226,7 +131,7 @@ const AdminDashboard = ({
     },
     {
       label: "Active Users",
-      value: activeUsers.toLocaleString(),
+      value: activeUsers.length.toLocaleString(),
       icon: Users,
       color: "from-green-500 to-green-600",
       textColor: "text-green-600",
@@ -360,13 +265,13 @@ const AdminDashboard = ({
             <div className="p-6">
               <div className="space-y-4">
                 {recentActivities.length > 0 ? (
-                  recentActivities.map((activity) => (
+                  recentActivities.map((activity, i) => (
                     <div
-                      key={activity.id}
+                      key={i}
                       className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
                     >
                       <div
-                        className={`w-3 h-3 rounded-full ${activity.color} mt-2 flex-shrink-0`}
+                        className={`w-3 h-3 rounded-full ${activity.bgColor} mt-2 flex-shrink-0`}
                       ></div>
                       <div className="flex-1">
                         <p className="text-sm text-gray-900 leading-relaxed">

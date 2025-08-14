@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Business } from '@/model/Business';
-import Message from '@/model/Message'; 
+import Message from '@/model/Message';
 import { Verification } from '@/model/Verification';
+import { VerificationLog } from '@/model/VerificationLog';
 
 export async function GET(req: Request) {
     try {
@@ -74,6 +75,10 @@ export async function GET(req: Request) {
                     verified: 1,
                     averageRating: 1,
                     verifiedBusiness: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    displayPics: 1,
+                    userType: 1,
                 }
             }
         ]);
@@ -102,12 +107,21 @@ export async function GET(req: Request) {
 
             const verification = await Verification.findOne({ userId: biz._id });
 
+            let latestLog = null;
+            if (verification?._id) {
+                latestLog = await VerificationLog.findOne({ verificationId: verification._id })
+                    .sort({ createdAt: -1 })
+                    .lean();
+            }
+
 
 
             return {
                 ...biz,
                 contactCount,
-                verificationStatus: verification?.status ?? "unverified"
+                verificationStatus: verification?.status ?? "unverified",
+                verificationLog: latestLog ?? null,
+                verificationData: verification ?? null
             };
         }));
 

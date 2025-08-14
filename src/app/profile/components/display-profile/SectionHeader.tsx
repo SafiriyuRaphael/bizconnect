@@ -1,3 +1,4 @@
+import { useEditProfileStore } from "@/store/useEditProfileStore";
 import { ChevronDown, ChevronUp, LucideIcon } from "lucide-react";
 import React from "react";
 
@@ -6,20 +7,6 @@ type Props = {
   icon: LucideIcon;
   section: "basic" | "personal" | "business" | "account";
   badge?: string | null;
-  setExpandedSections: React.Dispatch<
-    React.SetStateAction<{
-      basic: boolean;
-      personal: boolean;
-      business: boolean;
-      account: boolean;
-    }>
-  >;
-  expandedSections: {
-    basic: boolean;
-    personal: boolean;
-    business: boolean;
-    account: boolean;
-  };
 };
 
 export default function SectionHeader({
@@ -27,9 +14,8 @@ export default function SectionHeader({
   icon: Icon,
   section,
   badge = null,
-  setExpandedSections,
-  expandedSections,
 }: Props) {
+  const { expandedSections, setExpandedSections } = useEditProfileStore();
   const toggleSection = (
     section: "basic" | "personal" | "business" | "account"
   ) => {

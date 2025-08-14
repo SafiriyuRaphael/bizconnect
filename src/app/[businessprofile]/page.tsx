@@ -1,4 +1,3 @@
-import getAllUsername from "@/lib/profile/getAllUsername";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";

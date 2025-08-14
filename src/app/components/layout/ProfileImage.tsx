@@ -1,18 +1,22 @@
+import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
 import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 import React from "react";
 
 type Props = {
   logo?: string | null;
-  fallbackAlt: string;
-  fallbackSrc: string;
+  user: { businessName?: string; fullName?: string | null };
+  className: string;
 };
 
-export default function ProfileImage({
-  logo,
-  fallbackAlt,
-  fallbackSrc,
-}: Props) {
+export default function ProfileImage({ logo, className, user }: Props) {
+  const generateDefaultLogoDataUrl = (name: string): string => {
+    const svg = generateDefaultLogo(name);
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
+  };
+
+  const fallbackAlt = user?.businessName || user?.fullName || "User";
+  const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
   return (
     <>
       {logo ? (
@@ -21,7 +25,7 @@ export default function ProfileImage({
           src={logo}
           width={40}
           height={40}
-          className="rounded-full hover:scale-110 transition-transform duration-300"
+          className={className}
           crop={{
             type: "thumb",
             source: true,
@@ -33,7 +37,7 @@ export default function ProfileImage({
           alt={fallbackAlt}
           width={40}
           height={40}
-          className="rounded-full hover:scale-110 transition-transform duration-300"
+          className={className}
         />
       )}
     </>

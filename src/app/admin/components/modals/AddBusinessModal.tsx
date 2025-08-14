@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { X, Upload, Eye, EyeOff } from "lucide-react";
 import useRegister from "@/hook/useRegister";
 import { BUSINESSCATEGORIES } from "@/constants/business";
-import MessageModal from "@/app/components/ui/MessageModal";
 
 export default function AddBusinessModal({
   isOpen,
@@ -22,12 +21,7 @@ export default function AddBusinessModal({
     handleSubmit,
     isSubmitting,
     handleNestedChange,
-    businessCategories,
     logoFile,
-    isModalOpen,
-    onClose: modalClose,
-    modalType,
-    modalMessage,
     setUserType,
   } = useRegister();
 
@@ -41,24 +35,15 @@ export default function AddBusinessModal({
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <MessageModal
-        isOpen={isModalOpen}
-        onClose={modalClose}
-        autoClose
-        message={modalMessage}
-        type={modalType}
-      />
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[97vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-scroll flex flex-col">
         <form onSubmit={handleSubmit}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Add New Business
-            </h2>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to to-blue-800 text-white">
+            <h2 className="text-3xl font-bold text-white">Add New Business</h2>
             <button
               type="button"
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2 hover:bg-gray-100/10 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -294,9 +279,9 @@ export default function AddBusinessModal({
                     }`}
                   >
                     <option value="">Select a category</option>
-                    {businessCategories.map((category) => (
+                    {BUSINESSCATEGORIES.map((category) => (
                       <option key={category.value} value={category.value}>
-                        {category.category}
+                        {category.name}
                       </option>
                     ))}
                   </select>
@@ -430,6 +415,27 @@ export default function AddBusinessModal({
                   placeholder="0"
                 />
               </div>
+            </div>
+
+            {/* Verified Business */}
+            <div className="mt-6">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="verifiedBusiness"
+                  checked={formData.verifiedBusiness}
+                  onChange={handleInputChange}
+                  className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-sm text-gray-700">
+                  Add as verified business
+                </span>
+              </label>
+              {errors.verifiedBusiness && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.agreedToTerms}
+                </p>
+              )}
             </div>
 
             {/* Terms and Conditions */}

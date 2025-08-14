@@ -21,7 +21,7 @@ export default function PrivacyPolicy() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -60,11 +60,11 @@ export default function PrivacyPolicy() {
             {/* Introduction */}
             <div className="mb-8 p-6 bg-purple-50 rounded-xl border border-purple-200">
               <p className="text-purple-800 leading-relaxed">
-                At BizConnect, we&apos;re committed to protecting your privacy and
-                ensuring transparency about how we collect, use, and safeguard
-                your personal information. This Privacy Policy explains our
-                practices regarding data collection and usage when you use our
-                service marketplace platform.
+                At BizConnect, we&apos;re committed to protecting your privacy
+                and ensuring transparency about how we collect, use, and
+                safeguard your personal information. This Privacy Policy
+                explains our practices regarding data collection and usage when
+                you use our service marketplace platform.
               </p>
             </div>
 
@@ -382,9 +382,9 @@ export default function PrivacyPolicy() {
                   Your Privacy Matters
                 </p>
                 <p className="text-purple-100">
-                  We&apos;re committed to protecting your personal information and
-                  being transparent about our data practices. Contact us anytime
-                  with questions or concerns.
+                  We&apos;re committed to protecting your personal information
+                  and being transparent about our data practices. Contact us
+                  anytime with questions or concerns.
                 </p>
                 <p className="text-purple-200 text-sm mt-4">
                   Secure transactions, trusted connections.

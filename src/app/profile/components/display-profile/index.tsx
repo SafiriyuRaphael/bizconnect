@@ -54,7 +54,7 @@ export default function ProfileDisplay({ profile, userType }: Props) {
       ).toFixed(1)
     : "0.0";
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 ">
+    <div className="max-w-6xl mx-auto  bg-gray-50 ">
       <div className="space-y-8">
         {/* Basic Information */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
@@ -63,8 +63,6 @@ export default function ProfileDisplay({ profile, userType }: Props) {
             icon={User}
             section="basic"
             badge="Essential"
-            setExpandedSections={setExpandedSections}
-            expandedSections={expandedSections}
           />
 
           {expandedSections.basic && (
@@ -90,9 +88,7 @@ export default function ProfileDisplay({ profile, userType }: Props) {
               title="Personal Information"
               icon={User}
               section="personal"
-              expandedSections={expandedSections}
-              setExpandedSections={setExpandedSections}
-            />
+                       />
 
             {expandedSections.personal && (
               <div className="mt-6 space-y-4 animate-fadeIn">
@@ -133,8 +129,7 @@ export default function ProfileDisplay({ profile, userType }: Props) {
               icon={Building2}
               section="business"
               badge="Professional"
-              expandedSections={expandedSections}
-              setExpandedSections={setExpandedSections}
+              
             />
 
             {expandedSections.business && (
@@ -220,8 +215,6 @@ export default function ProfileDisplay({ profile, userType }: Props) {
             title="Account Information"
             icon={Shield}
             section="account"
-            expandedSections={expandedSections}
-            setExpandedSections={setExpandedSections}
           />
 
           {expandedSections.account && (

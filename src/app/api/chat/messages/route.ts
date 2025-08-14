@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         }
 
         const messages = await Message.find({
-            $or: [ 
+            $or: [
                 { sender: session.user.id, recipient: recipientId },
                 { sender: recipientId, recipient: session.user.id },
             ],

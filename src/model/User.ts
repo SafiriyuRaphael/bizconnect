@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false, // Never return password in queries
+      select: false, 
     },
     fullName: {
       type: String,

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FormErrors, RegisterData } from '../../types';
 import { usePathname, useRouter } from 'next/navigation';
 import { uploadCloudinary } from '@/lib/cloudinary/uploadClodinary';
+import { useMessageModalStore } from '@/store/useMessageModalStore';
 
 export default function useRegister() {
     const router = useRouter()
@@ -25,31 +26,13 @@ export default function useRegister() {
         userType: "customer" as "customer" | "business",
         logo: null,
         deliveryTime: "",
+        verifiedBusiness: false,
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [modalType, setModalType] = useState<"error" | "warning" | "info" | "success">("info")
-    const [modalMessage, setModalMessage] = useState("")
     const [isSubmitting, setIssubmitting] = useState(false)
 
-    const onClose = () => {
-        setIsModalOpen(false)
-    }
 
-    const businessCategories = [
-        { category: "Fashion & Clothing", value: "fashion" },
-        { category: "Electronics & Tech", value: "electronics" },
-        { category: "Beauty & Personal Care", value: "beauty" },
-        { category: "Home & Garden", value: "home" },
-        { category: "Food & Beverages", value: "food" },
-        { category: "Health & Wellness", value: "health" },
-        { category: "Automotive", value: "automotive" },
-        { category: "Sports & Recreation", value: "sports" },
-        { category: "Books & Education", value: "books" },
-        { category: "Art & Crafts", value: "art" },
-        { category: "Other", value: "other" }
-    ];
 
     const userType = formData.userType
 
@@ -190,25 +173,32 @@ export default function useRegister() {
             if (res.ok) {
 
                 if (pathname.includes("/auth/register")) {
-                    setModalMessage("Registration successful! Redirecting you to the login page...");
-                    setIsModalOpen(true)
-                    setModalType("success")
+                    useMessageModalStore.getState().onOpen({
+                        title: "Registration",
+                        message: "Registration successful! Redirecting you to the login page...",
+                        type: "success",
+                        autoCloseDelay: 4000,
+                    });
                     setTimeout(() => {
                         router.push("/auth/login")
                     }, 4000)
 
                 } else {
-                    setModalMessage("Registration successful!");
-                    setIsModalOpen(true)
-                    setModalType("success")
 
+                    useMessageModalStore.getState().onOpen({
+                        title: "Registration",
+                        message: "Registration successful!",
+                        type: "success",
+                    });
                 }
 
             } else {
                 const { error } = await res.json();
-                setModalMessage(error)
-                setIsModalOpen(true)
-                setModalType("error")
+                useMessageModalStore.getState().onOpen({
+                    title: "Registration error",
+                    message: error,
+                    type: "error",
+                });
             }
         }
         setIssubmitting(false)
@@ -221,7 +211,6 @@ export default function useRegister() {
         handleInputChange,
         handleLogoUpload,
         logoFile,
-        errors,
-        businessCategories, router, modalMessage, isModalOpen, onClose, isSubmitting, modalType, handleNestedChange, setFormData
+        errors,router, isSubmitting, handleNestedChange, setFormData
     }
 }

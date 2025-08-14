@@ -20,7 +20,7 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
   >([]);
   const [viewMode, setViewMode] = useState("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState(1000);
+  const [priceRange, setPriceRange] = useState(100000000000);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<
     "newest" | "rating" | "price-low" | "price-high" | "best"
@@ -114,6 +114,11 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
     setCurrentPage(1);
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > total) return;
+    setCurrentPage(newPage);
+  };
+
   const handleLoadMore = () => {
     setCurrentPage((prev) => prev + 1);
   };
@@ -127,5 +132,5 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
     setCurrentPage(1);
     setShowMobileFilters(false);
   };
-  return { searchQuery, handleSearchChange, setShowMobileFilters, showMobileFilters, selectedCategory, filteredBusinesses, loading, sortBy, handleSortChange, setViewMode, viewMode, error, debouncedFetchBusinesses, setSelectedServices, selectedServices, clearAllFilters, handleLoadMore, total, priceRange, setPriceRange, setDeliveryRange, setSelectedRating, setCurrentPage, setSelectedCategory, selectedRating, handleChat }
+  return { searchQuery, handleSearchChange, setShowMobileFilters, showMobileFilters, selectedCategory, filteredBusinesses, loading, sortBy, handleSortChange, setViewMode, viewMode, error, debouncedFetchBusinesses, setSelectedServices, selectedServices, clearAllFilters, handleLoadMore, total, priceRange, setPriceRange, setDeliveryRange, setSelectedRating, setCurrentPage, setSelectedCategory, selectedRating, handleChat, handlePageChange, currentPage }
 }

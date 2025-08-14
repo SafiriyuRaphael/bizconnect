@@ -1,10 +1,11 @@
 import { Upload, X } from "lucide-react";
 import { useState } from "react";
 import { BusinessDisplayPicsProps, ProfileData } from "../../../../../types";
-import MessageModal from "@/app/components/ui/MessageModal";
+
 import { uploadMultipleCloudinary } from "@/lib/cloudinary/uploadMultipleCloudinary";
 import uploadPictures from "@/lib/Image/uploadPictures";
 import deletePictures from "@/lib/Image/deletePictures";
+import { useMessageModalStore } from "@/store/useMessageModalStore";
 
 interface DisplayPictureSectionProps {
   pictures: BusinessDisplayPicsProps[];
@@ -20,21 +21,30 @@ export default function DisplayPictureSection({
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [message, setMessage] = useState<string>("");
-  const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
 
   const handleFileUpload = async (files: File[]) => {
     setUploading(true);
     const oversized = files.find((file) => file.size > 10 * 1024 * 1024);
     if (files.length > 10) {
-      setMessage("Maximum of 10 pictures allowed.");
-      setIsOpenModal(true);
+      useMessageModalStore.getState().onOpen({
+        title: "Failed to add display pics",
+        message: "Maximum of 10 pictures allowed.",
+        type: "error",
+        autoClose: true,
+        autoCloseDelay: 3000,
+        showIcon: true,
+      });
       return;
     }
     if (oversized) {
-      setMessage("File size must be less than 10MB");
-      setIsOpenModal(true);
-      return;
+      useMessageModalStore.getState().onOpen({
+        title: "Failed to add display pics",
+        message: "File size must be less than 10MB",
+        type: "error",
+        autoClose: true,
+        autoCloseDelay: 3000,
+        showIcon: true,
+      });
     }
 
     try {
@@ -52,9 +62,11 @@ export default function DisplayPictureSection({
       onUpdatePictures(pictures.pics);
     } catch (err) {
       console.log(err);
-
-      setMessage(`${err}`);
-      setIsOpenModal(true);
+      useMessageModalStore.getState().onOpen({
+        title: "Failed to add display pics",
+        message: `${err}`,
+        type: "error",
+      });
     } finally {
       setUploading(false);
     }
@@ -87,8 +99,11 @@ export default function DisplayPictureSection({
       const updatedPics = await deletePictures({ businessId, public_id });
       onUpdatePictures(updatedPics.pics);
     } catch (error) {
-      setMessage("failed to delete picture");
-      setIsOpenModal(true);
+      useMessageModalStore.getState().onOpen({
+        title: "Failed to add display pics",
+        message: `failed to delete picture`,
+        type: "error",
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -96,16 +111,6 @@ export default function DisplayPictureSection({
 
   return (
     <div className="space-y-6">
-      <MessageModal
-        isOpen={isOpenModal}
-        onClose={() => setIsOpenModal(false)}
-        message={message}
-        type="error"
-        autoClose
-        autoCloseDelay={3000}
-        showIcon
-        title="Failed to add display pics"
-      />
       {pictures.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-gray-700">

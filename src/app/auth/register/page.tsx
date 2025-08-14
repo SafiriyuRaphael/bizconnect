@@ -21,7 +21,7 @@ import { CheckboxField } from "@/app/components/ui/CheckBoxField";
 import { FormSection } from "@/app/components/ui/FormSection";
 import Facebook from "../../../../public/icons/Facebook";
 import Google from "../../../../public/icons/Google";
-import MessageModal from "@/app/components/ui/MessageModal";
+import { BUSINESSCATEGORIES } from "@/constants/business";
 
 export default function BizconnectRegister() {
   const {
@@ -33,19 +33,14 @@ export default function BizconnectRegister() {
     handleLogoUpload,
     logoFile,
     errors,
-    businessCategories,
     router,
-    modalMessage,
-    isModalOpen,
-    onClose,
     isSubmitting,
-    modalType
   } = useRegister();
 
   // Transform business categories for SelectField
-  const categoryOptions = businessCategories.map((category) => ({
+  const categoryOptions = BUSINESSCATEGORIES.map((category) => ({
     value: category.value,
-    label: category.category,
+    label: category.name,
   }));
 
   // Gender options
@@ -57,15 +52,7 @@ export default function BizconnectRegister() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 pt-20">
-      <MessageModal
-        isOpen={isModalOpen}
-        onClose={onClose}
-        message={modalMessage}
-        type={modalType}
-        autoClose
-        autoCloseDelay={4000}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">

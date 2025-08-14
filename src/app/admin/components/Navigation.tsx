@@ -1,14 +1,16 @@
 "use client";
-import { BarChart3, Building2, Settings, Users } from "lucide-react";
+import { BarChart3, Building2, Delete, Flag, Settings, Trash2, Users } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
   const tabs = [
-    { id: "/", label: "Dashboard", icon: BarChart3 },
+    { id: "/", label: "marketplace", icon: BarChart3 },
     { id: "businesses", label: "Businesses", icon: Building2 },
     { id: "users", label: "Users", icon: Users },
+    { id: "reports", label: "Reports", icon: Flag },
+    { id: "deleted", label: "Deleted", icon: Trash2 },
     { id: "settings", label: "Settings", icon: Settings },
   ];
   return (

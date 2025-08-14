@@ -21,58 +21,32 @@ import {
 } from "lucide-react";
 import { AllBusinessProps, BusinessReviewsProps } from "../../../../../types";
 import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
+import ProfileImage from "@/app/components/layout/ProfileImage";
+import ImageModal from "@/app/components/modals/ImageModal";
+import VerificationAdminModal from "./VerificationModal";
+import getVerificationDetails from "@/lib/business/getVerificationDetails";
+import getCategoryColor from "@/lib/business/getCategoryColor";
+import formatDate from "@/lib/static/formatDate";
+import formatPrice from "@/lib/business/formatPrice";
 
 export default function AdminBusinessModal({
   business,
   isOpen,
   onClose,
-  onViewVerificationLog,
 }: {
   business: AllBusinessProps | null;
   isOpen: boolean;
   onClose: () => void;
-  onViewVerificationLog?: (businessId: string) => void;
 }) {
   const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "media">(
     "overview"
   );
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState<"verification" | null>(null);
 
   if (!isOpen || !business) return null;
-
-  const formatDate = (date?: Date) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-    }).format(amount);
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      fashion: "bg-pink-100 text-pink-800 border-pink-200",
-      electronics: "bg-blue-100 text-blue-800 border-blue-200",
-      beauty: "bg-purple-100 text-purple-800 border-purple-200",
-      food: "bg-orange-100 text-orange-800 border-orange-200",
-      home: "bg-green-100 text-green-800 border-green-200",
-      health: "bg-red-100 text-red-800 border-red-200",
-      automotive: "bg-gray-100 text-gray-800 border-gray-200",
-      sports: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      books: "bg-indigo-100 text-indigo-800 border-indigo-200",
-      art: "bg-teal-100 text-teal-800 border-teal-200",
-      other: "bg-slate-100 text-slate-800 border-slate-200",
-    };
-    return colors[category as keyof typeof colors] || colors.other;
-  };
 
   const getAverageRating = (reviews: BusinessReviewsProps[]) => {
     if (!reviews || reviews.length === 0) return 0;
@@ -80,24 +54,14 @@ export default function AdminBusinessModal({
     return (sum / reviews.length).toFixed(1);
   };
 
-  const getVerificationStatus = () => {
-    if (business.verifiedBusiness) {
-      return {
-        text: "Verified Business",
-        color: "text-green-600",
-        bgColor: "bg-green-50",
-        borderColor: "border-green-200",
-      };
-    }
-    return {
-      text: "Pending Verification",
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      borderColor: "border-yellow-200",
-    };
+  const verificationStatus = getVerificationDetails(business);
+  const openImageModal = (index: number) => {
+    setSelectedImageIndex(index);
   };
 
-  const verificationStatus = getVerificationStatus();
+  const onCloseModal = () => {
+    setIsModalOpen(null);
+  };
 
   const TabButton = ({
     tab,
@@ -123,17 +87,30 @@ export default function AdminBusinessModal({
   );
 
   return (
-    <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <ImageModal
+        displayPics={business.displayPics}
+        selectedImageIndex={selectedImageIndex}
+        setSelectedImageIndex={setSelectedImageIndex}
+      />
+      <VerificationAdminModal
+        isOpen={isModalOpen === "verification"}
+        onClose={onCloseModal}
+        verification={business.verificationData}
+        verifiedBusiness={business.verifiedBusiness}
+        verificationLogs={business.verificationLog}
+        onVerificationUpdate={onCloseModal}
+      />
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
         {/* Enhanced Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <img
-                  src={business.logo}
-                  alt={business.businessName}
+                <ProfileImage
                   className="h-16 w-16 rounded-full border-4 border-white/20 object-cover shadow-lg"
+                  user={business}
+                  logo={business.logo}
                 />
                 {business.verifiedBusiness && (
                   <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
@@ -165,15 +142,6 @@ export default function AdminBusinessModal({
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              {onViewVerificationLog && (
-                <button
-                  onClick={() => onViewVerificationLog(business._id)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors backdrop-blur-sm border border-white/20"
-                >
-                  <FileText className="h-4 w-4" />
-                  <span className="text-sm font-medium">Verification Log</span>
-                </button>
-              )}
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -536,7 +504,10 @@ export default function AdminBusinessModal({
                           alt={`Business image ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-200"
                         />
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center">
+                        <div
+                          className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center"
+                          onClick={() => openImageModal(index)}
+                        >
                           <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                         </div>
                       </div>
@@ -568,13 +539,13 @@ export default function AdminBusinessModal({
             <span>Last activity: {formatDate(business.updatedAt)}</span>
           </div>
           <div className="flex space-x-3">
-            {onViewVerificationLog && (
+            {business.verificationData && (
               <button
-                onClick={() => onViewVerificationLog(business._id)}
+                onClick={() => setIsModalOpen("verification")}
                 className="flex items-center space-x-2 px-4 py-2 text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <FileText className="h-4 w-4" />
-                <span>View Verification Log</span>
+                <span>View Verification</span>
               </button>
             )}
             <button

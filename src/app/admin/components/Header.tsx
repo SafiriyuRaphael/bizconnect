@@ -1,6 +1,16 @@
+"use client";
+import ProfileImage from "@/app/components/layout/ProfileImage";
 import { Bell, RefreshCw } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const user = {
+    businessName: session?.user.businessName,
+    fullName: session?.user.name,
+  };
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,8 +29,15 @@ export default function Header() {
             <button className="p-2 text-gray-400 hover:text-gray-500">
               <RefreshCw className="w-6 h-6" />
             </button>
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-medium">A</span>
+            <div
+              className="cursor-pointer"
+              onClick={() => router.push(`/profile/${session?.user.id}`)}
+            >
+              <ProfileImage
+                user={user}
+                logo={session?.user.logo}
+                className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center"
+              />
             </div>
           </div>
         </div>

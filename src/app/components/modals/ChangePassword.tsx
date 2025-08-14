@@ -1,20 +1,21 @@
+"use client"
 import { useState } from "react";
 import { PasswordModalProps, PasswordValidation } from "../../../../types";
 import Modals from "./Modals";
 import PasswordInput from "../ui/PasswordInput";
 import { AlertCircle } from "lucide-react";
 import { validatePassword } from "@/lib/auth/validatePssword";
+import { useEditProfileStore } from "@/store/useEditProfileStore";
 
 export default function ChangePasswordModal({
-  isOpen,
-  onClose,
-  onSubmit,
   blurIntensity,
   showGlow,
   showPattern,
   size,
   variant,
 }: PasswordModalProps) {
+  const { activeModal, closeModal, handleChangePassword } =
+    useEditProfileStore();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -51,11 +52,11 @@ export default function ChangePasswordModal({
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true);
       try {
-        await onSubmit({ currentPassword, newPassword });
+        await handleChangePassword({ currentPassword, newPassword });
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        onClose();
+        closeModal();
       } catch (error) {
         setErrors(
           error instanceof Error
@@ -70,8 +71,8 @@ export default function ChangePasswordModal({
 
   return (
     <Modals
-      isOpen={isOpen}
-      onClose={onClose}
+      isOpen={activeModal === "changePassword"}
+      onClose={closeModal}
       title="Change Password"
       blurIntensity={blurIntensity}
       showGlow={showGlow}
@@ -112,7 +113,7 @@ export default function ChangePasswordModal({
         <div className="flex gap-3 pt-4">
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeModal}
             className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Cancel

@@ -33,6 +33,10 @@ export const authOptions: AuthOptions = {
 
                 if (!user) throw new Error("No user found");
 
+                if (user?.deleted) {
+                    return null;
+                }
+
                 const isValid = await compare(credentials.password, user.password);
                 if (!isValid) throw new Error("Invalid password");
 
@@ -40,6 +44,7 @@ export const authOptions: AuthOptions = {
                     id: user._id.toString(),
                     name: user.fullName,
                     email: user.email,
+                    verified: user.verified,
                     role: user.userType,
                     userRole: user.role,
                     username: user.username,
@@ -69,6 +74,12 @@ export const authOptions: AuthOptions = {
                 token.name = user.name;
                 token.email = user.email;
                 token.userRole = user.userRole;
+                token.verified = user.verified;
+                token.isBanned = (user as any).deleted ?? false;
+            } else {
+                await connectToDatabase();
+                const dbUser = await User.findById(token.id);
+                token.isBanned = dbUser?.deleted ?? false;
             }
             return token;
         },
@@ -79,6 +90,7 @@ export const authOptions: AuthOptions = {
                 session.user.username = token.username;
                 session.user.logo = token.picture ?? null;
                 session.user.businessName = token.businessName;
+                session.user.verified = token.verified;
                 session.user.name = token.name!;
                 session.user.email = token.email!;
                 session.user.userRole = token.userRole!;

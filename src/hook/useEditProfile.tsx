@@ -1,31 +1,25 @@
 import { uploadCloudinary } from "@/lib/cloudinary/uploadClodinary";
-import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
+
 import { signOut } from "next-auth/react";
 import React, { useState } from "react";
 import { AllBusinessProps, AnyUser, ProfileData } from "../../types";
+import { useMessageModalStore } from "@/store/useMessageModalStore";
 
 export default function useEditProfile(
   user: AnyUser | AllBusinessProps | null
 ) {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({});
-  const [modalType, setIsModalType] = useState<
-    "error" | "warning" | "info" | "success"
-  >("success");
-  const [message, setMessage] = useState("");
-  const [title, setTitle] = useState("");
   const [errors, setErrors] = useState<ProfileData>({});
-  const [autoClose, setAutoClose] = useState(true);
-  const [actions, setActions] = useState<React.JSX.Element | null>(null);
+
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const openModal = (type: string) => setActiveModal(type);
 
   const closeModal = () => setActiveModal(null);
+  const { onClose: handleCloseDelete } = useMessageModalStore();
 
   const [uploading, setUploading] = useState(false);
   const [profile, setProfile] = useState(user);
-
-  // Initialize form data when entering edit mode
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,15 +73,10 @@ export default function useEditProfile(
     }
   };
 
-  const generateDefaultLogoDataUrl = (name: string): string => {
-    const svg = generateDefaultLogo(name);
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
-
   const actionButtons = (
     <>
       <button
-        onClick={closeModal}
+        onClick={handleCloseDelete}
         className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
       >
         Cancel
@@ -102,14 +91,14 @@ export default function useEditProfile(
   );
 
   const handleDeleteModal = () => {
-    setAutoClose(false);
-    setTitle("Confirm Delete");
-    setIsModalType("warning");
-    setMessage(
-      "Are you sure you want to delete this item? This action cannot be undone."
-    );
-    setActions(actionButtons);
-    openModal("message");
+    useMessageModalStore.getState().onOpen({
+      title: "Confirm Delete",
+      message:
+        "Are you sure you want to delete this item? This action cannot be undone.",
+      type: "warning",
+      actions: actionButtons,
+      autoClose: false,
+    });
   };
 
   const handleDeletePassword = async ({ password }: { password: string }) => {
@@ -148,17 +137,15 @@ export default function useEditProfile(
     }
 
     setTimeout(() => {
-      setActions(null);
-      setAutoClose(true);
-      setTitle("Password Changed");
-      setIsModalType("success");
-      setMessage("Password Changed Successfully");
-      openModal("message");
+      useMessageModalStore.getState().onOpen({
+        title: "Password Changed",
+        message: "Password Changed Successfully",
+        type: "success",
+        actions: null,
+        autoClose: true,
+      });
     }, 500);
   };
-
-  const fallbackAlt = profile?.businessName || profile?.fullName || "User";
-  const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
 
   const [loading, setLoading] = useState(false);
 
@@ -304,7 +291,6 @@ export default function useEditProfile(
     if (!validateForm()) return;
 
     setLoading(true);
-    setMessage("");
     setErrors({});
 
     try {
@@ -324,7 +310,10 @@ export default function useEditProfile(
         if (data.errors) {
           setErrors(data.errors);
         } else {
-          setMessage("Something went wrong updating profile");
+          useMessageModalStore.getState().onOpen({
+            message: "Something went wrong updating profile",
+            type: "error",
+          });
         }
         return;
       }
@@ -334,23 +323,28 @@ export default function useEditProfile(
       if (data?.user) {
         setProfile(data.user);
       } else {
-        setMessage("Something went wrong updating profile");
+        useMessageModalStore.getState().onOpen({
+          message: "Something went wrong updating profile",
+          type: "error",
+        });
       }
-
-      setMessage("Profile updated successfully ✅");
-      setIsModalType("success");
-      setAutoClose(true);
-      setActions(null);
-      openModal("message");
+      useMessageModalStore.getState().onOpen({
+        message: "Profile updated successfully ✅",
+        type: "success",
+        autoClose: true,
+        actions: null,
+      });
       setEditMode(false);
       handleCancel();
     } catch (error) {
       console.error("Update failed:", error);
-      setMessage("Something went wrong updating profile ❌");
-      setIsModalType("error");
-      setAutoClose(true);
-      setActions(null);
       openModal("message");
+      useMessageModalStore.getState().onOpen({
+        message: "Something went wrong updating profile ❌",
+        type: "error",
+        autoClose: true,
+        actions: null,
+      });
     } finally {
       setLoading(false);
     }
@@ -359,14 +353,7 @@ export default function useEditProfile(
     activeModal,
     closeModal,
     handleChangePassword,
-    message,
-    modalType,
-    autoClose,
-    title,
-    actions,
     handleDeleteModal,
-    fallbackAlt,
-    fallbackSrc,
     profile,
     editMode,
     setEditMode,
@@ -377,7 +364,6 @@ export default function useEditProfile(
     handleDeletePassword,
     handleLogoUpload,
     setFormData,
-    setIsModalType,
     handleSubmit,
     handleInputChange,
     handleNestedChange,

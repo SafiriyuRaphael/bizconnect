@@ -1,0 +1,747 @@
+import React, { useState } from "react";
+import {
+  X,
+  Mail,
+  Phone,
+  User,
+  Building2,
+  MapPin,
+  Globe,
+  Clock,
+  DollarSign,
+  Star,
+  Calendar,
+  CheckCircle,
+  FileText,
+  Eye,
+  ExternalLink,
+  Award,
+  TrendingUp,
+  Heart,
+  UserCheck,
+  Cake,
+  Shield,
+} from "lucide-react";
+import ProfileImage from "@/app/components/layout/ProfileImage";
+import ImageModal from "@/app/components/modals/ImageModal";
+import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
+import getCategoryColor from "@/lib/business/getCategoryColor";
+import formatDate from "@/lib/static/formatDate";
+import { AnyUser, BusinessReviewsProps } from "../../../../../types";
+import VerificationAdminModal from "./VerificationModal";
+import getVerificationDetails from "@/lib/business/getVerificationDetails";
+import formatPrice from "@/lib/business/formatPrice";
+
+interface UniversalUserModalProps {
+  user: AnyUser;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ViewUserModal({
+  user,
+  isOpen,
+  onClose,
+}: UniversalUserModalProps) {
+  const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "media">(
+    "overview"
+  );
+  const [isModalOpen, setIsModalOpen] = useState<"verification" | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+
+  if (!isOpen || !user) return null;
+
+  const isBusiness = user.userType === "business";
+  const business = isBusiness ? (user as AnyUser) : null;
+  const customer = !isBusiness ? (user as AnyUser) : null;
+
+
+  const getAverageRating = (reviews?: BusinessReviewsProps[]) => {
+    if (!reviews || reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return (sum / reviews.length).toFixed(1);
+  };
+
+  const openImageModal = (index: number) => {
+    setSelectedImageIndex(index);
+  };
+
+  const getAge = (dateOfBirth: string) => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
+  const verificationDetail = {
+    verifiedBusiness: user.verifiedBusiness,
+    verificationData: user.verificationData,
+  };
+
+  const verificationStatus = getVerificationDetails(verificationDetail);
+
+  const onCloseModal = () => {
+    setIsModalOpen(null);
+  };
+
+  const TabButton = ({
+    tab,
+    label,
+    isActive,
+    onClick,
+    disabled = false,
+  }: {
+    tab: string;
+    label: string;
+    isActive: boolean;
+    onClick: () => void;
+    disabled?: boolean;
+  }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+        disabled
+          ? "text-gray-400 cursor-not-allowed"
+          : isActive
+          ? "bg-blue-600 text-white shadow-md"
+          : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {business && business.displayPics && (
+        <>
+          <ImageModal
+            displayPics={business.displayPics}
+            selectedImageIndex={selectedImageIndex}
+            setSelectedImageIndex={setSelectedImageIndex}
+          />
+          {business.verificationData && (
+            <VerificationAdminModal
+              isOpen={isModalOpen === "verification"}
+              onClose={onCloseModal}
+              verification={business.verificationData}
+              verifiedBusiness={business.verifiedBusiness}
+              verificationLogs={business.verificationLog}
+              onVerificationUpdate={onCloseModal}
+            />
+          )}
+        </>
+      )}
+
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+        {/* Enhanced Header */}
+        <div
+          className={`relative bg-gradient-to-r from-blue-600 to-blue-800
+           text-white`}
+        >
+          <div className="flex items-center justify-between p-6">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <ProfileImage
+                  className="h-16 w-16 rounded-full border-4 border-white/20 object-cover shadow-lg"
+                  user={user}
+                  logo={user.logo}
+                />
+                {isBusiness && business?.verifiedBusiness && (
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
+                    <CheckCircle className="h-4 w-4 text-white" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">
+                  {isBusiness ? business?.businessName : user.fullName}
+                </h2>
+                <p
+                  className={`${
+                    isBusiness ? "text-blue-100" : "text-purple-100"
+                  }`}
+                >
+                  @{user.username}
+                </p>
+                <div className="flex items-center mt-1 space-x-2">
+                  {isBusiness ? (
+                    <>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium border ${getCategoryColor(
+                          business?.businessCategory || ""
+                        )}`}
+                      >
+                        {
+                          getBusinessCategoryDetails(
+                            business?.businessCategory || ""
+                          ).name
+                        }
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="text-sm">
+                          {getAverageRating(business?.reviews || [])}
+                        </span>
+                        <span className="text-xs text-blue-200">
+                          ({business?.reviews?.length || 0})
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100/20 text-purple-100 border border-purple-200/30">
+                      Customer Account
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Bar */}
+        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    user.verified ? "bg-green-500" : "bg-red-500"
+                  }`}
+                ></div>
+                <span className="text-sm text-gray-600">
+                  Email {user.verified ? "Verified" : "Unverified"}
+                </span>
+              </div>
+
+              {isBusiness && (
+                <div
+                  className={`flex items-center space-x-2 px-3 py-1 rounded-full border bg-green-50 border-green-200 ${verificationStatus.bgColor} ${verificationStatus.borderColor}`}
+                >
+                  <Shield className={`h-3 w-3 ${verificationStatus.color}`} />
+                  <span
+                    className={`text-xs font-medium ${verificationStatus.color}`}
+                  >
+                    {verificationStatus.text}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
+                <Award
+                  className={`h-3 w-3 ${
+                    isBusiness ? "text-blue-500" : "text-purple-500"
+                  }`}
+                />
+                <span className="text-sm text-gray-600 capitalize">
+                  {user.userType} Account
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-500">Member since</p>
+              <p className="text-sm font-medium text-gray-700">
+                {formatDate(user.createdAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="px-6 py-4 border-b border-gray-200 bg-white">
+          <div className="flex space-x-2">
+            <TabButton
+              tab="overview"
+              label="Overview"
+              isActive={activeTab === "overview"}
+              onClick={() => setActiveTab("overview")}
+            />
+            {isBusiness && (
+              <>
+                <TabButton
+                  tab="reviews"
+                  label={`Reviews (${business?.reviews?.length || 0})`}
+                  isActive={activeTab === "reviews"}
+                  onClick={() => setActiveTab("reviews")}
+                />
+                <TabButton
+                  tab="media"
+                  label={`Media (${business?.displayPics?.length || 0})`}
+                  isActive={activeTab === "media"}
+                  onClick={() => setActiveTab("media")}
+                />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          {activeTab === "overview" && (
+            <div className="p-6 space-y-8">
+              {/* Quick Stats */}
+              {isBusiness && business ? (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <DollarSign className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+                          Price Range
+                        </p>
+                        <p className="text-lg font-bold text-blue-900">
+                          {formatPrice(business?.priceRange?.min ?? 0)} -
+                          {formatPrice(business?.priceRange?.max || 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <Clock className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-green-600 font-medium uppercase tracking-wide">
+                          Delivery
+                        </p>
+                        <p className="text-lg font-bold text-green-900">
+                          {business.deliveryTime}{" "}
+                          {business.deliveryTime === 1 ? "day" : "days"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-yellow-100 rounded-lg">
+                        <Star className="h-5 w-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-yellow-600 font-medium uppercase tracking-wide">
+                          Rating
+                        </p>
+                        <p className="text-lg font-bold text-yellow-900">
+                          {getAverageRating(business.reviews)}/5.0
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <TrendingUp className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">
+                          Reviews
+                        </p>
+                        <p className="text-lg font-bold text-purple-900">
+                          {business.reviews?.length || 0}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Customer stats
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <User className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-purple-600 font-medium uppercase tracking-wide">
+                          Account Type
+                        </p>
+                        <p className="text-lg font-bold text-purple-900 capitalize">
+                          {user.userType}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-green-600 font-medium uppercase tracking-wide">
+                          Status
+                        </p>
+                        <p className="text-lg font-bold text-green-900">
+                          {user.verified ? "Verified" : "Unverified"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {customer?.dateOfBirth && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Cake className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">
+                            Age
+                          </p>
+                          <p className="text-lg font-bold text-blue-900">
+                            {getAge(customer.dateOfBirth)} years
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* User Information */}
+                <div className="space-y-6">
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      {isBusiness ? (
+                        <Building2 className="h-5 w-5 text-gray-500 mr-2" />
+                      ) : (
+                        <User className="h-5 w-5 text-gray-500 mr-2" />
+                      )}
+                      {isBusiness
+                        ? "Business Information"
+                        : "Personal Information"}
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <User className="h-4 w-4 text-gray-400 mt-1" />
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500">
+                            {isBusiness ? "Owner" : "Full Name"}
+                          </p>
+                          <p className="font-medium text-gray-900">
+                            {user.fullName}
+                          </p>
+                        </div>
+                      </div>
+
+                      {isBusiness && business ? (
+                        <div className="flex items-start space-x-3">
+                          <MapPin className="h-4 w-4 text-gray-400 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">
+                              Business Address
+                            </p>
+                            <p className="font-medium text-gray-900">
+                              {business.businessAddress}
+                            </p>
+                          </div>
+                        </div>
+                      ) : customer?.deliveryAddress ? (
+                        <div className="flex items-start space-x-3">
+                          <MapPin className="h-4 w-4 text-gray-400 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">
+                              Delivery Address
+                            </p>
+                            <p className="font-medium text-gray-900">
+                              {customer.deliveryAddress}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {customer?.gender && (
+                        <div className="flex items-start space-x-3">
+                          <User className="h-4 w-4 text-gray-400 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">Gender</p>
+                            <p className="font-medium text-gray-900 capitalize">
+                              {customer.gender.replace("-", " ")}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {customer?.dateOfBirth && (
+                        <div className="flex items-start space-x-3">
+                          <Cake className="h-4 w-4 text-gray-400 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">
+                              Date of Birth
+                            </p>
+                            <p className="font-medium text-gray-900">
+                              {formatDate(customer.dateOfBirth)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {isBusiness && business?.businessDescription && (
+                        <div className="flex items-start space-x-3">
+                          <FileText className="h-4 w-4 text-gray-400 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">Description</p>
+                            <p className="font-medium text-gray-900 leading-relaxed">
+                              {business.businessDescription}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Timeline */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Calendar className="h-5 w-5 text-gray-500 mr-2" />
+                      Account Timeline
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">
+                          Account Created
+                        </span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatDate(user.createdAt)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between py-2">
+                        <span className="text-sm text-gray-600">
+                          Last Updated
+                        </span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatDate(user.updatedAt)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="space-y-6">
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Phone className="h-5 w-5 text-gray-500 mr-2" />
+                      Contact Information
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <Mail className="h-4 w-4 text-gray-500" />
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500">Email Address</p>
+                          <p className="font-medium text-gray-900">
+                            {user.email}
+                          </p>
+                        </div>
+                        {user.verified && (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        )}
+                      </div>
+
+                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <Phone className="h-4 w-4 text-gray-500" />
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-500">Phone Number</p>
+                          <p className="font-medium text-gray-900">
+                            {user.phone}
+                          </p>
+                        </div>
+                      </div>
+
+                      {isBusiness && business?.website && (
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <Globe className="h-4 w-4 text-gray-500" />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-500">Website</p>
+                            <div className="flex items-center space-x-2">
+                              <a
+                                href={business.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-blue-600 hover:text-blue-800 truncate"
+                              >
+                                {business.website}
+                              </a>
+                              <ExternalLink className="h-3 w-3 text-gray-400" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "reviews" && isBusiness && business && (
+            <div className="p-6">
+              {business.reviews && business.reviews.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Customer Reviews
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                      <span className="text-lg font-bold">
+                        {getAverageRating(business.reviews)}
+                      </span>
+                      <span className="text-gray-500">
+                        ({business.reviews.length} reviews)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4">
+                    {business.reviews.map((review, index) => (
+                      <div
+                        key={index}
+                        className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < review.rating
+                                    ? "text-yellow-400 fill-current"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                            <span className="ml-2 text-sm font-medium text-gray-700">
+                              {review.rating}/5
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {formatDate(review.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">
+                          {review.comment}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Reviews Yet
+                  </h3>
+                  <p className="text-gray-500">
+                    This business hasn't received any reviews yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "media" && isBusiness && business && (
+            <div className="p-6">
+              {business.displayPics && business.displayPics.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Business Gallery
+                    </h3>
+                    <span className="text-sm text-gray-500">
+                      {business.displayPics.length} images
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {business.displayPics.map((pic, index) => (
+                      <div
+                        key={index}
+                        className="relative group cursor-pointer"
+                      >
+                        <img
+                          src={pic.url}
+                          alt={`Business image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-200"
+                        />
+                        <div
+                          className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg flex items-center justify-center"
+                          onClick={() => openImageModal(index)}
+                        >
+                          <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="h-12 w-12 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No Images
+                  </h3>
+                  <p className="text-gray-500">
+                    This business hasn't uploaded any display pictures yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <span>User ID: {user._id}</span>
+            <span>•</span>
+            <span>Last activity: {formatDate(user.updatedAt)}</span>
+          </div>
+          <div className="flex space-x-3">
+            {isBusiness && business?.verificationData && (
+              <button
+                onClick={() => setIsModalOpen("verification")}
+                className="flex items-center space-x-2 px-4 py-2 text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                <FileText className="h-4 w-4" />
+                <span>View Verification</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

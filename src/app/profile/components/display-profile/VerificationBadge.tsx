@@ -72,7 +72,7 @@ export default function VerificationBadge({
 
   const handleUpdateVerification = () => {
     if (isPending) return;
-    router.push(`${userId}/verify`);
+    router.push(`/profile/verify`);
   };
 
   const getStatusConfig = () => {

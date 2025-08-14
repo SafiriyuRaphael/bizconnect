@@ -2,7 +2,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
 import ProfileImage from "../layout/ProfileImage";
 import { Session } from "next-auth";
 
@@ -14,11 +13,6 @@ interface Props {
 export default function AuthButton({ isLoggedIn, session }: Props) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/auth/login";
-
-  const generateDefaultLogoDataUrl = (name: string): string => {
-    const svg = generateDefaultLogo(name);
-    return `data:image/svg+xml;base64,${btoa(svg)}`;
-  };
 
   if (!isLoggedIn) {
     return (
@@ -46,15 +40,14 @@ export default function AuthButton({ isLoggedIn, session }: Props) {
 
   console.log("Session bruh:", session);
 
-  const fallbackAlt = businessName || name || "User";
-  const fallbackSrc = generateDefaultLogoDataUrl(fallbackAlt);
+  const fallbackSrc = { businessName, fullName: name };
 
   return (
     <Link href={`/profile/${userId}`}>
       <ProfileImage
-        fallbackAlt={fallbackAlt}
-        fallbackSrc={fallbackSrc}
+        className="rounded-full hover:scale-110 transition-transform duration-300"
         logo={logo}
+        user={fallbackSrc}
       />
     </Link>
   );

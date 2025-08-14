@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+:root {
+  --font-merriweather: "Merriweather", serif;
+}
+
+.font-merriweather {
+  font-family: var(--font-merriweather);
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;
@@ -45,6 +53,3 @@
     transform: rotate(360deg);
   }
 }
-
-
-

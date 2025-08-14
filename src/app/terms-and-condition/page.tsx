@@ -11,7 +11,7 @@ export default function TermsAndConditions() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -51,8 +51,8 @@ export default function TermsAndConditions() {
               <p className="text-blue-800 leading-relaxed">
                 Welcome to BizConnect! These Terms and Conditions govern your
                 use of our platform. BizConnect helps you list, manage, and
-                transact, whether you&apos;re offering services or shopping for them.
-                By using BizConnect, you agree to be bound by these terms.
+                transact, whether you&apos;re offering services or shopping for
+                them. By using BizConnect, you agree to be bound by these terms.
               </p>
             </div>
 
