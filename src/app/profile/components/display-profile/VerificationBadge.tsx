@@ -33,7 +33,8 @@ export default function VerificationBadge({
     try {
       setIsLoading(true);
       const status = await getVerificationStatus(userId);
-      setVerification(status);
+      setVerification(status || null);
+      
     } catch (error) {
       console.error("Failed to fetch verification status:", error);
       setVerification(null);

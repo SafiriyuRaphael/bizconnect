@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect, memo } from "react";
+import React, { useState, memo } from "react";
 import {
   Send,
   Search,
@@ -13,28 +13,20 @@ import {
   X,
   Check,
   CheckCheck,
-  Minimize2,
-  Maximize2,
-  Mic,
-  MicOff,
-  VideoOff,
   Image,
   File,
   Download,
   Users,
-  Settings,
   Archive,
   Star,
-  Volume2,
-  VolumeX,
-  Calendar,
   Clock,
 } from "lucide-react";
 
-import useChat from "@/hook/useChat";
+import useChat from "@/app/chat/hook/useChat";
 import { Contact } from "../../../types";
-import IncomingCallModal from "../components/modals/IncomingCallModal";
-
+import getFileIcon from "@/shared/components/composites/getFileIcon";
+import formatFileSize from "@/shared/utils/formatFileSize";
+import MessageStatus from "./components/composites/MessageStatus";
 const BizConnectChat: React.FC = () => {
   const {
     showMobileChat,
@@ -102,38 +94,6 @@ const BizConnectChat: React.FC = () => {
       } as React.ChangeEvent<HTMLInputElement>;
       handleFileChange(event);
     }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.split(".").pop()?.toLowerCase();
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext || ""))
-      return <Image className="w-4 h-4" />;
-    return <File className="w-4 h-4" />;
-  };
-
-  const MessageStatus = ({ message }: { message: any }) => {
-    if (!message.isOwn) return null;
-
-    if (message.isSeen) {
-      return (
-        <div className="flex items-center space-x-1 text-blue-100">
-          <CheckCheck className="w-3 h-3" />
-          {message.seenAt && (
-            <span className="text-xs opacity-75">{message.seenAt}</span>
-          )}
-        </div>
-      );
-    }
-
-    return <Check className="w-3 h-3 text-blue-100" />;
   };
 
   const ContactListItem = memo(
@@ -299,21 +259,6 @@ const BizConnectChat: React.FC = () => {
       </div>
     );
   };
-
-  // useEffect(() => {
-  //   if (localStreamRef.current) {
-  //     const audioTrack = localStreamRef.current.getAudioTracks()[0];
-  //     if (audioTrack) {
-  //       audioTrack.enabled = !isMuted;
-  //     }
-  //     if (callType === "video") {
-  //       const videoTrack = localStreamRef.current.getVideoTracks()[0];
-  //       if (videoTrack) {
-  //         videoTrack.enabled = !isVideoOff;
-  //       }
-  //     }
-  //   }
-  // }, [isMuted, isVideoOff, callType]);
 
   return (
     <div className="flex h-[87vh] max-h-screen bg-gray-50 overflow-hidden">

@@ -1,4 +1,4 @@
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 import { ChevronDown, ChevronUp, LucideIcon } from "lucide-react";
 import React from "react";
 

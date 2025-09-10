@@ -1,5 +1,5 @@
-import useProductsApi from "@/hook/useProductsApi";
-import { useProductStore } from "@/store/useProductsStore";
+import useProductsApi from "@/app/profile/[usersId]/products/hooks/useProductsApi";
+import { useProductStore } from "@/shared/store/useProductsStore";
 import { Trash2 } from "lucide-react";
 import React from "react";
 

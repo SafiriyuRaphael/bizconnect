@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { BusinessDisplayPicsProps } from "../../../types";
 
 export default async function deletePictures({ businessId, public_id }: { businessId: string; public_id: string }) {

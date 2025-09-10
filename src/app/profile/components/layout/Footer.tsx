@@ -1,5 +1,5 @@
 "use client";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 import { signOut } from "next-auth/react";
 import React from "react";
 

@@ -22,15 +22,15 @@ import {
   Cake,
   Shield,
 } from "lucide-react";
-import ProfileImage from "@/app/components/layout/ProfileImage";
-import ImageModal from "@/app/components/modals/ImageModal";
-import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
-import getCategoryColor from "@/lib/business/getCategoryColor";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
+import ImageModal from "@/shared/components/modal/ImageModal";
+import { getBusinessCategoryDetails } from "@/shared/utils/getBusinessCategoryDetails";
+import getCategoryColor from "@/shared/utils/getCategoryColor";
 import formatDate from "@/lib/static/formatDate";
 import { AnyUser, BusinessReviewsProps } from "../../../../../types";
 import VerificationAdminModal from "./VerificationModal";
-import getVerificationDetails from "@/lib/business/getVerificationDetails";
-import formatPrice from "@/lib/business/formatPrice";
+import getVerificationDetails from "@/shared/utils/getVerificationDetails";
+import formatPrice from "@/shared/utils/formatPrice";
 
 interface UniversalUserModalProps {
   user: AnyUser;
@@ -56,7 +56,6 @@ export default function ViewUserModal({
   const isBusiness = user.userType === "business";
   const business = isBusiness ? (user as AnyUser) : null;
   const customer = !isBusiness ? (user as AnyUser) : null;
-
 
   const getAverageRating = (reviews?: BusinessReviewsProps[]) => {
     if (!reviews || reviews.length === 0) return 0;

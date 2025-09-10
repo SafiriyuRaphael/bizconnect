@@ -10,7 +10,7 @@ import {
 import { AllBusinessProps } from "../../../../types";
 import { CldImage } from "next-cloudinary";
 import Image from "next/image";
-import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
+import { generateDefaultLogo } from "@/shared/utils/generateDefaultLogo";
 import { useRouter } from "next/navigation";
 
 type Props = {

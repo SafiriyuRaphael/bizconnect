@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import VerificationBadge from "../components/display-profile/VerificationBadge";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 import {
   Building2,
   Calendar,

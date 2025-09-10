@@ -1,16 +1,11 @@
 "use client";
-import {
-  User,
-  ArrowRight,
-  AlertCircle,
-
-} from "lucide-react";
+import { User, ArrowRight, AlertCircle } from "lucide-react";
 import Facebook from "../../../../public/icons/Facebook";
 import Google from "../../../../public/icons/Google";
-import { InputField } from "@/app/components/ui/InputField";
-import { PasswordField } from "@/app/components/ui/PasswordField";
-import { CheckboxField } from "@/app/components/ui/CheckBoxField";
-import useLogin from "@/hook/useLogin";
+import { InputField } from "@/shared/components/ui/InputField";
+import { PasswordField } from "@/shared/components/ui/PasswordField";
+import { CheckboxField } from "@/shared/components/ui/CheckBoxField";
+import useLogin from "@/app/auth/login/hooks/useLogin";
 
 export default function BizconnectLogin() {
   const {
@@ -22,7 +17,7 @@ export default function BizconnectLogin() {
     handleSubmit,
     handleSocialLogin,
     router,
-    handleForgotPassword
+    handleForgotPassword,
   } = useLogin();
 
   return (

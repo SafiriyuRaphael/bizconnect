@@ -1,12 +1,16 @@
-const mongoose = require('mongoose');
+import mongoose, { Schema } from "mongoose";
 
-const reportSchema = new mongoose.Schema({
+const reportSchema = new Schema({
   reporter: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
   reason: {
+    type: String,
+    default: ""
+  },
+  title: {
     type: String,
     required: true
   },
@@ -33,3 +37,7 @@ const reportSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+const Report = mongoose.models.Report || mongoose.model('Report', reportSchema);
+
+export default Report;

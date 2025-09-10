@@ -22,7 +22,7 @@ import {
   VerificationLogType,
 } from "../../../../../types";
 import verifyBusiness from "@/lib/admin/verifyBusiness";
-import getVerificationDetails from "@/lib/business/getVerificationDetails";
+import getVerificationDetails from "@/shared/utils/getVerificationDetails";
 import formatDate from "@/lib/static/formatDate";
 
 type Props = {

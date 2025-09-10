@@ -1,7 +1,7 @@
 "use client";
-import useProductsApi from "@/hook/useProductsApi";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
-import { useProductStore } from "@/store/useProductsStore";
+import useProductsApi from "@/app/profile/[usersId]/products/hooks/useProductsApi";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
+import { useProductStore } from "@/shared/store/useProductsStore";
 import {
   Edit3,
   Eye,
@@ -17,9 +17,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import React, { useState } from "react";
+import React from "react";
 import AddProducts from "./modals/AddProducts";
-import Loader from "@/app/components/ui/Loader";
+import Loader from "@/shared/components/ui/Loader";
 import EditProducts from "./modals/EditProducts";
 import ViewProduct from "./modals/ViewProduct";
 import DeleteProduct from "./modals/DeleteProduct";
@@ -48,9 +48,11 @@ export default function page() {
   if (!profile || editMode) return;
 
   if (queryLoading)
-    return <Loader size="lg" text="Loading Products/Services" />;
-
-  console.log(profile);
+    return (
+      <div className="flex items-center justify-center h-[40vh]">
+        <Loader text="Getting products/services" size="lg" variant="bars" />
+      </div>
+    );
 
   // Only show for business users
   if (profile.userType !== "business") {

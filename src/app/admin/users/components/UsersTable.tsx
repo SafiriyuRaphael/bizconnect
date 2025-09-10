@@ -4,7 +4,7 @@ import {
   GenericTable,
   GenericTableProps,
 } from "../../components/layout/GenericTable";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 
 export default function UserTable({
   filteredUsers,
@@ -18,7 +18,7 @@ export default function UserTable({
   onPageChange,
   handleAudioCall,
   handleVideoCall,
-  handleChat
+  handleChat,
 }: GenericTableProps<AnyUser> & {
   filteredUsers: AnyUser[];
   activeUsers: string[];

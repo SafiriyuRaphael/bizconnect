@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { AnyUser } from "../../../types";
 
 export default async function getLastBusinessUser() {
@@ -15,7 +15,7 @@ export default async function getLastBusinessUser() {
       throw new Error("Failed to fetch last business user");
     }
 
-    const user:AnyUser = await res.json();
+    const user: AnyUser = await res.json();
     return user;
   } catch (err) {
     console.error("💥 Frontend error:", err);

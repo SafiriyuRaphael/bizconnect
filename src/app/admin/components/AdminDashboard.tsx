@@ -23,7 +23,7 @@ import { AnyUser } from "../../../../types";
 import getConnectionsAnalytics from "@/lib/admin/getConnectionsAnalytics";
 import getTotalBusiness from "@/lib/admin/getTotalBusiness";
 import getLastBusinessUser from "@/lib/admin/getLastBusiness";
-import { useSocketStore } from "@/store/useSocketStore";
+import { useSocketStore } from "@/shared/store/useSocketStore";
 
 type Props = {
   allBusinesses: {

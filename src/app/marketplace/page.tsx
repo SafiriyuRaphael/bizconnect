@@ -1,8 +1,8 @@
 "use client";
 import { Search, Grid, List, SlidersHorizontal, X } from "lucide-react";
 import ServiceCard from "./components/Service";
-import { BUSINESSCATEGORIES } from "@/constants/business";
-import useDashboard from "@/hook/useDashboard";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
+import useDashboard from "@/shared/hooks/useDashboard";
 import FilterSidebar from "./components/FilterSideBar";
 
 export default function BizConnectBuyerPage() {
@@ -271,8 +271,6 @@ export default function BizConnectBuyerPage() {
         </div>
       </div>
 
-      {/* Footer */}
-     
     </div>
   );
 }

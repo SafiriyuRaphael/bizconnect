@@ -14,8 +14,17 @@ const escrowSchema = new Schema({
     isDisputed: { type: Boolean, default: false },
     releaseDate: { type: Date },
     paymentIntentId: { type: String },
-    deliveryProof: { type: String },
-    notes: { type: String },
+    deliveryProof: {
+        type: [String],
+        default: [],
+        validate: {
+            validator: function (val: string[]) {
+                return val.length <= 3;
+            },
+            message: 'You can only upload up to 3 delivery proofs.',
+        },
+    },
+    notes: { type: [String], default: [] },
     disputeId: { type: Schema.Types.ObjectId, ref: 'Dispute' },
 }, { timestamps: true });
 

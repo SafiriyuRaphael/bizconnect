@@ -1,6 +1,6 @@
 "use client";
-import ProfileImage from "@/app/components/layout/ProfileImage";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 import { Edit3, Shield, Star } from "lucide-react";
 
 export default function ProfileHeader() {

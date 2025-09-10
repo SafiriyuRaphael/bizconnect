@@ -36,9 +36,9 @@ import { AnyUser } from "../../../../types";
 import EditProfile from "./edit-profile";
 import ProfileDisplay from "./display-profile";
 import { signOut } from "next-auth/react";
-import ChangePasswordModal from "@/app/components/modals/ChangePassword";
-import InputPasswordModal from "@/app/components/modals/InputPassword";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ChangePasswordModal from "@/shared/components/modal/ChangePassword";
+import InputPasswordModal from "@/shared/components/modal/InputPassword";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 
 // Mock data - replace with real data
 const mockUser = {

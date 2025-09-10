@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Upload, Eye, EyeOff, User, Building } from "lucide-react";
-import useRegister from "@/hook/useRegister";
-import { BUSINESSCATEGORIES } from "@/constants/business";
+import useRegister from "@/app/auth/register/hook/useRegister";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
 
 export default function AddUserModal({
   isOpen,

@@ -1,5 +1,5 @@
 
-import { BASEURL } from '@/constants/url';
+import { BASEURL } from '@/shared/constants/url';
 import apiService from '../service/apiService';
 import { IWallet } from '../../../types';
 

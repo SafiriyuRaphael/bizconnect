@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Upload, Eye, EyeOff } from "lucide-react";
 import { AllBusinessProps } from "../../../../../types";
 import useEditProfile from "@/hook/useEditProfile";
-import { BUSINESSCATEGORIES } from "@/constants/business";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
 
 // Edit Business Modal Component
 export default function EditBusinessModal({

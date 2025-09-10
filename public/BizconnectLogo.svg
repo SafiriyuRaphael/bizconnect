@@ -1,0 +1,56 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<!-- Premium gradient system -->
+		<linearGradient id="piece1" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#3b82f6" />
+			<stop offset="100%" style="stop-color:#2563eb" />
+		</linearGradient>
+		<linearGradient id="piece2" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#2563eb" />
+			<stop offset="100%" style="stop-color:#1d4ed8" />
+		</linearGradient>
+		<linearGradient id="piece3" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#1d4ed8" />
+			<stop offset="100%" style="stop-color:#1e40af" />
+		</linearGradient>
+		<linearGradient id="piece4" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#1e40af" />
+			<stop offset="100%" style="stop-color:#1e3a8a" />
+		</linearGradient>
+		<!-- Epic shadows -->
+		<filter id="puzzleShadow" x="-50%" y="-50%" width="200%" height="200%">
+			<feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="#1e3a8a" flood-opacity="0.3" />
+		</filter>
+	</defs>
+	<!-- Just the "B" puzzle pieces - BIGGER and BOLDER -->
+	<g transform="translate(50, 50) scale(1.8)">
+		<!-- Top piece of B -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 -22 L -18 -2 L 2 -2 C 8 -2 12 -6 12 -12 C 12 -18 8 -22 2 -22 Z
+               M -10 -18 L 2 -18 C 4 -18 6 -16 6 -12 C 6 -8 4 -6 2 -6 L -10 -6 Z
+               M -2 -18 Q 0 -20 2 -18
+               M 8 -12 Q 10 -10 8 -8
+               M 2 -6 Q 0 -4 -2 -6" fill="url(#piece1)" />
+		</g>
+		<!-- Left spine piece -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 -2 L -18 2 L -10 2 L -10 -2 Z
+               M -18 -2 Q -20 0 -18 2
+               M -10 -2 Q -8 0 -10 2" fill="url(#piece2)" />
+		</g>
+		<!-- Bottom piece of B -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 2 L -18 22 L 6 22 C 12 22 16 18 16 12 C 16 6 12 2 6 2 Z
+               M -10 6 L 6 6 C 8 6 10 8 10 12 C 10 16 8 18 6 18 L -10 18 Z
+               M -2 2 Q 0 4 2 2
+               M 12 12 Q 14 14 12 16
+               M 6 18 Q 4 20 2 18" fill="url(#piece3)" />
+		</g>
+		<!-- Middle connector piece -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -10 -2 L 2 -2 L 6 2 L -10 2 Z
+               M 2 -2 Q 4 0 2 2
+               M -10 -2 Q -8 0 -10 2" fill="url(#piece4)" />
+		</g>
+	</g>
+</svg>

@@ -8,7 +8,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PasswordField } from "@/app/components/ui/PasswordField";
+import { PasswordField } from "@/shared/components/ui/PasswordField";
 
 interface FormErrors {
   [key: string]: string;

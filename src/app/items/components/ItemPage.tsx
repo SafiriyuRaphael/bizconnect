@@ -14,11 +14,11 @@ import {
   Info,
 } from "lucide-react";
 import { ProductsItemsPageProps } from "../../../../types";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 import { useRouter } from "next/navigation";
-import { useProductStore } from "@/store/useProductsStore";
-import PaymentModal from "@/app/components/layout/Payment";
-import formatPrice from "@/lib/business/formatPrice";
+import { useProductStore } from "@/shared/store/useProductsStore";
+import PaymentModal from "@/shared/components/modal/Payment";
+import formatPrice from "@/shared/utils/formatPrice";
 
 const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
   const router = useRouter();
@@ -34,6 +34,9 @@ const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
   };
 
   if (!productItem) return null;
+
+  console.log("Product Item:", productItem);
+  
 
   return (
     <div className="min-h-screen bg-gray-50">

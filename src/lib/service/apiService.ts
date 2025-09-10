@@ -23,9 +23,9 @@ class AuthRedirectError extends Error {
     }
 }
 
-interface CustomAxiosRequestConfig extends AxiosRequestConfig {
-    _retry?: boolean;
-}
+// interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+//     _retry?: boolean;
+// }
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
 type ContentType = 'application/json' | 'application/x-www-form-urlencoded';
@@ -49,10 +49,10 @@ interface ApiServiceConfig<TBody = unknown> {
     requiresAuth?: boolean;
 }
 
-const DEFAULT_TIMEOUT = 20000;
+const DEFAULT_TIMEOUT = 15000;
 const MAX_RETRIES = 3;
 
-const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000/api';
+const apiUrl = process.env.NEXT_PUBLIC_BASE_URL
 
 const apiClient = axios.create({
     baseURL: apiUrl,
@@ -62,48 +62,6 @@ const apiClient = axios.create({
     }),
     validateStatus: (status) => status >= 200 && status < 500,
 });
-
-let interceptorsInitialized = false;
-
-export const initializeApiInterceptors = async () => {
-    if (interceptorsInitialized) return;
-
-    apiClient.interceptors.request.use(
-        async (config) => {
-            const session = await getSession();
-            if (session?.user?.id && !config.headers.get('Authorization')) {
-                config.headers.set('Authorization', `Bearer ${session.user.id}`);
-            }
-            return config;
-        },
-        (error) => Promise.reject(error)
-    );
-
-    apiClient.interceptors.response.use(
-        (response) => response,
-        async (error: AxiosError) => {
-            if (error.response?.status === 401 && error.config && !(error.config as CustomAxiosRequestConfig)._retry) {
-                try {
-                    (error.config as CustomAxiosRequestConfig)._retry = true;
-                    const session = await getSession();
-                    if (!session) {
-                        throw new AuthRedirectError('Session expired, please sign in again.', 401, '/auth/login');
-                    }
-                    error.config.headers.set('Authorization', `Bearer ${session.user.id}`);
-                    return apiClient(error.config as CustomAxiosRequestConfig);
-                } catch (refreshError) {
-                    throw new AuthRedirectError('Session expired, please sign in again.', 401, '/auth/login');
-                }
-            }
-            const apiError: ApiError = new Error(error.message || 'Request failed');
-            apiError.status = error.response?.status;
-            apiError.data = error.response?.data;
-            throw apiError;
-        }
-    );
-
-    interceptorsInitialized = true;
-};
 
 axiosRetry(apiClient, {
     retries: MAX_RETRIES,
@@ -133,7 +91,6 @@ async function apiService<TResponse, TBody = unknown>({
         source.cancel('Query was cancelled by TanStack Query');
     });
 
-    // Check authentication if requiresAuth is true
     if (requiresAuth) {
         const session = await getSession();
         if (!session?.user?.id) {
@@ -147,8 +104,8 @@ async function apiService<TResponse, TBody = unknown>({
             url: endpoint,
             method,
             headers: new AxiosHeaders({
-                ...headers,
                 'Content-Type': contentType,
+                ...(headers?.toJSON?.() || headers),
             }),
             data: contentType === 'application/x-www-form-urlencoded' && body ? qs.stringify(body) : body,
             params,
@@ -161,12 +118,37 @@ async function apiService<TResponse, TBody = unknown>({
                     ? [(data) => (typeof data === 'string' ? data : qs.stringify(data))]
                     : undefined),
         });
+
+        if (response.status >= 400) {
+            const apiError: ApiError = new Error(
+                (response.data as any)?.message || 'Request failed'
+            );
+            apiError.status = response.status;
+            apiError.data = response.data;
+            throw apiError;
+        }
         return { response, cancel: (reason?: string) => source.cancel(reason) };
     } catch (error) {
         if (axios.isCancel(error)) {
             throw error;
         }
         if (axios.isAxiosError(error)) {
+
+            const status = error.response?.status;
+
+            if (status === 401) {
+                throw new AuthRedirectError(
+                    (error.response?.data as any)?.message || 'Unauthorized',
+                    401,
+                    '/auth/login'
+                );
+            }
+
+
+            if (error.code === 'ECONNABORTED') {
+                error.message = 'The request took too long. Please try again later.';
+            }
+
             const apiError: ApiError = new Error(error.message || 'Request failed');
             apiError.status = error.response?.status;
             apiError.data = error.response?.data;

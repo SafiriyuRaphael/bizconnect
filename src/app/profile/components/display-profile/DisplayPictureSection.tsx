@@ -1,3 +1,4 @@
+
 import { Upload, X } from "lucide-react";
 import { useState } from "react";
 import { BusinessDisplayPicsProps, ProfileData } from "../../../../../types";
@@ -5,7 +6,7 @@ import { BusinessDisplayPicsProps, ProfileData } from "../../../../../types";
 import { uploadMultipleCloudinary } from "@/lib/cloudinary/uploadMultipleCloudinary";
 import uploadPictures from "@/lib/Image/uploadPictures";
 import deletePictures from "@/lib/Image/deletePictures";
-import { useMessageModalStore } from "@/store/useMessageModalStore";
+import { useMessageModalStore } from "@/shared/store/useMessageModalStore";
 
 interface DisplayPictureSectionProps {
   pictures: BusinessDisplayPicsProps[];

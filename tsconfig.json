@@ -20,7 +20,9 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "~/*": ["../*"] 
+      "~/*": ["../*"] ,
+      "@ui/*": ["./src/shared/components/ui/*"],
+      "@modals/*": ["./src/shared/components/modal/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/payments/escrow-payment"],

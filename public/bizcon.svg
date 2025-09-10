@@ -1,0 +1,104 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<!-- Premium gradient system -->
+		<linearGradient id="piece1" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#3b82f6" />
+			<stop offset="100%" style="stop-color:#2563eb" />
+		</linearGradient>
+		<linearGradient id="piece2" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#2563eb" />
+			<stop offset="100%" style="stop-color:#1d4ed8" />
+		</linearGradient>
+		<linearGradient id="piece3" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#1d4ed8" />
+			<stop offset="100%" style="stop-color:#1e40af" />
+		</linearGradient>
+		<linearGradient id="piece4" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" style="stop-color:#1e40af" />
+			<stop offset="100%" style="stop-color:#1e3a8a" />
+		</linearGradient>
+		<!-- Epic shadows and effects -->
+		<filter id="puzzleShadow" x="-50%" y="-50%" width="200%" height="200%">
+			<feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="#1e3a8a" flood-opacity="0.3" />
+			<feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1d4ed8" flood-opacity="0.2" />
+		</filter>
+		<filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+			<feGaussianBlur stdDeviation="2" result="coloredBlur" />
+			<feMerge>
+				<feMergeNode in="coloredBlur" />
+				<feMergeNode in="SourceGraphic" />
+			</feMerge>
+		</filter>
+	</defs>
+	<!-- Clean background -->
+	<rect width="100" height="100" rx="20" fill="#ffffff" />
+	<rect x="3" y="3" width="94" height="94" rx="17" fill="#f8fafc" />
+	<!-- The "B" puzzle pieces - positioned and styled -->
+	<g transform="translate(50, 50)">
+		<!-- Top piece of B (upper curve) -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 -22 L -18 -2 L 2 -2 C 8 -2 12 -6 12 -12 C 12 -18 8 -22 2 -22 Z
+               M -10 -18 L 2 -18 C 4 -18 6 -16 6 -12 C 6 -8 4 -6 2 -6 L -10 -6 Z
+               M -2 -18 Q 0 -20 2 -18
+               M 8 -12 Q 10 -10 8 -8
+               M 2 -6 Q 0 -4 -2 -6" fill="url(#piece1)" stroke="#ffffff" stroke-width="1" />
+		</g>
+		<!-- Left spine piece -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 -2 L -18 2 L -10 2 L -10 -2 Z
+               M -18 -2 Q -20 0 -18 2
+               M -10 -2 Q -8 0 -10 2" fill="url(#piece2)" stroke="#ffffff" stroke-width="1" />
+		</g>
+		<!-- Bottom piece of B (lower curve) -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -18 2 L -18 22 L 6 22 C 12 22 16 18 16 12 C 16 6 12 2 6 2 Z
+               M -10 6 L 6 6 C 8 6 10 8 10 12 C 10 16 8 18 6 18 L -10 18 Z
+               M -2 2 Q 0 4 2 2
+               M 12 12 Q 14 14 12 16
+               M 6 18 Q 4 20 2 18" fill="url(#piece3)" stroke="#ffffff" stroke-width="1" />
+		</g>
+		<!-- Middle connector piece -->
+		<g filter="url(#puzzleShadow)">
+			<path d="M -10 -2 L 2 -2 L 6 2 L -10 2 Z
+               M 2 -2 Q 4 0 2 2
+               M -10 -2 Q -8 0 -10 2" fill="url(#piece4)" stroke="#ffffff" stroke-width="1" />
+		</g>
+		<!-- Puzzle connection indicators (small circles at connection points) -->
+		<g fill="#60a5fa" opacity="0.8">
+			<circle cx="-2" cy="-18" r="1" />
+			<circle cx="8" cy="-8" r="1" />
+			<circle cx="-2" cy="-2" r="1" />
+			<circle cx="2" cy="2" r="1" />
+			<circle cx="12" cy="16" r="1" />
+			<circle cx="2" cy="18" r="1" />
+		</g>
+		<!-- Connection lines showing how pieces fit -->
+		<g stroke="#3b82f6" stroke-width="1" fill="none" opacity="0.4" stroke-dasharray="2,2">
+			<line x1="-10" y1="-6" x2="-10" y2="-2" />
+			<line x1="-10" y1="2" x2="-10" y2="6" />
+			<line x1="2" y1="-6" x2="2" y2="-2" />
+			<line x1="2" y1="2" x2="6" y2="6" />
+		</g>
+		<!-- Subtle connection nodes around the puzzle -->
+		<g opacity="0.6">
+			<circle cx="-25" cy="-10" r="2" fill="#93c5fd" />
+			<circle cx="25" cy="-5" r="2" fill="#93c5fd" />
+			<circle cx="20" cy="15" r="2" fill="#93c5fd" />
+			<circle cx="-25" cy="15" r="2" fill="#93c5fd" />
+			<!-- Connection lines to external nodes -->
+			<g stroke="#60a5fa" stroke-width="1" opacity="0.3" stroke-linecap="round">
+				<line x1="-18" y1="-12" x2="-23" y2="-10" />
+				<line x1="12" y1="-12" x2="23" y2="-5" />
+				<line x1="16" y1="12" x2="18" y2="15" />
+				<line x1="-18" y1="12" x2="-23" y2="15" />
+			</g>
+		</g>
+	</g>
+	<!-- Floating micro-elements for marketplace feel -->
+	<g opacity="0.5">
+		<rect x="15" y="15" width="1.5" height="1.5" rx="0.5" fill="#3b82f6" />
+		<rect x="83" y="12" width="1.5" height="1.5" rx="0.5" fill="#2563eb" />
+		<rect x="85" y="85" width="1.5" height="1.5" rx="0.5" fill="#1d4ed8" />
+		<rect x="12" y="83" width="1.5" height="1.5" rx="0.5" fill="#1e40af" />
+	</g>
+</svg>

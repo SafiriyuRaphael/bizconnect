@@ -11,12 +11,12 @@ import {
   Download,
 } from "lucide-react";
 import getAllBusiness from "@/lib/admin/getAllBusiness";
-import useDashboard from "@/hook/useDashboard";
+import useDashboard from "@/shared/hooks/useDashboard";
 import AddBusinessModal from "../components/modals/AddBusinessModal";
 import EditBusinessModal from "../components/modals/EditBusinessModal";
 import AdminBusinessModal from "../components/modals/ViewBusinessModal";
-import { useSocketStore } from "@/store/useSocketStore";
-import { BUSINESSCATEGORIES } from "@/constants/business";
+import { useSocketStore } from "@/shared/store/useSocketStore";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
 import BusinessTable from "./components/BusinessTable";
 import StatCard from "../components/layout/StatCard";
 import BusinessCard from "./components/BusinessCard";

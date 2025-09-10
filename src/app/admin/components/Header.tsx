@@ -1,5 +1,5 @@
 "use client";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 import { Bell, RefreshCw } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";

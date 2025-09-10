@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { BusinessReviewsProps } from "../../../types";
 
 export default async function getBusinessReviews({ businessId }: { businessId: string }) {

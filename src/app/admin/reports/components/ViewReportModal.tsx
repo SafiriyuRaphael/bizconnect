@@ -12,43 +12,43 @@ import {
   Image,
   Paperclip,
 } from "lucide-react";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 
 export interface Report {
+  _id: string;
+  reportType: "user" | "message" | "review" | "business" | "content";
+  reportCategory: string;
+  reportedBy: {
     _id: string;
-    reportType: "user" | "message" | "review" | "business" | "content";
-    reportCategory: string;
-    reportedBy: {
-      _id: string;
-      fullName: string;
-      username: string;
-      logo?: string;
-    };
-    reportedUser?: {
-      _id: string;
-      fullName: string;
-      username: string;
-      logo?: string;
-    };
-    reportedContent?: {
-      _id: string;
-      content: string;
-      type: string;
-    };
-    reason: string;
-    description: string;
-    status: "pending" | "investigating" | "resolved" | "dismissed" | "escalated";
-    priority: "low" | "medium" | "high" | "critical";
-    createdAt: string;
-    updatedAt: string;
-    resolvedAt?: string;
-    resolvedBy?: string;
-    adminNotes?: string;
-    evidence?: {
-      screenshots: string[];
-      attachments: string[];
-    };
-  }
+    fullName: string;
+    username: string;
+    logo?: string;
+  };
+  reportedUser?: {
+    _id: string;
+    fullName: string;
+    username: string;
+    logo?: string;
+  };
+  reportedContent?: {
+    _id: string;
+    content: string;
+    type: string;
+  };
+  reason: string;
+  description: string;
+  status: "pending" | "investigating" | "resolved" | "dismissed" | "escalated";
+  priority: "low" | "medium" | "high" | "critical";
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  adminNotes?: string;
+  evidence?: {
+    screenshots: string[];
+    attachments: string[];
+  };
+}
 
 interface ViewReportModalProps {
   isOpen: boolean;

@@ -10,32 +10,70 @@ export async function GET(req: NextRequest) {
         const user = session?.user?.id;
 
         if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({ message: 'Unauthorized', success: false }, { status: 401 });
         }
 
         const { searchParams } = new URL(req.url);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "20");
-
         const skip = (page - 1) * limit;
+
         const userId = searchParams.get('id');
+        const searchQuery = searchParams.get("q") || "";
+        const filterBy = searchParams.get("filterBy") || "all";
+        const sortBy = searchParams.get("sortBy") || "createdAt";
 
         await connectToDatabase();
 
-        const items = await Item.find({ userId }).sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean();
+        // Base query
+        const query: any = { userId };
 
-        const total = await Item.countDocuments({ userId });
-        const active = await Item.countDocuments({ userId, isAvailable: true });
-        const escrow = await Item.countDocuments({ userId, useEscrow: true });
+        // Search filter
+        if (searchQuery) {
+            query.$or = [
+                { title: { $regex: searchQuery, $options: "i" } },
+                { description: { $regex: searchQuery, $options: "i" } },
+            ];
+        }
 
-        const prices = await Item.find({ userId }).select("price").lean();
+        // Availability / type filters
+        if (filterBy === "product") query.type = "product";
+        if (filterBy === "service") query.type = "service";
+        if (filterBy === "available") query.isAvailable = true;
+        if (filterBy === "unavailable") query.isAvailable = false;
+
+        // Sorting
+        let sort: any = {};
+        switch (sortBy) {
+            case "name":
+                sort.title = 1; // alphabetical
+                break;
+            case "price-low":
+                sort.price = 1;
+                break;
+            case "price-high":
+                sort.price = -1;
+                break;
+            case "availability":
+                sort.isAvailable = -1;
+                break;
+            default:
+                sort.createdAt = -1; // latest first
+        }
+
+        // Query DB
+        const [items, total, active, escrow, prices] = await Promise.all([
+            Item.find(query).sort(sort).skip(skip).limit(limit).lean(),
+            Item.countDocuments({ userId }),
+            Item.countDocuments({ userId, isAvailable: true }),
+            Item.countDocuments({ userId, useEscrow: true }),
+            Item.find({ userId }).select("price").lean(),
+        ]);
+
         const totalPrice = prices.reduce((sum, i) => sum + (i.price || 0), 0);
         const avgPrice = prices.length > 0 ? totalPrice / prices.length : 0;
 
-        return new Response(JSON.stringify({
+        return NextResponse.json({
             items,
             pagination: {
                 page,
@@ -49,9 +87,9 @@ export async function GET(req: NextRequest) {
                 avgPrice: Math.round(avgPrice),
                 escrowEnabled: escrow,
             },
-        }), { status: 200 });
+        });
     } catch (error) {
         console.error('[USER_ITEMS_ERROR]', error);
-        return NextResponse.json({ error: 'Failed to fetch user items' }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to fetch user items', success: false }, { status: 500 });
     }
 }

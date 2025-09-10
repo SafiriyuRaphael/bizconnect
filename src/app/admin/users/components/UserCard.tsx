@@ -1,4 +1,4 @@
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 import { AnyUser } from "../../../../../types";
 import {
   Calendar,

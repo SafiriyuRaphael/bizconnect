@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 
 export default async function getAllUserId() {
     const res = await fetch(`${BASEURL}/api/profile/all-userid`, {

@@ -1,7 +1,7 @@
 "use client";
 import { Save } from "lucide-react";
-import { BUSINESSCATEGORIES } from "@/constants/business";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 // import { BASEURL } from "@/constants/url";
 
 export default function EditProfile({}) {

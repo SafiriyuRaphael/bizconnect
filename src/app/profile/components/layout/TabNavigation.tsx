@@ -1,5 +1,5 @@
 "use client";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
 import { BarChart3, Package, Shield, User } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -10,7 +10,7 @@ export default function TabNavigation() {
   const tabs = [
     { id: "/", label: "Overview", icon: User },
     { id: "products", label: "Products/Services", icon: Package },
-    { id: "escrow", label: "Transactions", icon: Shield },
+    { id: "escrow", label: "Escrows", icon: Shield },
     ...(profile?.verifiedBusiness
       ? [{ id: "analytics", label: "Analytics", icon: BarChart3 }]
       : []),

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Eye, EyeOff, User, Building2 } from "lucide-react";
-import { BUSINESSCATEGORIES } from "@/constants/business";
+import { BUSINESSCATEGORIES } from "@/shared/constants/business";
 import { AnyUser } from "../../../../../types";
 import useEditProfile from "@/hook/useEditProfile";
 

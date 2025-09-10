@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { AllBusinessProps, AnyUser } from "../../../../types";
-import { useMessageModalStore } from "@/store/useMessageModalStore";
+import { useMessageModalStore } from "@/shared/store/useMessageModalStore";
 import { useRouter } from "next/navigation";
-import { useSocketStore } from "@/store/useSocketStore";
+import { useSocketStore } from "@/shared/store/useSocketStore";
 
 export default function useAdminModal() {
   const { onClose: handleCloseDelete } = useMessageModalStore();

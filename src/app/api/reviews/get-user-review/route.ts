@@ -21,10 +21,10 @@ export async function POST(req: Request) {
         const review: BusinessReviewsProps = business.reviews.find((r: BusinessReviewsProps) => r.userId.toString() === userId);
 
         if (!review) {
-            return NextResponse.json({ error: "No review found" }, { status: 404 });
+            return NextResponse.json({ message: "No review found" }, { status: 204 });
         }
 
-        return NextResponse.json({ review, status:"success" }, { status: 200 });
+        return NextResponse.json({ review, status: "success" }, { status: 200 });
     } catch (err) {
         return NextResponse.json({ error: "Server error", details: err }, { status: 500 });
     }

@@ -4,7 +4,7 @@ import {
   GenericTable,
   GenericTableProps,
 } from "../../components/layout/GenericTable";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 import {
   Flag,
   User,

@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { sendEmail } from "@/lib/auth/sendEmail";
 import User from "@/model/User";
 import { NextResponse } from "next/server";

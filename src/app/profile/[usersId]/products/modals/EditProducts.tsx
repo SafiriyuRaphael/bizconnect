@@ -1,8 +1,8 @@
-import useProductsApi from "@/hook/useProductsApi";
-import getBaseType from "@/lib/chat/getBaseType";
-import { useEditProfileStore } from "@/store/useEditProfileStore";
-import { useMessageModalStore } from "@/store/useMessageModalStore";
-import { useProductStore } from "@/store/useProductsStore";
+import useProductsApi from "@/app/profile/[usersId]/products/hooks/useProductsApi";
+import getBaseType from "@/shared/utils/getBaseType";
+import { useEditProfileStore } from "@/shared/store/useEditProfileStore";
+import { useMessageModalStore } from "@/shared/store/useMessageModalStore";
+import { useProductStore } from "@/shared/store/useProductsStore";
 import {
   Plus,
   Shield,

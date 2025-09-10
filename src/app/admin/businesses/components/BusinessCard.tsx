@@ -1,8 +1,8 @@
-import getVerificationDetails from "@/lib/business/getVerificationDetails";
+import getVerificationDetails from "@/shared/utils/getVerificationDetails";
 import { AllBusinessProps } from "../../../../../types";
-import ProfileImage from "@/app/components/layout/ProfileImage";
-import getCategoryColor from "@/lib/business/getCategoryColor";
-import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
+import getCategoryColor from "@/shared/utils/getCategoryColor";
+import { getBusinessCategoryDetails } from "@/shared/utils/getBusinessCategoryDetails";
 import { Edit3, Eye, Mail, MapPin, Phone, Trash2, Users } from "lucide-react";
 
 export default function BusinessCard({

@@ -4,32 +4,27 @@ import { redirect } from "next/navigation";
 import getUserById from "@/lib/profile/getUserById";
 import UserInitializer from "../components/layout/SetUserStore";
 import ProfileHeader from "../components/layout/ProfileHeader";
-import ChangePasswordModal from "@/app/components/modals/ChangePassword";
-import InputPasswordModal from "@/app/components/modals/InputPassword";
+import ChangePasswordModal from "@/shared/components/modal/ChangePassword";
+import InputPasswordModal from "@/shared/components/modal/InputPassword";
 import EditProfile from "../components/edit-profile";
 import TabNavigation from "../components/layout/TabNavigation";
 import Footer from "../components/layout/Footer";
 
 type Params = {
-  usersId: string;
+  params: Promise<{ usersId: string }>;
+  children: React.ReactNode;
 };
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfileLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Params;
-}) {
+export default async function ProfileLayout({ children, params }: Params) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     redirect("/auth/login");
   }
 
-  const userId = params.usersId;
+  const userId = (await params).usersId;
 
   if (session.user.id !== userId) {
     redirect("/unauthorized");
@@ -40,7 +35,6 @@ export default async function ProfileLayout({
   if (!user) {
     redirect("/not-found");
   }
-
 
   return (
     <>

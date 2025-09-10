@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import UserTable from "./components/UsersTable";
-import { useSocketStore } from "@/store/useSocketStore";
+import { useSocketStore } from "@/shared/store/useSocketStore";
 import StatCard from "../components/layout/StatCard";
 import UserCard from "./components/UserCard";
 import useAdminModal from "../hooks/useAdminModal";

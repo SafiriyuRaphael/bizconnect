@@ -26,7 +26,7 @@ export default async function page({ params }: Params) {
   const itemId = (await params).itemId;
 
   const item = await getProductsById({ id: itemId });
-  console.log("items", item);
+
 
   const productItem = item.item;
 

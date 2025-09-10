@@ -1,13 +1,13 @@
-import getCategoryColor from "@/lib/business/getCategoryColor";
+import getCategoryColor from "@/shared/utils/getCategoryColor";
 import { AllBusinessProps } from "../../../../../types";
 import {
   Column,
   GenericTable,
   GenericTableProps,
 } from "../../components/layout/GenericTable";
-import ProfileImage from "@/app/components/layout/ProfileImage";
-import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
-import getVerificationDetails from "@/lib/business/getVerificationDetails";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
+import { getBusinessCategoryDetails } from "@/shared/utils/getBusinessCategoryDetails";
+import getVerificationDetails from "@/shared/utils/getVerificationDetails";
 
 export default function BusinessTable({
   filteredBusinesses,

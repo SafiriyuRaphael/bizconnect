@@ -4,7 +4,7 @@ import {
   GenericTable,
   GenericTableProps,
 } from "../../components/layout/GenericTable";
-import ProfileImage from "@/app/components/layout/ProfileImage";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 import { RotateCcw, AlertCircle } from "lucide-react";
 
 interface DeletedUser extends AnyUser {
@@ -22,8 +22,8 @@ export default function DeletedUsersTable({
   limit,
   currentPage,
   onPageChange,
-  handleRestore, 
-  handlePermanentDelete, 
+  handleRestore,
+  handlePermanentDelete,
 }: GenericTableProps<DeletedUser> & {
   filteredUsers: DeletedUser[];
   handleRestore?: (user: DeletedUser) => void;
@@ -160,7 +160,6 @@ export default function DeletedUsersTable({
       currentPage={currentPage}
       onPageChange={onPageChange}
       handleView={handleView}
-  
     />
   );
 }

@@ -1,6 +1,6 @@
 import apiService from "../service/apiService";
 import { ProductsItemsPageProps } from "../../../types";
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 
 export default async function getProductsById({
   signal,

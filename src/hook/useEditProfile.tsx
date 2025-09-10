@@ -3,7 +3,7 @@ import { uploadCloudinary } from "@/lib/cloudinary/uploadClodinary";
 import { signOut } from "next-auth/react";
 import React, { useState } from "react";
 import { AllBusinessProps, AnyUser, ProfileData } from "../../types";
-import { useMessageModalStore } from "@/store/useMessageModalStore";
+import { useMessageModalStore } from "@/shared/store/useMessageModalStore";
 
 export default function useEditProfile(
   user: AnyUser | AllBusinessProps | null

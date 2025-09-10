@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Business } from "@/model/Business";
 import { NextResponse } from "next/server";
 import { BusinessReviewsProps } from "../../../../../types";
+import createNotification from "@/lib/socket/createNotification";
 
 export async function POST(req: Request) {
     try {
@@ -28,19 +29,6 @@ export async function POST(req: Request) {
             r.userId.toString() === userId
         );
 
-        const existingReview = business.reviews[existingReviewIndex];
-
-
-        const newReview = {
-            userId,
-            username,
-            displayPic,
-            rating,
-            comment,
-            fullName,
-            createdAt: new Date(),
-        };
-
         if (existingReviewIndex !== -1) {
             Object.assign(business.reviews[existingReviewIndex], {
                 username,
@@ -63,6 +51,25 @@ export async function POST(req: Request) {
         }
 
         await business.save();
+
+        const existingReview = business.reviews.find((r: BusinessReviewsProps) =>
+            r.userId.toString() === userId
+        );
+
+        const entityId = existingReview ? existingReview._id : business.reviews[0]._id;
+
+        createNotification({
+            userId: business._id,
+            senderId: userId,
+            type: "REVIEW_RECEIVED",
+            message: `${fullName} rated you ${rating}⭐ and left a review.`,
+            title: "New review",
+            entityId,
+            entityType: "REVIEW",
+            priority: "NORMAL",
+            link: `/${business.username}/`,
+        });
+
 
         return NextResponse.json({
             message: "Review saved",

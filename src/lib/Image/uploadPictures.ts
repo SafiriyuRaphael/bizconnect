@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { BusinessDisplayPicsProps } from "../../../types";
 
 export default async function uploadPictures({ businessId, pictures }: { businessId: string, pictures: { url: string; name: string; public_id: string }[] }) {

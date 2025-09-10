@@ -53,3 +53,11 @@
     transform: rotate(360deg);
   }
 }
+
+.thin-scroll {
+  scrollbar-width: thin;
+}
+
+.hide-scroll {
+  scrollbar-width: none;
+}

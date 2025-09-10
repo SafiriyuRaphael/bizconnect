@@ -382,11 +382,11 @@ interface ProductsItemsPageProps {
     user: {
         logo: string
         fullName: string
-        businessName: string
+        businessName?: string
         averageRating: string
         totalReviews: string
         username: string
-        verified: boolean
+        verified?: boolean
         email: string
     }
 }
@@ -556,13 +556,13 @@ interface EscrowPaymentBody {
     quantity: number;
 }
 
-interface IWallet  {
+interface IWallet {
     _id: string;
-    userId: string; 
+    userId: string;
     balance: number;
     locked: number;
-    currency: string; 
+    currency: string;
     status: "active" | "locked";
     createdAt: Date;
     updatedAt: Date;
-  }
+}

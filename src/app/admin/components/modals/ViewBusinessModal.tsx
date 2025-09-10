@@ -20,14 +20,14 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { AllBusinessProps, BusinessReviewsProps } from "../../../../../types";
-import { getBusinessCategoryDetails } from "@/lib/business/getBusinessCategoryDetails";
-import ProfileImage from "@/app/components/layout/ProfileImage";
-import ImageModal from "@/app/components/modals/ImageModal";
+import { getBusinessCategoryDetails } from "@/shared/utils/getBusinessCategoryDetails";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
+import ImageModal from "@/shared/components/modal/ImageModal";
 import VerificationAdminModal from "./VerificationModal";
-import getVerificationDetails from "@/lib/business/getVerificationDetails";
-import getCategoryColor from "@/lib/business/getCategoryColor";
+import getVerificationDetails from "@/shared/utils/getVerificationDetails";
+import getCategoryColor from "@/shared/utils/getCategoryColor";
 import formatDate from "@/lib/static/formatDate";
-import formatPrice from "@/lib/business/formatPrice";
+import formatPrice from "@/shared/utils/formatPrice";
 
 export default function AdminBusinessModal({
   business,

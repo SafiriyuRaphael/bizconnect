@@ -8,6 +8,7 @@ export default async function escrowPayments(product: EscrowPaymentBody) {
         method: 'POST',
         body: product,
         requiresAuth: true,
+        timeout: 200000,
     });
     return response.data;
 

@@ -1,9 +1,9 @@
-import { BASEURL } from "@/constants/url";
-import { generateDefaultLogo } from "@/lib/Image/generateDefaultLogo";
+import { BASEURL } from "@/shared/constants/url";
+import { generateDefaultLogo } from "@/shared/utils/generateDefaultLogo";
 import getBusinessReviews from "@/lib/reviews/getBusinessReviews";
 import getUserReviews from "@/lib/reviews/getUserReviews";
 import toggleUserHelpful from "@/lib/reviews/toggleUserHelpful";
-import { useMessageModalStore } from "@/store/useMessageModalStore";
+import { useMessageModalStore } from "@/shared/store/useMessageModalStore";
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -17,7 +17,6 @@ export default function useUserDashBoard({
   user: AnyUser;
   session: SessionUser;
 }) {
-
   const [comments, setComments] = useState<BusinessReviewsProps[]>(
     user.reviews || []
   );

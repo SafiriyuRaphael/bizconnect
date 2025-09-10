@@ -1,4 +1,4 @@
-import { BASEURL } from "@/constants/url";
+import { BASEURL } from "@/shared/constants/url";
 import { AnyUser } from "../../../types";
 
 export default async function getUserById(_id: string) {
