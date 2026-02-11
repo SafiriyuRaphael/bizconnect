@@ -16,7 +16,7 @@
     "limiter": "^3.0.0",
     "lucide-react": "^0.513.0",
     "mongoose": "^8.16.0",
-    "next": "15.3.3",
+    "next": "15.3.8",
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
     "nodemailer": "^6.10.1",
