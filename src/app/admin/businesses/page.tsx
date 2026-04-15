@@ -11,7 +11,7 @@ import {
   Download,
 } from "lucide-react";
 import getAllBusiness from "@/lib/admin/getAllBusiness";
-import useDashboard from "@/shared/hooks/useDashboard";
+import useDashboard from "@/app/marketplace/hooks/useDashboard";
 import AddBusinessModal from "../components/modals/AddBusinessModal";
 import EditBusinessModal from "../components/modals/EditBusinessModal";
 import AdminBusinessModal from "../components/modals/ViewBusinessModal";

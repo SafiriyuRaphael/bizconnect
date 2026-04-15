@@ -15,6 +15,7 @@ type Params = {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const username = (await params).businessprofile;
   const user = await getUserByUsername(username);
+  // console.log(user);
 
   if (!user) {
     return {

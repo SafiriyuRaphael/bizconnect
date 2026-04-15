@@ -2,7 +2,7 @@
 import { Search, Grid, List, SlidersHorizontal, X } from "lucide-react";
 import ServiceCard from "./components/Service";
 import { BUSINESSCATEGORIES } from "@/shared/constants/business";
-import useDashboard from "@/shared/hooks/useDashboard";
+import useDashboard from "@/app/marketplace/hooks/useDashboard";
 import FilterSidebar from "./components/FilterSideBar";
 
 export default function BizConnectBuyerPage() {
@@ -20,8 +20,6 @@ export default function BizConnectBuyerPage() {
     viewMode,
     error,
     debouncedFetchBusinesses,
-    setSelectedServices,
-    selectedServices,
     clearAllFilters,
     handleLoadMore,
     total,
@@ -228,8 +226,6 @@ export default function BizConnectBuyerPage() {
                   handleChat={handleChat}
                   key={service._id}
                   service={service}
-                  setSelectedServices={setSelectedServices}
-                  selectedServices={selectedServices}
                 />
               ))}
             </div>
@@ -270,7 +266,6 @@ export default function BizConnectBuyerPage() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

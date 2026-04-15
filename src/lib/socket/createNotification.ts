@@ -33,23 +33,24 @@ export default async function createNotification({
 }) {
 
     try {
-        // const notification = new Notification({
-        //     userId,
-        //     senderId: senderId ? senderId : null,
-        //     type,
-        //     title,
-        //     message,
-        //     entityId: entityId ? entityId : null,
-        //     entityType,
-        //     priority,
-        //     link,
-        // });
-        // await notification.save();
+        const notification = new Notification({
+            userId,
+            senderId: senderId ? senderId : null,
+            type,
+            title,
+            message,
+            entityId: entityId ? entityId : null,
+            entityType,
+            priority,
+            link,
+        });
+        await notification.save();
 
         await apiService({
             endpoint: `/api/notify`,
             method: 'POST',
             body: {
+                id: notification._id,
                 userId,
                 senderId,
                 type,
@@ -58,7 +59,9 @@ export default async function createNotification({
                 entityId,
                 entityType,
                 priority,
-                link
+                link,
+                isRead: notification.isRead,
+                createdAt: notification.createdAt,
             },
             headers: new AxiosHeaders({
                 "x-api-key": process.env.NEXT_PUBLIC_NOTIFY_API_KEY!,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { AllBusinessProps, BusinessQueryParams } from "../../../types";
-import getAllBusiness from "@/lib/business/getAllBusiness";
+import { AllBusinessProps, BusinessQueryParams } from "../../../../types";
+import getAllBusiness from "@/app/marketplace/api/getAllBusiness";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -21,7 +21,6 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
   const [viewMode, setViewMode] = useState("grid");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [priceRange, setPriceRange] = useState(100000000000);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<
     "newest" | "rating" | "price-low" | "price-high" | "best"
   >("best");
@@ -63,13 +62,14 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
 
   // Effect to fetch data when filters change
   useEffect(() => {
+
     const timeoutId = setTimeout(() => {
       const params: BusinessQueryParams = {
         category: selectedCategory,
         search: searchQuery.trim() || undefined,
         sort: sortBy,
         maxPrice: priceRange,
-        deliveryTime: deliveryRange.length === 1 ? deliveryRange[0] : undefined,
+        deliveryTime: deliveryRange.length > 0 ? Math.max(...deliveryRange) : undefined,
         page: currentPage,
         rating: selectedRating || undefined,
         limit: 12,
@@ -132,5 +132,5 @@ export default function useDashboard(fetcher: FetchBusinessesFn = getAllBusiness
     setCurrentPage(1);
     setShowMobileFilters(false);
   };
-  return { searchQuery, handleSearchChange, setShowMobileFilters, showMobileFilters, selectedCategory, filteredBusinesses, loading, sortBy, handleSortChange, setViewMode, viewMode, error, debouncedFetchBusinesses, setSelectedServices, selectedServices, clearAllFilters, handleLoadMore, total, priceRange, setPriceRange, setDeliveryRange, setSelectedRating, setCurrentPage, setSelectedCategory, selectedRating, handleChat, handlePageChange, currentPage }
+  return { searchQuery, handleSearchChange, setShowMobileFilters, showMobileFilters, selectedCategory, filteredBusinesses, loading, sortBy, handleSortChange, setViewMode, viewMode, error, debouncedFetchBusinesses, clearAllFilters, handleLoadMore, total, priceRange, setPriceRange, setDeliveryRange, setSelectedRating, setCurrentPage, setSelectedCategory, selectedRating, handleChat, handlePageChange, currentPage }
 }

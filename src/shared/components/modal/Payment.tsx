@@ -21,7 +21,7 @@ export default function PaymentModal({
     setSelectedPaymentMethod,
   } = useProductStore();
   const subtotal = Number(productItem.price) * quantity;
-  const serviceFee = subtotal * 0.04;
+  const serviceFee = subtotal * 0.02;
   const total = subtotal + serviceFee;
 
   if (!showPaymentModal || !productItem) return null;

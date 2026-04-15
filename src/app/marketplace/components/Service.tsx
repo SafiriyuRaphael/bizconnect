@@ -12,31 +12,19 @@ import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 import { generateDefaultLogo } from "@/shared/utils/generateDefaultLogo";
 import { useRouter } from "next/navigation";
+import Favorites from "@/shared/components/ui/Favorites";
 
 type Props = {
   service: AllBusinessProps;
-  setSelectedServices: React.Dispatch<React.SetStateAction<string[]>>;
-  selectedServices: string[];
   handleChat: (businessId: string) => void;
 };
 
-export default function ServiceCard({
-  service,
-  setSelectedServices,
-  selectedServices,
-  handleChat,
-}: Props) {
-  const toggleFavorite = (serviceId: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(serviceId)
-        ? prev.filter((id) => id !== serviceId)
-        : [...prev, serviceId]
-    );
-  };
-
+export default function ServiceCard({ service, handleChat }: Props) {
   function formatDeliveryTime(days: number) {
-    if (days === 0) return "Not specified";
-    if (days <= 1) return "Same day";
+    console.log(days);
+
+    if (!days) return "Not specified";
+    if (days === 1) return "Same day";
     if (days <= 3) return "1-3 days";
     if (days <= 7) return "1 week";
     return "2+ weeks";
@@ -55,12 +43,12 @@ export default function ServiceCard({
     businessAddress,
     priceRange,
     businessDescription,
-    verified,
     logo,
     username,
     businessName,
     deliveryTime,
     averageRating,
+    verifiedBusiness,
   } = service;
   const allReviews = reviews?.flatMap((r) => r.comment).length || 0;
 
@@ -89,19 +77,9 @@ export default function ServiceCard({
             className="w-full h-40 sm:h-48 md:h-52 object-cover group-hover:scale-105 transition-transform duration-300"
           />
         )}
-        <button
-          onClick={() => toggleFavorite(_id)}
-          className={`absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full transition-colors ${
-            selectedServices.includes(_id)
-              ? "bg-red-500 text-white"
-              : "bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white"
-          }`}
-        >
-          <Heart
-            className="w-4 h-4 sm:w-5 sm:h-5"
-            fill={selectedServices.includes(_id) ? "white" : "none"}
-          />
-        </button>
+        <div className={`absolute top-3 right-3 sm:top-4 sm:right-4`}>
+          <Favorites businessId={_id} showText={false} variant="compact" />
+        </div>
       </div>
 
       {/* Content Section */}
@@ -111,7 +89,7 @@ export default function ServiceCard({
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight pr-2">
             {businessName}
           </h3>
-          {verified && (
+          {verifiedBusiness && (
             <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
           )}
         </div>
@@ -127,6 +105,7 @@ export default function ServiceCard({
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3">
           <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
+
           <span className="text-xs sm:text-sm font-medium text-gray-900">
             {averageRating || 0}
           </span>

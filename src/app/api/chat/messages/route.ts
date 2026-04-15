@@ -8,7 +8,6 @@ import { authOptions } from "@/lib/auth/options";
 export async function GET(req: Request) {
     await connectToDatabase();
 
-
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,22 +16,36 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const recipientId = searchParams.get("recipientId");
+        const page = parseInt(searchParams.get("page") || "1", 10);
+        const limit = parseInt(searchParams.get("limit") || "20", 10);
 
         if (!recipientId) {
             return NextResponse.json({ error: "Missing recipientId" }, { status: 400 });
         }
 
-        const messages = await Message.find({
+        const query = {
             $or: [
                 { sender: session.user.id, recipient: recipientId },
                 { sender: recipientId, recipient: session.user.id },
             ],
-        })
+        };
+
+        const total = await Message.countDocuments(query);
+        const messages = await Message.find(query)
             .populate("sender", "fullName logo")
             .populate("recipient", "fullName logo")
-            .sort({ createdAt: 1 });
+            .sort({ createdAt: -1 }) // newest first
+            .skip((page - 1) * limit)
+            .limit(limit);
 
-        return NextResponse.json(messages);
+        return NextResponse.json({
+            messages,
+            pagination: {
+                total,
+                page,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
     } catch (error) {
         console.error("Error fetching messages:", error);
         return NextResponse.json({ error: "Error fetching messages" }, { status: 500 });

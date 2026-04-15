@@ -1,18 +1,19 @@
-import { AddReviewProps, AnyUser, BusinessReviewHelpfulProps, BusinessReviewsProps, ProductsItem, SessionUser } from '../../../../types';
+import { AddReviewProps, AnyUser, BusinessReviewHelpfulProps, BusinessReviewsProps, SessionUser } from '../../../../types';
 import { useUserDashboardStore } from '../store';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMessageModalStore } from '@/shared/store/useMessageModalStore';
 import addReview from '../api/addReview';
 import toggleUserHelpful from '../api/toggleUserHelpful';
 import getUserReview from '../api/getUserReview';
 import getBusinessReview from '../api/getBusinessReview';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BASEURL } from '@/shared/constants/url';
+import slugify from '@/shared/utils/slugify';
 
 export default function useUserDashboardActions() {
   const router = useRouter()
   const { setComments, setIsEditable, setNewRating, setNewComment, setSelectedImageIndex, newComment, newRating, setCopied } = useUserDashboardStore();
+  const queryClient = useQueryClient();
 
   const submitReview = useMutation<{
     message: string;
@@ -31,8 +32,50 @@ export default function useUserDashboardActions() {
     },
   });
 
-  const helpfulToggle = useMutation<{ helpful: BusinessReviewHelpfulProps; message: string }, Error, { businessId: string; reviewId: string; userId: string; }>({
+  const helpfulToggle = useMutation<
+    { helpful: BusinessReviewHelpfulProps; message: string },
+    Error,
+    { businessId: string; reviewId: string; userId: string }, { previousComments: BusinessReviewsProps[] }
+  >({
     mutationFn: toggleUserHelpful,
+    // optimistic update
+    onMutate: async ({ reviewId, userId }) => {
+      await queryClient.cancelQueries({ queryKey: ["businessReviews"] });
+
+      const previousComments = useUserDashboardStore.getState().comments;
+
+      useUserDashboardStore.getState().setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === reviewId
+            ? {
+              ...comment,
+              helpful: {
+                ...comment.helpful,
+                voters: comment.helpful?.voters?.includes(userId)
+                  ? comment.helpful.voters.filter((id) => id !== userId)
+                  : [...(comment.helpful?.voters || []), userId],
+                count:
+                  (comment.helpful?.count || 0) +
+                  (comment.helpful?.voters?.includes(userId) ? -1 : 1),
+              },
+            }
+            : comment
+        )
+      );
+
+      return { previousComments };
+    },
+    onError: (err, _vars, context) => {
+      // rollback if API fails
+      if (context?.previousComments) {
+        useUserDashboardStore.getState().setComments(context.previousComments);
+      }
+
+    },
+    onSettled: () => {
+      // optionally refetch actual server state to sync
+      queryClient.invalidateQueries({ queryKey: ["businessReviews"] });
+    },
   });
 
 
@@ -67,9 +110,9 @@ export default function useUserDashboardActions() {
   //   );
   // };
 
-  const handleViewItem = (itemId?: string) => {
-    if (!itemId) return;
-    router.push(`/items/${itemId}`);
+  const handleViewItem = (itemId?: string, itemTitle?: string) => {
+    if (!itemId || !itemTitle) return;
+    router.push(`/items/${slugify(itemTitle)}-${itemId}`);
   };
 
   const handleChatClick = (user: AnyUser) => {
@@ -95,22 +138,28 @@ export default function useUserDashboardActions() {
     });
   }
 
+  // const handleToggleHelpFul = ({ reviewId, businessId, userId }: { reviewId: string, businessId: string, userId: string }) => {
+
+  //   if (!reviewId || !businessId || !userId) return
+  //   helpfulToggle.mutate({ reviewId, businessId, userId }, {
+  //     onSuccess: (data) => {
+  //       setComments((prev) =>
+  //         prev.map((comment) =>
+  //           comment._id === reviewId
+  //             ? { ...comment, helpful: data.helpful }
+  //             : comment
+  //         )
+  //       )
+  //     }
+  //   })
+
+  // }
+
   const handleToggleHelpFul = ({ reviewId, businessId, userId }: { reviewId: string, businessId: string, userId: string }) => {
+    if (!reviewId || !businessId || !userId) return;
+    helpfulToggle.mutate({ reviewId, businessId, userId });
+  };
 
-    if (!reviewId || !businessId || !userId) return
-    helpfulToggle.mutate({ reviewId, businessId, userId }, {
-      onSuccess: (data) => {
-        setComments((prev) =>
-          prev.map((comment) =>
-            comment._id === reviewId
-              ? { ...comment, helpful: data.helpful }
-              : comment
-          )
-        )
-      }
-    })
-
-  }
 
   const fetchInitialData = ({ user, session }: { user: AnyUser, session: SessionUser }) => {
     try {
@@ -135,6 +184,7 @@ export default function useUserDashboardActions() {
       alert("Failed to copy link");
     }
   }
+
 
   return { submitReview, helpfulToggle, profileReview, userReview, handleViewItem, handleChatClick, openImageModal, router, handleSubmitComment, handleToggleHelpFul, fetchInitialData, handleCopy }
 }

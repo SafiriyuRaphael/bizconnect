@@ -1,12 +1,11 @@
 import { useCallback, useMemo } from "react";
-import { useUserDashboardStore } from "@/app/[businessprofile]/store";
 import useCollections from "@/shared/hooks/useCollections";
 import { Heart } from "lucide-react";
 import { useTailwindBreakpoints } from "@/shared/hooks/useWindowScreenSize";
 
 interface FavoritesProps {
   showText?: boolean;
-  businessId: string;
+  businessId?: string;
   variant?: "default" | "compact" | "floating";
   disabled?: boolean;
   type?: "favorite" | "wishlist";
@@ -21,6 +20,7 @@ export default function Favorites({
 }: FavoritesProps) {
   const { isSm } = useTailwindBreakpoints();
   const { toggleFavorite, collections } = useCollections();
+  if (!businessId) return null;
 
   const isFavorited = useMemo(
     () => collections?.some((c) => c.refId === businessId) ?? false,

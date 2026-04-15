@@ -35,29 +35,255 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(5deg);
-  }
-}
-
-@keyframes spin {
+@keyframes orbit {
   from {
-    transform: rotate(0deg);
+    transform: rotate(0deg) translateX(24px) rotate(0deg);
+    opacity: 0.4;
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(360deg) translateX(24px) rotate(-360deg);
+    opacity: 1;
   }
 }
 
-.thin-scroll {
-  scrollbar-width: thin;
+@keyframes bars {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
-.hide-scroll {
-  scrollbar-width: none;
+@keyframes puzzlePiece {
+  0%,
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1) rotate(90deg);
+    opacity: 1;
+  }
+}
+
+@keyframes lock-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(2px) rotate(1deg);
+  }
+}
+@keyframes lock-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes lock-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+@keyframes lock-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-12deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-8deg);
+  }
+}
+@keyframes ping-security {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+@keyframes ping-security-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+@keyframes barrier-flash {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+@keyframes barrier-flash-delayed {
+  0%,
+  30% {
+    opacity: 0.2;
+  }
+  50%,
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+@keyframes barrier-flash-slow {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+@keyframes gate-close {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.8);
+  }
+}
+@keyframes gate-close-delayed {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.9);
+  }
+}
+@keyframes blink-warning {
+  0%,
+  50% {
+    opacity: 1;
+    background-color: rgb(239 68 68);
+  }
+  51%,
+  100% {
+    opacity: 0.4;
+    background-color: rgb(185 28 28);
+  }
+}
+@keyframes float-bg-1 {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+  33% {
+    transform: translate(20px, -20px);
+  }
+  66% {
+    transform: translate(-15px, -10px);
+  }
+}
+@keyframes float-bg-2 {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(-25px, 15px);
+  }
+}
+@keyframes float-bg-3 {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(15px, -25px);
+  }
+  75% {
+    transform: translate(-20px, -15px);
+  }
+}
+@keyframes float-bg-4 {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(18px, -10px);
+  }
+}
+
+.animate-lock-shake {
+  animation: lock-shake 3s ease-in-out infinite;
+}
+.animate-lock-bounce {
+  animation: lock-bounce 2s ease-in-out infinite 0.5s;
+}
+.animate-lock-pulse {
+  animation: lock-pulse 2.5s ease-in-out infinite 1s;
+}
+.animate-lock-float {
+  animation: lock-float 3s ease-in-out infinite 1.5s;
+}
+.animate-ping-security {
+  animation: ping-security 2s ease-out infinite;
+}
+.animate-ping-security-slow {
+  animation: ping-security-slow 3s ease-out infinite;
+}
+.animate-barrier-flash {
+  animation: barrier-flash 1.5s linear infinite;
+}
+.animate-barrier-flash-delayed {
+  animation: barrier-flash-delayed 2s linear infinite;
+}
+.animate-barrier-flash-slow {
+  animation: barrier-flash-slow 2.5s linear infinite;
+}
+.animate-gate-close {
+  animation: gate-close 2s ease-in-out infinite;
+}
+.animate-gate-close-delayed {
+  animation: gate-close-delayed 2.2s ease-in-out infinite;
+}
+.animate-blink-warning {
+  animation: blink-warning 1s ease-in-out infinite;
+}
+.animate-float-bg-1 {
+  animation: float-bg-1 18s ease-in-out infinite;
+}
+.animate-float-bg-2 {
+  animation: float-bg-2 15s ease-in-out infinite;
+}
+.animate-float-bg-3 {
+  animation: float-bg-3 22s ease-in-out infinite;
+}
+.animate-float-bg-4 {
+  animation: float-bg-4 16s ease-in-out infinite;
 }

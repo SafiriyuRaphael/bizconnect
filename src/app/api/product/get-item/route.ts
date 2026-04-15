@@ -10,43 +10,51 @@ export async function GET(req: NextRequest) {
         const user = session?.user?.id;
 
         if (!user) {
-            return NextResponse.json({ message: 'Unauthorized', success: false }, { status: 401 });
+            return NextResponse.json(
+                { message: 'Unauthorized', success: false },
+                { status: 401 }
+            );
         }
+
 
         const { searchParams } = new URL(req.url);
         const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "20");
+        const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20"), 1), 100);
         const skip = (page - 1) * limit;
-
         const userId = searchParams.get('id');
         const searchQuery = searchParams.get("q") || "";
         const filterBy = searchParams.get("filterBy") || "all";
         const sortBy = searchParams.get("sortBy") || "createdAt";
 
+        if (!userId) {
+            return NextResponse.json({ message: "Missing user ID", success: false }, { status: 400 });
+        }
+
         await connectToDatabase();
 
-        // Base query
+        // ✅ Build query properly
         const query: any = { userId };
 
-        // Search filter
+        // ✅ Search across title, description, tags
         if (searchQuery) {
             query.$or = [
                 { title: { $regex: searchQuery, $options: "i" } },
                 { description: { $regex: searchQuery, $options: "i" } },
+                { tags: { $in: [new RegExp(searchQuery, "i")] } }
             ];
         }
 
-        // Availability / type filters
+        // ✅ Apply filters
         if (filterBy === "product") query.type = "product";
         if (filterBy === "service") query.type = "service";
         if (filterBy === "available") query.isAvailable = true;
         if (filterBy === "unavailable") query.isAvailable = false;
 
-        // Sorting
-        let sort: any = {};
+        // ✅ Sorting
+        const sort: Record<string, 1 | -1> = {};
         switch (sortBy) {
             case "name":
-                sort.title = 1; // alphabetical
+                sort.title = 1;
                 break;
             case "price-low":
                 sort.price = 1;
@@ -58,38 +66,51 @@ export async function GET(req: NextRequest) {
                 sort.isAvailable = -1;
                 break;
             default:
-                sort.createdAt = -1; // latest first
+                sort.createdAt = -1;
         }
 
-        // Query DB
-        const [items, total, active, escrow, prices] = await Promise.all([
+
+        const [items, totalFiltered, totalItems, active, escrow, totalProducts, totalServices] = await Promise.all([
             Item.find(query).sort(sort).skip(skip).limit(limit).lean(),
+            Item.countDocuments(query),
             Item.countDocuments({ userId }),
             Item.countDocuments({ userId, isAvailable: true }),
             Item.countDocuments({ userId, useEscrow: true }),
-            Item.find({ userId }).select("price").lean(),
+            Item.countDocuments({ userId, type: "product" }),
+            Item.countDocuments({ userId, type: "service" }),
         ]);
 
-        const totalPrice = prices.reduce((sum, i) => sum + (i.price || 0), 0);
-        const avgPrice = prices.length > 0 ? totalPrice / prices.length : 0;
+        const priceStats = await Item.aggregate([
+            { $match: query },
+            { $group: { _id: null, totalPrice: { $sum: "$price" }, avgPrice: { $avg: "$price" } } }
+        ]);
+
+        const { totalPrice = 0, avgPrice = 0 } = priceStats[0] || {};
 
         return NextResponse.json({
             items,
             pagination: {
                 page,
                 limit,
-                totalPages: Math.ceil(total / limit),
-                total,
+                totalPages: Math.ceil(totalFiltered / limit),
+                total: totalFiltered,
             },
             stats: {
-                totalItems: total,
+                totalItems,
+                filteredItems: totalFiltered,
                 activeItems: active,
                 avgPrice: Math.round(avgPrice),
+                totalPrice,
                 escrowEnabled: escrow,
+                totalProducts,
+                totalServices
             },
         });
     } catch (error) {
         console.error('[USER_ITEMS_ERROR]', error);
-        return NextResponse.json({ message: 'Failed to fetch user items', success: false }, { status: 500 });
+        return NextResponse.json(
+            { message: 'Failed to fetch user items', success: false },
+            { status: 500 }
+        );
     }
 }

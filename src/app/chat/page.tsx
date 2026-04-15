@@ -1,9 +1,12 @@
 import { Suspense } from "react";
-import BizConnectChat from "./ChatPage"; 
+import BizConnectChat from "./ChatPage";
+import Loader from "@/shared/components/ui/Loader";
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={<Loader fullScreen text="Loading chats ..." variant="bars" />}
+    >
       <BizConnectChat />
     </Suspense>
   );

@@ -29,7 +29,7 @@ export default function FilterSidebar({
   selectedRating,
   setCurrentPage,
   setSelectedCategory,
-  setShowMobileFilters
+  setShowMobileFilters,
 }: Props) {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -158,10 +158,10 @@ export default function FilterSidebar({
             </label>
             <div className="space-y-2">
               {[
-                { time: "Same day", value: 0 },
+                { time: "Same day", value: 1 },
                 { time: "1-3 days", value: 3 },
                 { time: "1 week", value: 7 },
-                { time: "2+ weeks", value: 1000 },
+                { time: "2+ weeks", value: 100000000000000 },
               ].map((time) => (
                 <label
                   key={time.time}

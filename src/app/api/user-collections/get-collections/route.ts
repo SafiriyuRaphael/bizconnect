@@ -11,7 +11,7 @@ export async function GET(
         await connectToDatabase()
 
         const session = await getServerSession(authOptions)
-        if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        if (!session) return NextResponse.json({ message: "Unauthorized", success: false }, { status: 401 });
 
         const userId = session?.user.id
 
@@ -23,7 +23,7 @@ export async function GET(
     } catch (err: any) {
         console.error("Error fetching favorites:", err)
         return NextResponse.json(
-            { error: "Failed to fetch favorites" },
+            { message: "Failed to fetch favorites", success: false },
             { status: 500 }
         )
     }

@@ -21,7 +21,7 @@ export default function BizconnectLogin() {
   } = useLogin();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 pt-28">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 sm:pt-28">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">

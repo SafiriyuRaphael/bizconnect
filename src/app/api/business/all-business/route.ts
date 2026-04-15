@@ -1,11 +1,26 @@
 import { NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Business } from '@/model/Business';
+import { Item } from '@/model/Item';
+import User from '@/model/User';
+import { getServerSession } from "next-auth"; // if you’re using next-auth
+import { AnyUser } from '../../../../../types';
 
 export async function GET(req: Request) {
     try {
         await connectToDatabase();
         const { searchParams } = new URL(req.url);
+
+        // Session / logged-in user
+        const session = await getServerSession();
+        let userLocation: string | null = null;
+
+        if (session?.user?.email) {
+            const user = await User.findOne({ email: session.user.email }).lean<AnyUser>();
+            if (user?.deliveryAddress || user?.businessAddress) {
+                userLocation = user.deliveryAddress || user.businessAddress || null;
+            }
+        }
 
         const category = searchParams.get('category') || null;
         const search = searchParams.get('search') || "";
@@ -19,45 +34,58 @@ export async function GET(req: Request) {
 
         // Build filter
         const filter: any = {};
-
         if (category && category !== "all") {
             filter.businessCategory = category;
         }
 
         if (deliveryTime && deliveryTime !== 0) {
-            filter.deliveryTime = deliveryTime;
+            filter.deliveryTime = { $lte: deliveryTime };
         }
 
         if (search) {
             filter.$or = [
                 { businessName: { $regex: search, $options: "i" } },
-                { username: { $regex: search, $options: "i" } }
+                { username: { $regex: search, $options: "i" } },
+                { businessDescription: { $regex: search, $options: "i" } },
+                { businessAddress: { $regex: search, $options: "i" } },
             ];
+
+            //  Find businesses by item name OR tags
+            const items = await Item.find({
+                $or: [
+                    { title: { $regex: search, $options: "i" } },
+                    { tags: { $regex: search, $options: "i" } },
+                ]
+            }).distinct("userId");
+
+            if (items.length > 0) {
+                filter.$or.push({ _id: { $in: items } });
+            }
         }
 
         if (!isNaN(rating) && rating > 0) {
             filter["reviews.rating"] = { $gte: rating };
         }
 
-        // Add price range filtering if query includes it
+        // Price range filtering
         const minPrice = parseFloat(searchParams.get("minPrice") || "0");
         const maxPrice = parseFloat(searchParams.get("maxPrice") || "1000000");
 
-        filter["priceRange.min"] = { $lte: maxPrice }; // business min price less than filter max
-        filter["priceRange.max"] = { $gte: minPrice }; // business max price more than filter min
+        filter["priceRange.min"] = { $lte: maxPrice };
+        filter["priceRange.max"] = { $gte: minPrice };
         filter.deleted = { $ne: true };
 
-        // Sorting
+        // Sorting logic
         let sortOption: any = {};
         switch (sort) {
             case "newest":
                 sortOption.createdAt = -1;
                 break;
             case "rating":
-                sortOption["averageRating"] = -1; // We'll calculate this later
+                sortOption["averageRating"] = -1;
                 break;
             case "price-low":
-                sortOption["priceRange.min"] = 1; // Must convert priceRange to number
+                sortOption["priceRange.min"] = 1;
                 break;
             case "price-high":
                 sortOption["priceRange.max"] = -1;
@@ -69,17 +97,40 @@ export async function GET(req: Request) {
                 sortOption.createdAt = -1;
         }
 
-        const total = await Business.countDocuments(filter);
-
-        // Pipeline to calculate rating & price for sorting
-        const entrepreneurs = await Business.aggregate([
+        // Pipeline
+        let pipeline: any[] = [
             { $match: filter },
             {
                 $addFields: {
                     averageRating: { $avg: "$reviews.rating" },
+                    relevance: search ? {
+                        $cond: [
+                            { $regexMatch: { input: "$businessName", regex: search, options: "i" } },
+                            2,
+                            {
+                                $cond: [
+                                    { $regexMatch: { input: "$businessDescription", regex: search, options: "i" } },
+                                    1,
+                                    0
+                                ]
+                            }
+                        ]
+                    } : 0,
+                    locationBoost: userLocation ? {
+                        $cond: [
+                            { $regexMatch: { input: "$businessAddress", regex: userLocation, options: "i" } },
+                            5,
+                            0
+                        ]
+                    } : 0
                 }
             },
-            { $sort: sortOption },
+            {
+                $addFields: {
+                    totalScore: { $add: ["$relevance", "$locationBoost"] }
+                }
+            },
+            { $sort: sort === "best" ? { totalScore: -1, averageRating: -1 } : sortOption },
             { $skip: skip },
             { $limit: limit },
             {
@@ -103,12 +154,15 @@ export async function GET(req: Request) {
                     createdAt: 1,
                     updatedAt: 1,
                     displayPics: 1,
+                    totalScore: 1
                 }
             }
-        ]);
+        ];
+
+        const total = await Business.countDocuments(filter);
+        const entrepreneurs = await Business.aggregate(pipeline);
 
         return NextResponse.json({ entrepreneurs, status: "success", total }, { status: 200 });
-
     } catch (error) {
         console.error('Entrepreneur error:', error);
         return NextResponse.json(
@@ -122,4 +176,3 @@ export async function GET(req: Request) {
         );
     }
 }
-

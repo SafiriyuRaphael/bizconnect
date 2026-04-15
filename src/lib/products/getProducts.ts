@@ -7,7 +7,6 @@ export default async function getProducts({ signal }: { signal?: AbortSignal }) 
         endpoint: '/api/product/overview',
         method: 'GET',
         signal,
-        requiresAuth: true,
     });
     return response.data;
 }

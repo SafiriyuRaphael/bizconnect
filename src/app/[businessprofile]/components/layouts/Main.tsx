@@ -2,48 +2,31 @@ import generateDefaultLogoDataUrl from "@/shared/utils/generateDefaultLogoDataUr
 import {
   Building,
   Calendar,
-  CheckCircle,
   Clock,
-  CreditCard,
   DollarSign,
   Edit2,
   ExternalLink,
-  Eye,
   Flag,
   Globe,
   Heart,
   ImageIcon,
   Mail,
   MapPin,
-  MessageCircle,
   Package,
   Phone,
   Send,
-  Shield,
-  ShoppingBag,
-  ShoppingCart,
   StarIcon,
-  Tag,
-  Users,
-  XCircle,
 } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 import React from "react";
 import RenderRatingInput from "../composites/RenderRatingInput";
 import Loader from "@/shared/components/ui/Loader";
-import formatPrice from "@/shared/utils/formatPrice";
 import { useUserDashboardStore } from "../../store";
-import {
-  AnyUser,
-  ProductItemsResponse,
-  SessionUser,
-} from "../../../../../types";
+import { SessionUser } from "../../../../../types";
 import formatDate from "@/lib/static/formatDate";
 import RenderStars from "../composites/RenderStars";
 import useUserDashboardActions from "../../hooks";
-import { useProductStore } from "@/shared/store/useProductsStore";
-import PaymentModal from "@/shared/components/modal/Payment";
 import ProductGrid from "@/app/[businessprofile]/components/composites/ProductsItem";
 import useProductsApi from "@/app/profile/[usersId]/products/hooks/useProductsApi";
 
@@ -69,6 +52,7 @@ export default function Main({ session }: Props) {
     helpfulToggle,
     handleSubmitComment,
     handleToggleHelpFul,
+    userReview
   } = useUserDashboardActions();
 
   const { fetchedItems, isFetchingItems } = useProductsApi();
@@ -80,7 +64,7 @@ export default function Main({ session }: Props) {
   return (
     <div className="lg:col-span-2 space-y-6">
       {/* Business Items Section - Only for businesses */}
-      {user.userType === "business" && !isFetchingItems && (
+      {user.userType === "business" && (
         <div className="bg-white rounded-2xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900 flex items-center">
@@ -92,7 +76,9 @@ export default function Main({ session }: Props) {
             </span>
           </div>
 
-          {fetchedItems?.stats.totalItems === 0 || !fetchedItems ? (
+          {/* <Loader size="lg" text="Checking business items" variant="bars" /> */}
+
+          {fetchedItems?.stats.totalItems === 0 && !isFetchingItems ? (
             <div className="text-center py-12">
               <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 text-lg">No items listed yet</p>
@@ -101,12 +87,9 @@ export default function Main({ session }: Props) {
               </p>
             </div>
           ) : (
-            <ProductGrid items={fetchedItems?.items} />
+            <ProductGrid />
           )}
         </div>
-      )}
-      {user.userType === "business" && isFetchingItems && (
-        <Loader size="lg" text="Checking business items" variant="bars" />
       )}
 
       {/* Business Gallery */}
@@ -302,7 +285,7 @@ export default function Main({ session }: Props) {
                 {isEditable ? (
                   <button
                     onClick={() => handleSubmitComment({ session, user })}
-                    disabled={submitReview.isPending || !newComment.trim()}
+                    disabled={submitReview.isPending || !newComment.trim() || userReview.isPending}
                     className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2 text-sm sm:text-base"
                   >
                     <Send className="w-4 h-4" />
@@ -354,6 +337,7 @@ export default function Main({ session }: Props) {
                             type: "thumb",
                             source: true,
                           }}
+                          priority={true}
                         />
                       ) : (
                         <Image
@@ -362,6 +346,7 @@ export default function Main({ session }: Props) {
                           width={48}
                           height={48}
                           className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200"
+                          priority={true}
                         />
                       )}
                       <div className="flex-1 min-w-0">

@@ -1,8 +1,12 @@
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Item } from "@/model/Item";
-import { Business } from "@/model/Business";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import { AnyUser, ProductsItemsPageProps } from "../../../../../types";
+
+type ItemWithUser = ProductsItemsPageProps & {
+    userId?: AnyUser | null;
+};
 
 export async function GET(req: Request) {
     try {
@@ -12,19 +16,20 @@ export async function GET(req: Request) {
         const id = searchParams.get("id");
 
         if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return NextResponse.json({ error: "Invalid or missing item ID." }, { status: 400 });
+            return NextResponse.json({ message: "Invalid or missing item ID.", success: false }, { status: 400 });
         }
 
-        const item: any = await Item.findById(id)
+        const item = await Item.findById(id)
             .populate({
                 path: "userId",
                 select: "logo fullName businessName reviews username email verified",
+                match: { deleted: false },
                 model: "Business",
             })
-            .lean();
+            .lean<ItemWithUser>();
 
         if (!item) {
-            return NextResponse.json({ error: "Item not found." }, { status: 404 });
+            return NextResponse.json({ message: "Item not found.", success: false }, { status: 404 });
         }
 
         const user = item.userId;
@@ -40,9 +45,9 @@ export async function GET(req: Request) {
             logo: user?.logo || "",
             fullName: user?.fullName || "",
             businessName: user?.businessName || "",
-            username: user.username || "",
-            email: user.email || "",
-            verified: user.verified || "",
+            username: user?.username || "",
+            email: user?.email || "",
+            verified: user?.verified || "",
             averageRating: avgRating,
             totalReviews,
         };
@@ -50,6 +55,6 @@ export async function GET(req: Request) {
         return NextResponse.json({ item: { ...item, user: userInfo } }, { status: 200 });
     } catch (error) {
         console.error("Failed to fetch item:", error);
-        return NextResponse.json({ error: "Server error" }, { status: 500 });
+        return NextResponse.json({ message: "Failed to fetch item", success: false }, { status: 500 });
     }
 }

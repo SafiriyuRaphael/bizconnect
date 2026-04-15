@@ -19,6 +19,9 @@ import { useRouter } from "next/navigation";
 import { useProductStore } from "@/shared/store/useProductsStore";
 import PaymentModal from "@/shared/components/modal/Payment";
 import formatPrice from "@/shared/utils/formatPrice";
+import Image from "next/image";
+import { CldImage } from "next-cloudinary";
+import Favorites from "@/shared/components/ui/Favorites";
 
 const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
   const router = useRouter();
@@ -33,10 +36,31 @@ const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
     fullName: productItem.user.businessName,
   };
 
-  if (!productItem) return null;
-
-  console.log("Product Item:", productItem);
+  const handleShare = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/item/${productItem._id}`;
+      const shareText = `🔥 Check this out!  
+  ${productItem.type}: ${productItem.title}  
   
+  Tap the link to see more 👉`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: productItem.title,
+          text: shareText,
+          url: shareUrl,
+        });
+      } else {
+        // fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareUrl);
+        alert("✅ Link copied! Share it anywhere.");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
+  if (!productItem) return null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,29 +69,37 @@ const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative group">
-              {productItem.media ? (
-                <img
-                  src={
-                    productItem.media[currentImageIndex]?.url ||
-                    "/fallbackproduct.png"
-                  }
+              {productItem.media && productItem.media?.length > 0 ? (
+                <CldImage
+                  src={productItem.media[currentImageIndex]?.url}
+                  width={1000}
+                  height={1000}
                   alt={productItem.title}
                   className="w-full h-96 lg:h-[500px] object-cover rounded-2xl"
                 />
               ) : (
-                <img
+                <Image
                   src={"/fallbackproduct.png"}
                   alt={productItem.title}
+                  width={1000}
+                  height={1000}
                   className="w-full h-96 lg:h-[500px] object-cover rounded-2xl"
                 />
               )}
-              <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors">
-                <Heart className="w-5 h-5 text-gray-600" />
-              </button>
+              <div className="absolute top-4 right-4 ">
+                {/* <Heart className="w-5 h-5 text-gray-600" />
+                 */}
+                <Favorites
+                  businessId={productItem._id}
+                  showText={false}
+                  variant="floating"
+                />
+              </div>
             </div>
 
             <div className="flex gap-2 overflow-x-auto">
               {productItem.media &&
+                productItem.media?.length > 1 &&
                 productItem.media.map((image, index) => (
                   <button
                     key={index}
@@ -78,9 +110,11 @@ const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
                         : "border-gray-200"
                     }`}
                   >
-                    <img
+                    <CldImage
                       src={image.url}
-                      alt=""
+                      alt={image.name}
+                      width={1000}
+                      height={1000}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -216,14 +250,22 @@ const ItemPage = ({ productItem }: { productItem: ProductsItemsPageProps }) => {
                   </button>
                 )}
 
-                <button className="flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transition-colors">
+                <button
+                  className="flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-xl font-semibold hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                  onClick={() =>
+                    router.push(`/chats?recipientId=${productItem.userId}`)
+                  }
+                >
                   <MessageCircle className="w-5 h-5" />
                   Contact Seller
                 </button>
               </div>
 
               <div className="mt-4 flex justify-center">
-                <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
+                <button
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  onClick={handleShare}
+                >
                   <Share2 className="w-4 h-4" />
                   Share this item
                 </button>

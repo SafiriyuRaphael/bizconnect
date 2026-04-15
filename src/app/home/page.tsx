@@ -6,20 +6,25 @@ import {
   Star,
   Users,
   TrendingUp,
-  Globe,
   CheckCircle,
-  PlayCircle,
   MessageSquare,
   BarChart3,
   Sparkles,
-  HomeIcon,
-  Eye,
+  Home,
   Clock,
   Award,
   Target,
   Rocket,
+  DollarSign,
+  ShoppingBag,
+  Bell,
+  Settings,
+  PieChart,
+  Calendar,
+  Package,
+  Eye,
+  MessageCircle,
 } from "lucide-react";
-import Link from "next/link";
 import React from "react";
 
 export default function HomePage() {
@@ -69,23 +74,13 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 mb-12">
-                <Link
-                  href="/signup"
-                  className="group px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3"
-                >
+                <button className="group px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xl font-bold rounded-2xl hover:shadow-2xl hover:shadow-blue-500/30 transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
                   Start Free Today
                   <ArrowRight
                     size={24}
                     className="group-hover:translate-x-2 transition-transform duration-300"
                   />
-                </Link>
-                {/* <button className="group px-10 py-5 bg-white border-2 border-gray-900 text-gray-900 text-xl font-bold rounded-2xl hover:bg-gray-900 hover:text-white transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3">
-                  <PlayCircle
-                    size={24}
-                    className="group-hover:scale-110 transition-transform duration-300"
-                  />
-                  Watch Demo
-                </button> */}
+                </button>
               </div>
 
               {/* Trust Signals */}
@@ -111,101 +106,210 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column - Hero Visual */}
+            {/* Right Column - Services Marketplace Mockup */}
             <div className="relative">
-              {/* Main Dashboard Mockup */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 shadow-2xl border border-gray-200 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="text-white font-bold text-lg">
-                      Dashboard
-                    </div>
+              {/* Services Marketplace Interface */}
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-1 shadow-2xl border border-gray-200 transform rotate-2 hover:rotate-0 transition-transform duration-500 backdrop-blur-sm">
+                {/* Browser-like header */}
+                <div className="bg-gray-100 rounded-t-3xl px-6 py-3 flex items-center gap-2 border-b border-gray-200">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                   </div>
-                  <div className="text-white/80 text-sm">
-                    Welcome back, Business Owner!
+                  <div className="flex-1 bg-white rounded-lg px-4 py-1 mx-4">
+                    <div className="text-xs text-gray-500">
+                      bizconnect.ng/marketplace
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <div className="text-blue-600 mb-2">
-                      <BarChart3 size={20} />
+                <div className="p-6">
+                  {/* Header Section */}
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 mb-6 text-center">
+                    <h3 className="text-white font-bold text-lg mb-2">
+                      Find Services
+                    </h3>
+                    <p className="text-white/80 text-sm mb-4">
+                      Connect with trusted professionals
+                    </p>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 flex items-center gap-2">
+                      <div className="text-white/60 text-xs">🔍</div>
+                      <div className="text-white/60 text-xs flex-1">
+                        What service are you looking for?
+                      </div>
                     </div>
-                    <div className="font-bold text-gray-900">₦250K</div>
-                    <div className="text-gray-600 text-sm">This Month</div>
                   </div>
-                  <div className="bg-green-50 rounded-xl p-4">
-                    <div className="text-green-600 mb-2">
-                      <TrendingUp size={20} />
-                    </div>
-                    <div className="font-bold text-gray-900">+32%</div>
-                    <div className="text-gray-600 text-sm">Growth</div>
-                  </div>
-                </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">
-                        New Order #1234
+                  {/* Categories Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="bg-blue-50 rounded-lg p-3 flex items-center gap-2">
+                      <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <div className="text-white text-xs">👔</div>
                       </div>
-                      <div className="text-gray-600 text-xs">2 minutes ago</div>
+                      <div>
+                        <div className="text-xs font-bold text-gray-900">
+                          Fashion
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          120+ services
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-3 flex items-center gap-2">
+                      <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                        <div className="text-white text-xs">🏠</div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-gray-900">
+                          Home
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          85+ services
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"></div>
-                    <div>
-                      <div className="font-semibold text-gray-900 text-sm">
-                        Customer Message
+
+                  {/* Service Cards */}
+                  <div className="space-y-3">
+                    {/* Service Card 1 */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                      <div className="flex gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                          <div className="text-sm">✂️</div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="font-bold text-gray-900 text-sm">
+                              Hair Salon
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star
+                                size={10}
+                                className="text-yellow-500 fill-current"
+                              />
+                              <span className="text-xs text-gray-600">4.8</span>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 mb-2">
+                            Professional styling services
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs font-bold text-green-600">
+                              From ₦5,000
+                            </div>
+                            <div className="flex items-center">
+                              <div className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <MessageCircle className="w-4 h-4" />
+                              </div>
+                              <div className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                                More Details
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-gray-600 text-xs">5 minutes ago</div>
+                    </div>
+
+                    {/* Service Card 2 */}
+                    <div className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                      <div className="flex gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
+                          <div className="text-sm">🍕</div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="font-bold text-gray-900 text-sm">
+                              Food Delivery
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Star
+                                size={10}
+                                className="text-yellow-500 fill-current"
+                              />
+                              <span className="text-xs text-gray-600">4.9</span>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-600 mb-2">
+                            Fast & reliable delivery
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs font-bold text-green-600">
+                              From ₦500
+                            </div>
+                            <div className="flex items-center">
+                              <div className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                                <MessageCircle className="w-4 h-4" />
+                              </div>
+                              <div className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                                More Details
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats Footer */}
+                  <div className="mt-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-3">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <div className="font-bold text-gray-900 text-sm">
+                          500+
+                        </div>
+                        <div className="text-xs text-gray-600">Services</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900 text-sm">
+                          1000+
+                        </div>
+                        <div className="text-xs text-gray-600">Providers</div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900 text-sm">
+                          5K+
+                        </div>
+                        <div className="text-xs text-gray-600">Users</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating Cards */}
-              <div className="absolute -top-8 -right-8 bg-white rounded-2xl p-4 shadow-xl border border-gray-100 transform rotate-12 hover:rotate-6 transition-transform duration-300">
+              {/* Enhanced Floating Cards */}
+              <div className="absolute -top-8 -right-8 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100 transform rotate-12 hover:rotate-6 transition-transform duration-300 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-2">
                   <Shield size={16} className="text-green-500" />
                   <span className="font-bold text-gray-900 text-sm">
-                    Verified
+                    SSL Secured
                   </span>
                 </div>
-                <div className="text-gray-600 text-xs">100% Secure</div>
+                <div className="text-gray-600 text-xs">Bank-grade security</div>
+                <div className="flex gap-1 mt-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={10}
+                      className="text-yellow-400 fill-current"
+                    />
+                  ))}
+                </div>
               </div>
 
-              <div className="absolute -bottom-8 -left-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-4 text-white shadow-xl transform -rotate-12 hover:-rotate-6 transition-transform duration-300">
-                <div className="font-black text-2xl mb-1">24/7</div>
-                <div className="text-green-100 text-sm">Support</div>
+              <div className="absolute -bottom-8 -left-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-4 text-white shadow-2xl transform -rotate-12 hover:-rotate-6 transition-transform duration-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="font-black text-2xl">24/7</div>
+                  <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
+                </div>
+                <div className="text-green-100 text-sm mb-1">Live Support</div>
+                <div className="text-green-200 text-xs">Available now</div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Social Proof - Logo Wall */}
-      {/* <section className="bg-gray-50 py-16 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-gray-600 font-semibold mb-8 text-lg">
-            Trusted by leading Nigerian businesses
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60">
-            {["Jumia", "Konga", "Paystack", "Flutterwave", "Interswitch"].map(
-              (company, index) => (
-                <div
-                  key={index}
-                  className="text-2xl font-black text-gray-400 hover:text-gray-700 transition-colors duration-300 cursor-pointer"
-                >
-                  {company}
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </section> */}
 
       {/* Features - Problem/Solution */}
       <section className="bg-white py-24 px-6">
@@ -225,22 +329,22 @@ export default function HomePage() {
                 {
                   icon: <Clock size={32} />,
                   title: "Wasted Time",
-                  desc: "Hours spent on manual processes",
+                  desc: "Hours spent on manual processes that could be automated",
                 },
                 {
                   icon: <MessageSquare size={32} />,
                   title: "Poor Communication",
-                  desc: "Lost customers due to delayed responses",
+                  desc: "Lost customers due to delayed responses and poor follow-up",
                 },
                 {
                   icon: <BarChart3 size={32} />,
                   title: "No Insights",
-                  desc: "Flying blind without proper analytics",
+                  desc: "Flying blind without proper analytics and business intelligence",
                 },
               ].map((problem, index) => (
                 <div
                   key={index}
-                  className="bg-red-50 rounded-2xl p-8 border-2 border-red-100"
+                  className="bg-red-50 rounded-2xl p-8 border-2 border-red-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
                 >
                   <div className="text-red-500 mb-4">{problem.icon}</div>
                   <h3 className="text-xl font-black text-gray-900 mb-3">
@@ -271,7 +375,7 @@ export default function HomePage() {
               <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-10 text-white relative overflow-hidden group hover:scale-105 transition-transform duration-300">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 group-hover:scale-150 transition-transform duration-700"></div>
                 <div className="relative z-10">
-                  <HomeIcon size={48} className="mb-6 text-cyan-300" />
+                  <Home size={48} className="mb-6 text-cyan-300" />
                   <h3 className="text-3xl font-black mb-6">Business Owners</h3>
                   <div className="space-y-4 text-left">
                     {[
@@ -289,12 +393,9 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                  <Link
-                    href="/business-signup"
-                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:shadow-lg transition-all duration-300"
-                  >
+                  <button className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300">
                     Start Selling <ArrowRight size={16} />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -320,12 +421,9 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                  <Link
-                    href="/customer-signup"
-                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-green-600 font-bold rounded-xl hover:shadow-lg transition-all duration-300"
-                  >
+                  <button className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-green-600 font-bold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300">
                     Start Shopping <ArrowRight size={16} />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -351,12 +449,9 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                  <Link
-                    href="/about"
-                    className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 font-bold rounded-xl hover:shadow-lg transition-all duration-300"
-                  >
+                  <button className="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 font-bold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300">
                     Learn More <ArrowRight size={16} />
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -379,14 +474,14 @@ export default function HomePage() {
                 icon: <Users size={32} />,
               },
               {
-                number: "₦100k+",
+                number: "₦100M+",
                 label: "Transaction Volume",
                 icon: <TrendingUp size={32} />,
               },
               {
-                number: "10,000+",
+                number: "1000+",
                 label: "Businesses",
-                icon: <HomeIcon size={32} />,
+                icon: <Home size={32} />,
               },
               { number: "99.9%", label: "Uptime", icon: <Shield size={32} /> },
             ].map((stat, index) => (
@@ -428,7 +523,7 @@ export default function HomePage() {
                 role: "CEO, Lagos Fashion House",
                 avatar: "AO",
                 content:
-                  "BizConnect transformed my fashion business. I went from 10 orders per month to 200+ orders. The platform is incredibly easy to use!",
+                  "BizConnect transformed my fashion business. I went from 10 orders per month to 200+ orders. The platform is incredibly easy to use and the support is amazing!",
                 rating: 5,
                 color: "from-blue-500 to-purple-500",
               },
@@ -437,7 +532,7 @@ export default function HomePage() {
                 role: "Owner, Abuja Catering",
                 avatar: "FS",
                 content:
-                  "I love how I can manage everything from one dashboard. Customer communication is seamless and my business has grown 300%!",
+                  "I love how I can manage everything from one dashboard. Customer communication is seamless and my business has grown 300% since joining!",
                 rating: 5,
                 color: "from-green-500 to-cyan-500",
               },
@@ -446,7 +541,7 @@ export default function HomePage() {
                 role: "Electronics Retailer",
                 avatar: "CO",
                 content:
-                  "The analytics features helped me understand my customers better. My conversion rate doubled within 3 months of using BizConnect.",
+                  "The analytics features helped me understand my customers better. My conversion rate doubled within 3 months of using BizConnect. Highly recommended!",
                 rating: 5,
                 color: "from-purple-500 to-pink-500",
               },
@@ -498,29 +593,19 @@ export default function HomePage() {
             Your Business?
           </h2>
           <p className="text-2xl text-blue-100 mb-12 leading-relaxed">
-            Join 50,000+ businesses already growing with BizConnect. Start your
+            Join 5,000+ businesses already growing with BizConnect. Start your
             free account today and see the difference.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-            <Link
-              href="/signup"
-              className="group px-12 py-6 bg-white text-blue-600 text-2xl font-black rounded-2xl hover:shadow-2xl transform hover:scale-110 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
-            >
+            <button className="group px-12 py-6 bg-white text-blue-600 text-2xl font-black rounded-2xl hover:shadow-2xl transform hover:scale-110 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4">
               <Rocket size={28} />
               Start Free Today
               <ArrowRight
                 size={28}
                 className="group-hover:translate-x-3 transition-transform duration-300"
               />
-            </Link>
-            {/* <Link
-              href="/demo"
-              className="px-12 py-6 bg-white/10 backdrop-blur-xl border-2 border-white/30 text-white text-2xl font-black rounded-2xl hover:bg-white/20 transform hover:scale-110 hover:-translate-y-2 transition-all duration-300 flex items-center justify-center gap-4"
-            >
-              <PlayCircle size={28} />
-              Watch Demo
-            </Link> */}
+            </button>
           </div>
 
           <div className="text-center">

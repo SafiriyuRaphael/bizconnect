@@ -8,7 +8,6 @@ export default async function getAllCollections({ signal }: { signal?: AbortSign
     }[]>({
         endpoint: "api/user-collections/get-collections",
         method: "GET",
-        requiresAuth: true,
         signal: signal
     })
 

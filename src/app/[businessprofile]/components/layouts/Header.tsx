@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import RenderStars from "../composites/RenderStars";
-import { AnyUser } from "../../../../../types";
 import { useUserDashboardStore } from "../../store";
 import useUserDashboardActions from "../../hooks";
 import getRatingColor from "@/shared/utils/getRatingColor";
@@ -27,7 +26,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+      <div className="bg-white shadow-sm border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4">

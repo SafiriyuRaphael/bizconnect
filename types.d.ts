@@ -404,6 +404,9 @@ type ProductItemsResponse = {
         activeItems: number
         avgPrice: number
         escrowEnabled: number
+        totalProducts: number
+        totalServices: number
+        filteredItems: number
     },
 }
 
@@ -438,7 +441,8 @@ interface Contact {
     avatar: string;
     online: boolean;
     unread: number;
-    username: string
+    username: string;
+    starred?: boolean
 }
 
 interface CallerProps {
@@ -495,6 +499,9 @@ interface Message {
     callDetails: {
         status: "attempted" | "connected" | "failed" | "rejected" | "ended" | "unavailable";
         callType: "audio" | "video";
+        startedAt?: string
+        endedAt?: string
+        duration?: string
     };
     timestamp: string;
     displayTime: string;

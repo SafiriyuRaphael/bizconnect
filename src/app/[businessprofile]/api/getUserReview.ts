@@ -7,7 +7,6 @@ export default async function getUserReview(review: { businessId: string; userId
         endpoint: `/api/reviews/get-user-review`,
         method: 'POST',
         body: review,
-        requiresAuth: true,
     });
     return response.data;
 }

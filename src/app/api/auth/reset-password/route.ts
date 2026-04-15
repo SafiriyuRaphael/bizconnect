@@ -1,4 +1,3 @@
-// /api/reset-password
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import User from "@/model/User";
 import { hash } from "bcrypt";

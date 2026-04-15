@@ -23,8 +23,8 @@ export default function ProfileImage({ logo, className, user }: Props) {
         <CldImage
           alt={fallbackAlt}
           src={logo}
-          width={40}
-          height={40}
+          width={1000}
+          height={1000}
           className={className}
           crop={{
             type: "thumb",

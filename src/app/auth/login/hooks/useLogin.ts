@@ -16,7 +16,6 @@ export default function useLogin() {
     const [isLoading, setIsLoading] = useState(false);
 
 
-
     const isEmailFormat = (input: string): boolean => {
         return input.includes("@");
     };
@@ -90,7 +89,7 @@ export default function useLogin() {
                     const callbackUrl =
                         searchParams.get("callbackUrl") ||
                         (session?.user?.userRole === "admin" ? "/admin" : "/marketplace");
-                    router.push(callbackUrl)
+                    router.replace(callbackUrl)
                 }
             } catch (_) {
                 setErrors({ general: "Network error. Please check your connection." });

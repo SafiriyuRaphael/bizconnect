@@ -7,7 +7,6 @@ export default async function getBusinessReview(data: { businessId: string }) {
         endpoint: `/api/reviews/get-by-business`,
         method: 'POST',
         body: data,
-        requiresAuth: true,
     });
     return response.data;
 }

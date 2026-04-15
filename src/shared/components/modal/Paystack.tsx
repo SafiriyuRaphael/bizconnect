@@ -78,6 +78,15 @@ const PaystackCheckout = ({
           price: Number(productItem.price),
           quantity,
         });
+        useMessageModalStore.getState().onOpen({
+          title: "Confirming Transaction ⏳",
+          message: "Please wait while we confirm your payment with Paystack...",
+          type: "info",
+          autoClose: false,
+          actions: null,
+          closable: false,
+          showIcon: true,
+        });
         setLoading(false);
       },
       onLoad: (response) => {

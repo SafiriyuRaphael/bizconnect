@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
-      select: false, 
+      select: false,
     },
     fullName: {
       type: String,
@@ -66,9 +66,26 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    verificationToken: {
+      type: String,
+      default: null,
+    },
+    verificationTokenExpiry: {
+      type: Date,
+      default: null,
+    },
     logo: {
       type: String,
       default: ""
+    },
+    starredContacts: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      validate: {
+        validator: function (arr: any[]) {
+          return arr.length <= 3;
+        },
+        message: "You can only star up to 3 contacts.",
+      },
     },
     deleted: {
       type: Boolean,

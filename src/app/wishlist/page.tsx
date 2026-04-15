@@ -141,7 +141,7 @@ const BizConnectFavoritesWishlist = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const formatPrice = (price) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
@@ -149,21 +149,27 @@ const BizConnectFavoritesWishlist = () => {
     }).format(price);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-NG");
   };
 
-  const removeFromFavorites = (businessId) => {
+  const removeFromFavorites = (businessId: string) => {
     setFavorites((prev) =>
       prev.filter((business) => business._id !== businessId)
     );
   };
 
-  const removeFromWishlist = (itemId) => {
+  const removeFromWishlist = (itemId: string) => {
     setWishlist((prev) => prev.filter((item) => item._id !== itemId));
   };
 
-  const BusinessCard = ({ business, onRemove }) => (
+  const BusinessCard = ({
+    business,
+    onRemove,
+  }: {
+    business: any;
+    onRemove: (id: string) => void;
+  }) => (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       <div className="relative">
         <img
@@ -242,7 +248,13 @@ const BizConnectFavoritesWishlist = () => {
     </div>
   );
 
-  const ItemCard = ({ item, onRemove }) => (
+  const ItemCard = ({
+    item,
+    onRemove,
+  }: {
+    item: any;
+    onRemove: (id: string) => void;
+  }) => (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       <div className="relative">
         <img
@@ -283,7 +295,7 @@ const BizConnectFavoritesWishlist = () => {
         </p>
 
         <div className="flex flex-wrap gap-1 mb-3">
-          {item.tags.slice(0, 3).map((tag, index) => (
+          {item.tags.slice(0, 3).map((tag: any, index: number) => (
             <span
               key={index}
               className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"

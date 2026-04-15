@@ -6,6 +6,10 @@ import { Message, Contact, CallerProps, } from "../../../types";
 import getUserById from "@/lib/profile/getUserById";
 import apiService from "@/lib/service/apiService";
 import axios from "axios";
+import fetchContacts from "@/app/chat/api/fetchContacts";
+import { Session } from "next-auth";
+import formatTime from "../utils/formatTime";
+import sortContacts from "@/app/chat/utils/sortContacts";
 
 interface ConnectionsMade {
   from: string;
@@ -24,6 +28,8 @@ interface CallData {
   to?: string;
   offer: any;
   callType: "audio" | "video";
+  startedAt?: string;
+  endedAt?: string;
 }
 
 interface ActivitiesProp {
@@ -36,6 +42,8 @@ interface ActivitiesProp {
 
 
 interface SocketStore {
+  isLoadingMessage: boolean
+  isLoadingInitialMessage: boolean
   socket: Socket | null;
   messages: Message[];
   notifications: Notification[];
@@ -60,9 +68,16 @@ interface SocketStore {
   remoteAudio: HTMLAudioElement | null;
   // ringtone: HTMLAudioElement | null;
   ringtone: HTMLAudioElement | null;
+  setIsLoadingMessage: (isLoadingMessage: boolean) => void;
+  setIsLoadingInitialMessage: (isLoadingMessage: boolean) => void;
   setRingtone: (audio: HTMLAudioElement | null) => void;
   setNotifications: (notifications: Notification[]) => void;
   callData: CallData | null;
+  pagination: {
+    total: number;
+    page: number
+    totalPages: number
+  } | null
 
   initSocket: () => Promise<void>;
   setError: (error: string | null) => void;
@@ -71,7 +86,7 @@ interface SocketStore {
   addPendingIceCandidate: (candidate: RTCIceCandidateInit) => void;
   clearPendingIceCandidates: () => void;
   stopRingtone: () => void;
-  sendCallMessage: (status: string, callType: "video" | "audio", recipientId: string) => void;
+  sendCallMessage: (status: string, callType: "video" | "audio", recipientId: string, startedAt?: string, endedAt?: string) => void;
   setActiveUsers: (users: string[]) => void;
   setActiveCalls: (count: number) => void;
   setIsTyping: (typing: boolean) => void;
@@ -91,16 +106,28 @@ interface SocketStore {
   handleDeclineCall: () => void;
   endCall: () => void;
   startCall: (type: "audio" | "video", userId: string) => Promise<void>;
+  markChatRead: (session: Session, chatUserId: string) => void
   addNotification: (notification: Notification) => void;
   markNotificationRead: (notificationId: string) => void;
   updateNotification: (notificationId: string, updates: Partial<Notification>) => void;
   markAllNotificationsRead: () => Promise<void>
+  setMessages: (message: Message[]) => void
+  prependMessages: (olderMessages: Message[]) => void
+  appendMessages: (olderMessages: Message[]) => void
+  setPagination: (pagination: {
+    total: number;
+    page: number
+    totalPages: number
+  } | null) => void
+  cleanupCall: () => void
 }
 
 export const useSocketStore = create<SocketStore>()(
   devtools((set, get) => ({
     socket: null,
     notifications: [],
+    isLoadingMessage: false,
+    isLoadingInitialMessage: false,
     messages: [],
     contacts: [],
     activeChat: null,
@@ -120,6 +147,7 @@ export const useSocketStore = create<SocketStore>()(
     remoteVideo: null,
     remoteAudio: null,
     ringtone: null,
+    pagination: { page: 1 },
     setRingtone: (audio: HTMLAudioElement | null): void => set({ ringtone: audio }),
     callData: null,
     unreadCount: 0,
@@ -127,6 +155,12 @@ export const useSocketStore = create<SocketStore>()(
     setError: (error) => set({ error }),
     setNotifications: (notifications: Notification[]) => set({ notifications }),
     setActiveChat: (contact) => set({ activeChat: contact }),
+    setPagination: (pagination) => set({ pagination }),
+    setMessages: (messages) => set({ messages }),
+    appendMessages: (newMsgs) =>
+      set((state) => ({ messages: [...state.messages, ...newMsgs] })),
+    prependMessages: (olderMsgs) =>
+      set((state) => ({ messages: [...olderMsgs, ...state.messages] })),
     addPendingIceCandidate: (candidate) =>
       set((state) => ({
         pendingIceCandidates: [...state.pendingIceCandidates, candidate],
@@ -139,7 +173,7 @@ export const useSocketStore = create<SocketStore>()(
         ringtone.currentTime = 0;
       }
     },
-    sendCallMessage: async (status, callType, recipientId) => {
+    sendCallMessage: async (status, callType, recipientId, startedAt, endedAt) => {
       const { socket } = get();
       if (!socket) return;
       const session = await getSession();
@@ -148,16 +182,37 @@ export const useSocketStore = create<SocketStore>()(
         senderId: session.user.id,
         recipientId,
         type: "call",
-        callDetails: { status, callType },
+        callDetails: {
+          startedAt,
+          endedAt: new Date().toISOString(), status, callType
+        },
         timestamp: new Date().toISOString(),
       };
+
       socket.emit("sendMessage", message);
     },
     setActiveUsers: (users) => set({ activeUsers: users }),
+    setIsLoadingMessage: (loading) => set({ isLoadingMessage: loading }),
+    setIsLoadingInitialMessage: (loading) => set({ isLoadingInitialMessage: loading }),
     setActiveCalls: (count) => set({ activeCalls: count }),
     setIsTyping: (typing) => set({ isTyping: typing }),
     setStatus: (status) => set({ status }),
     recentActivities: [],
+    cleanupCall: () => {
+      const { peerConnection, localStream, remoteVideo, remoteAudio } = get();
+
+      if (peerConnection) {
+        peerConnection.close();
+        set({ peerConnection: null });
+      }
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        set({ localStream: null });
+      }
+      get().stopRingtone();
+      if (remoteVideo) remoteVideo.srcObject = null;
+      if (remoteAudio) remoteAudio.srcObject = null;
+    },
     addActivity: (type, message, bgColor) => {
       const newActivity = {
         id: Date.now().toString(),
@@ -178,7 +233,14 @@ export const useSocketStore = create<SocketStore>()(
     setRemoteAudio: (audio) => set({ remoteAudio: audio }),
     setCaller: (caller) => set({ caller }),
     setReceiving: (receiving) => set({ receiving }),
-    setCallStatus: (status) => set({ callStatus: status }),
+    // setCallStatus: (status) => set({ callStatus: status }),
+
+    setCallStatus: (status) => {
+      const current = get().callStatus;
+      if (current === status) return;
+      if (["failed", "ended"].includes(current)) return;
+      set({ callStatus: status });
+    },
     setCallType: (callType) => set({ callType }),
     addNotification: (notification) =>
       set((state) => ({
@@ -205,7 +267,8 @@ export const useSocketStore = create<SocketStore>()(
         set({ error: "No incoming call data available" });
         return;
       }
-      const { from, offer, callType, } = callData;
+
+      const { from, offer, callType, startedAt } = callData;
       try {
         get().stopRingtone();
 
@@ -220,7 +283,7 @@ export const useSocketStore = create<SocketStore>()(
             }
             callerContact = {
               id: userData._id,
-              name: userData.businessName || userData.fullName || "Unknown User",
+              name: userData.businessName || userData.fullName,
               online: false,
               lastMessage: "",
               timestamp: new Date().toISOString(),
@@ -245,7 +308,12 @@ export const useSocketStore = create<SocketStore>()(
             return;
           }
         }
-        setActiveChat(callerContact);
+        // setActiveChat(callerContact);
+
+        if (get().callStatus !== "ringing") {
+          console.warn("Call already cancelled before accept.");
+          return;
+        }
 
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -267,22 +335,40 @@ export const useSocketStore = create<SocketStore>()(
         });
         set({ peerConnection: pc });
 
+        pc.oniceconnectionstatechange = () => {
+          if (pc.iceConnectionState === "connected") {
+            set({ pendingIceCandidates: [] });
+          }
+        };
+
         pc.onicecandidateerror = (event) => {
           console.error("ICE candidate error:", event);
           set({ callStatus: "failed" });
           get().sendCallMessage("failed", callType, from);
         };
 
+        let everConnected = false;
+
         pc.onconnectionstatechange = () => {
-          console.log("Connection state:", pc.connectionState);
-          if (pc.connectionState === "failed") {
-            console.error("WebRTC connection failed");
-            set({ callStatus: "failed" });
-            get().sendCallMessage("failed", callType, from);
-          } else if (pc.connectionState === "connected") {
-            console.log("Call connected at:", new Date().toISOString());
-            set({ callStatus: "connected" });
-            get().sendCallMessage("connected", callType, from);
+
+
+          if (pc.connectionState === "connected") {
+            everConnected = true;
+            const now = new Date();
+
+            set({ callStatus: "connected", callData: { ...callData, startedAt: now.toISOString() } });
+          }
+
+          if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+            console.error("WebRTC connection dropped:", pc.connectionState);
+
+            if (everConnected) {
+              set({ callStatus: "ended" });
+              get().sendCallMessage("ended", callType, from, startedAt, new Date().toISOString());
+            } else {
+              set({ callStatus: "failed" });
+              get().sendCallMessage("failed", callType, from);
+            }
           }
         };
 
@@ -298,7 +384,7 @@ export const useSocketStore = create<SocketStore>()(
         };
 
         pc.ontrack = (event) => {
-          console.log("🎥 Got remote track!", event.streams);
+
           const [remoteStream] = event.streams;
           if (callType === "video" && remoteVideo) {
             remoteVideo.srcObject = remoteStream;
@@ -326,15 +412,22 @@ export const useSocketStore = create<SocketStore>()(
         const pendingCandidates = get().pendingIceCandidates;
         while (pendingCandidates.length) {
           const candidate = pendingCandidates.shift();
+          if (!candidate) continue;
+
           try {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+              get().pendingIceCandidates.push(candidate);
+            }
           } catch (err) {
             console.error("Error adding pending ICE candidate:", err);
           }
         }
-        set({ pendingIceCandidates: [], callData: null });
+        set({ pendingIceCandidates: [] });
       } catch (error) {
         console.error(`Error handling incoming ${callType} call:`, error);
+        get().cleanupCall();
         socket.emit("reject-call", { to: from });
         set({ callStatus: "failed", callType: null, receiving: false, callData: null });
         get().sendCallMessage("failed", callType, from);
@@ -348,12 +441,34 @@ export const useSocketStore = create<SocketStore>()(
       const { from, callType } = callData;
       socket.emit("reject-call", { to: from });
       set({ callStatus: "rejected", callType: null, receiving: false, caller: null, callData: null });
-      get().sendCallMessage("rejected", callType, from);
+      // get().sendCallMessage("rejected", callType, from);
       get().stopRingtone();
     },
 
+
+    markChatRead: (session: Session, chatUserId: string) => {
+      const { socket, activeChat } = get()
+      socket?.emit("markChatSeen", { chatUserId, viewerId: session.user.id });
+
+      set((state) => ({
+        messages: state.messages.map((msg): Message =>
+          msg.sender === activeChat?.id && msg.recipient === session.user.id
+            ? { ...msg, isSeen: true, seenAt: new Date().toISOString() }
+            : msg
+        ),
+        contacts: state.contacts.map((contact): Contact =>
+          contact.id === activeChat?.id ? { ...contact, unread: 0 } : contact
+        ),
+      }));
+    },
+
     endCall: () => {
-      const { peerConnection, localStream, localVideo, remoteVideo, remoteAudio, socket, callType, callData } = get();
+      const { peerConnection, localStream, localVideo, remoteVideo, remoteAudio, socket, callType, callData, } = get();
+      const recipientId = callData?.to || callData?.from
+      if (recipientId) {
+        socket?.emit("end-call", { to: recipientId });
+        if (callType) get().sendCallMessage("ended", callType, recipientId, callData.startedAt, callData.endedAt);
+      }
       if (peerConnection) {
         peerConnection.close();
         set({ peerConnection: null });
@@ -365,11 +480,6 @@ export const useSocketStore = create<SocketStore>()(
       }
       if (localVideo) localVideo.srcObject = null;
       if (remoteVideo) remoteVideo.srcObject = null;
-      const recipientId = callData?.to
-      if (recipientId) {
-        socket?.emit("end-call", { to: recipientId });
-        if (callType) get().sendCallMessage("ended", callType, recipientId);
-      }
       get().stopRingtone();
       set({ callStatus: "ended", callType: null, receiving: false, caller: null, callData: null });
     },
@@ -414,6 +524,14 @@ export const useSocketStore = create<SocketStore>()(
       // setActiveChat(targetContact);
       try {
         set({ callStatus: "ringing", callType: type, callData: { from: session.user.id, to: userId, offer: null, callType: type } })
+        const { ringtone, callData } = get();
+
+        if (ringtone) {
+          ringtone.play().catch((err) => {
+            console.error("Error playing ringtone:", err);
+            set({ error: "Failed to play ringtone. Check audio permissions." });
+          });
+        }
 
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -439,20 +557,56 @@ export const useSocketStore = create<SocketStore>()(
           console.error("ICE candidate error:", event);
           set({ callStatus: "failed" });
           get().sendCallMessage("failed", type, userId);
+          get().cleanupCall()
         };
 
+        let everConnected = false;
+
         pc.onconnectionstatechange = () => {
-          console.log("Connection state:", pc.connectionState);
-          if (pc.connectionState === "failed") {
-            console.error("WebRTC connection failed");
-            set({ callStatus: "failed" });
-            get().sendCallMessage("failed", type, userId);
-          } else if (pc.connectionState === "connected") {
-            console.log("Call connected at:", new Date().toISOString());
-            set({ callStatus: "connected" });
-            get().sendCallMessage("connected", type, userId);
+
+
+          if (pc.connectionState === "connected") {
+            everConnected = true;
+            const now = new Date();
+
+            set({ callStatus: "connected", callData: { ...callData as CallData, startedAt: now.toISOString() } });
           }
+
+          if (pc.connectionState === "failed" || pc.connectionState === "disconnected") {
+            console.error("WebRTC connection dropped:", pc.connectionState);
+
+            if (everConnected) {
+              set({ callStatus: "ended" });
+              get().sendCallMessage("ended", type, userId, callData?.startedAt, new Date().toISOString());
+            } else {
+              set({ callStatus: "failed" });
+              get().sendCallMessage("failed", type, userId);
+            }
+
+            get().cleanupCall();
+          }
+
+          // if (pc.connectionState === "closed") {
+          //   console.log("Peer connection closed");
+          //   set({ callStatus: "ended" });
+          //   get().sendCallMessage("ended", type, userId);
+          //   get().cleanupCall();
+          // }
         };
+
+        // pc.onconnectionstatechange = () => {
+        //   console.log("Connection state:", pc.connectionState);
+        //   if (pc.connectionState === "failed") {
+        //     console.error("WebRTC connection failed");
+        //     set({ callStatus: "failed" });
+        //     get().sendCallMessage("failed", type, userId);
+        //     get().cleanupCall()
+        //   } else if (pc.connectionState === "connected") {
+        //     console.log("Call connected at:", new Date().toISOString());
+        //     set({ callStatus: "connected" });
+        //     // get().sendCallMessage("connected", type, userId);
+        //   }
+        // };
 
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
@@ -466,7 +620,7 @@ export const useSocketStore = create<SocketStore>()(
         };
 
         pc.ontrack = (event) => {
-          console.log("🎥 Got remote track!", event.streams);
+
           const [remoteStream] = event.streams;
           if (type === "video" && remoteVideo) {
             remoteVideo.srcObject = remoteStream;
@@ -481,6 +635,7 @@ export const useSocketStore = create<SocketStore>()(
               console.error("Error playing remote audio:", err);
               set({ callStatus: "failed" });
               get().sendCallMessage("failed", type, userId);
+              get().cleanupCall()
             });
           }
         };
@@ -495,39 +650,30 @@ export const useSocketStore = create<SocketStore>()(
 
         const callTimeout = setTimeout(() => {
           console.error("Call timed out");
-          if (pc) {
-            pc.close();
-            set({ peerConnection: null });
-          }
-          if (stream) {
-            stream.getTracks().forEach((track) => track.stop());
-            set({ localStream: null });
-          }
+          get().cleanupCall()
           set({ callStatus: "ended", callType: null });
           get().sendCallMessage("ended", type, userId);
         }, 120000);
 
+        socket.off("call-queued");
+        socket.off("call-unavailable");
+        socket.off("call-answered");
+        socket.off("call-rejected");
+
         socket.on("call-queued", ({ to, callType }) => {
-          console.log(`Recipient ${to} is offline, call queued`);
+
           set({
             error: `${contacts.find((c) => c.id === to)?.name || "User"
               } is offline, waiting for them to come online...`,
           });
         });
 
+
         socket.on("call-unavailable", async ({ to, callType }) => {
           get().stopRingtone();
           set({ receiving: false });
           clearTimeout(callTimeout);
-          console.log(`Recipient ${to} is offline for ${callType} call`);
-          if (pc) {
-            pc.close();
-            set({ peerConnection: null });
-          }
-          if (stream) {
-            stream.getTracks().forEach((track) => track.stop());
-            set({ localStream: null });
-          }
+          get().cleanupCall()
           set({ callStatus: "unavailable", callType: null });
           get().sendCallMessage("unavailable", callType, userId);
           set({ error: `${contacts.find((c) => c.id === to)?.name || "User"} is offline.` });
@@ -535,27 +681,19 @@ export const useSocketStore = create<SocketStore>()(
 
         socket.on("call-answered", async ({ answer }) => {
           clearTimeout(callTimeout);
-          console.log("✅ Call answered, setting remote description...");
           if (pc) {
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
             set({ callStatus: "connected" });
-            get().sendCallMessage("connected", type, userId);
+            // get().sendCallMessage("connected", type, userId);
           }
+          get().stopRingtone();
         });
 
         socket.on("call-rejected", () => {
           get().stopRingtone();
           set({ receiving: false });
           clearTimeout(callTimeout);
-          console.log("Call was rejected");
-          if (pc) {
-            pc.close();
-            set({ peerConnection: null });
-          }
-          if (stream) {
-            stream.getTracks().forEach((track) => track.stop());
-            set({ localStream: null });
-          }
+          get().cleanupCall()
           set({ callStatus: "rejected", callType: null });
           get().sendCallMessage("rejected", type, userId);
         });
@@ -573,6 +711,11 @@ export const useSocketStore = create<SocketStore>()(
         set({ error: "Session or API URL not configured" });
         return;
       }
+      const oldSocket = get().socket;
+      if (oldSocket) {
+        oldSocket.removeAllListeners();
+        oldSocket.disconnect();
+      }
 
       const socket = io(process.env.NEXT_PUBLIC_API_URL);
       socket.emit("register", session.user.id);
@@ -581,119 +724,125 @@ export const useSocketStore = create<SocketStore>()(
       const ringtone = get().ringtone;
       if (ringtone) ringtone.loop = true;
 
+
+      socket.off("newMessage");
       socket.on("newMessage", (message: Message) => {
-        if (!message.timestamp || typeof message.timestamp !== "string") {
-          console.error("Received message with invalid timestamp:", message);
-          return;
-        }
-        const newMessage = {
+        const { id, sender, recipient, content, file, type, callDetails, timestamp, isSeen } = message;
+
+        const formattedMessage = {
           ...message,
-          isOwn: message.sender === session.user.id,
-          displayTime: new Date(message.timestamp).toLocaleTimeString("en-US", {
+          isOwn: sender === session.user.id,
+          displayTime: new Date(timestamp).toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
             hour12: true,
             timeZone: "Africa/Lagos",
           }),
         };
-        set((state) => ({
-          messages: [...state.messages, newMessage],
-        }));
 
-        set((state) => {
-          const contactExists = state.contacts.find(
-            (c) => c.id === message.sender || c.id === message.recipient
+        const { activeChat } = get();
+
+        if (recipient === session.user.id && sender === activeChat?.id) {
+          set(state => ({
+            messages: [...state.messages, formattedMessage],
+          }));
+        }
+
+        set(state => {
+          const contactIndex = state.contacts.findIndex(
+            c => c.id === sender || c.id === recipient
           );
-          if (
-            !contactExists &&
-            (message.sender === session.user.id ||
-              message.recipient === session.user.id)
-          ) {
-            fetch(
-              `/api/chat/contacts?recipientId=${message.sender === session.user.id
-                ? message.recipient
-                : message.sender
-              }`
-            )
-              .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch new contact");
-                return res.json();
-              })
-              .then((newContact) => {
-                if (newContact.id) {
-                  set((state) => ({
-                    contacts: [
-                      ...state.contacts,
-                      {
-                        ...newContact,
-                        lastMessage:
-                          message.content ||
-                          (message.file
-                            ? message.file.name
-                            : message.type === "call"
-                              ? `${message.callDetails?.callType} call ${message.callDetails?.status}`
-                              : ""),
-                        timestamp: message.timestamp || new Date().toISOString(),
-                        displayTime: new Date(
-                          message.timestamp || Date.now()
-                        ).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                          timeZone: "Africa/Lagos",
-                        }),
-                        unread:
-                          message.recipient === session.user.id && !message.isSeen
-                            ? 1
-                            : 0,
-                      },
-                    ],
-                  }));
-                }
-              })
-              .catch((err) => {
-                console.error("Error fetching new contact:", err);
-                set({ error: "Failed to load new contact" });
-              });
+
+          const lastMessageText =
+            content ||
+            (file
+              ? file.name
+              : type === "call"
+                ? `${callDetails?.callType} call ${callDetails?.status}`
+                : "");
+
+          const displayTime = new Date(timestamp || Date.now()).toLocaleTimeString(
+            "en-US",
+            {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "Africa/Lagos",
+            }
+          );
+
+          const updatedContacts = [...state.contacts];
+          let newContact;
+
+          if (contactIndex === -1) {
+            const recipientId = sender === session.user.id ? recipient : sender;
+
+            fetchContacts(recipientId).then(data => {
+              if (data && !Array.isArray(data) && data.id) {
+                set(state => ({
+                  contacts: [
+                    ...state.contacts,
+                    {
+                      ...data,
+                      lastMessage: lastMessageText,
+                      timestamp: timestamp || new Date().toISOString(),
+                      displayTime,
+                      unread: recipient === session.user.id && !isSeen ? 1 : 0,
+                    },
+                  ],
+                }));
+              }
+            });
+
+            return state;
+          } else {
+            const contact = updatedContacts[contactIndex];
+            const isActive = activeChat?.id === (sender === session.user.id ? recipient : sender);
+
+            newContact = {
+              ...contact,
+              lastMessage: lastMessageText,
+              timestamp: timestamp || new Date().toISOString(),
+              displayTime,
+              unread: isActive
+                ? 0 // reset unread if chat is open
+                : contact.unread + (recipient === session.user.id && !isSeen ? 1 : 0),
+            };
+
+            updatedContacts[contactIndex] = newContact;
           }
+
           return {
-            contacts: state.contacts.map((contact) =>
-              contact.id === message.sender &&
-                message.recipient === session.user.id
-                ? {
-                  ...contact,
-                  lastMessage:
-                    message.content ||
-                    (message.file
-                      ? message.file.name
-                      : message.type === "call"
-                        ? `${message.callDetails?.callType} call ${message.callDetails?.status}`
-                        : ""),
-                  timestamp: message.timestamp || new Date().toISOString(),
-                  displayTime: new Date(
-                    message.timestamp || Date.now()
-                  ).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Africa/Lagos",
-                  }),
-                  unread: contact.unread + (message.isSeen ? 0 : 1),
-                }
-                : contact
-            ),
+            contacts: sortContacts(updatedContacts),
           };
         });
 
-        const { activeChat } = get();
-        if (
-          message.recipient === session.user.id &&
-          message.sender === activeChat?.id
-        ) {
-          socket.emit("messageSeen", { messageId: message.id });
+        if (recipient === session.user.id && sender === activeChat?.id) {
+          set((state) => ({
+            contacts: state.contacts.map((contact): Contact =>
+              contact.id === activeChat.id ? { ...contact, unread: 0 } : contact
+            ),
+          }));
+          socket.emit("messageSeen", { messageId: id });
         }
       });
 
+      socket.on("chatSeen", ({ viewerId, seenAt }) => {
+
+        set((state) => ({
+          messages: state.messages.map((msg): Message =>
+            msg.recipient === viewerId && msg.isSeen === false
+              ? { ...msg, isSeen: true, seenAt: formatTime(seenAt) }
+              : msg
+          ),
+          contacts: state.contacts.map((contact): Contact =>
+            contact.id === viewerId ? { ...contact, unread: 0 } : contact
+          ),
+        }));
+      });
+
+
+      socket.off("messageSent");
       socket.on("messageSent", (message: Message) => {
         set((state) => ({
           messages: [
@@ -731,6 +880,7 @@ export const useSocketStore = create<SocketStore>()(
       socket.on(
         "messageSeen",
         ({ messageId, seenAt }: { messageId: string; seenAt: string }) => {
+
           set((state) => ({
             messages: state.messages.map((msg) =>
               msg.id === messageId
@@ -755,7 +905,7 @@ export const useSocketStore = create<SocketStore>()(
       );
 
       socket.on("receive-call", ({ from, offer, callType, callerName, callerLogo }) => {
-        console.log(`📞 Incoming ${callType} call from: ${callerName}`);
+
         const { ringtone } = get();
         if (ringtone) {
           ringtone.play().catch((err) => {
@@ -771,7 +921,6 @@ export const useSocketStore = create<SocketStore>()(
         });
 
         socket.once("call-cancelled", () => {
-          console.log("Call cancelled by caller, setting receiving to false");
           get().stopRingtone();
           set({ receiving: false, caller: null, callData: null });
         });
@@ -793,7 +942,6 @@ export const useSocketStore = create<SocketStore>()(
       });
 
       socket.on("call-answered", async ({ answer }) => {
-        console.log("✅ Call answered, setting remote description...");
         const { peerConnection, pendingIceCandidates } = get();
         if (peerConnection) {
           await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
@@ -813,7 +961,6 @@ export const useSocketStore = create<SocketStore>()(
         const { stopRingtone, peerConnection, localStream, localVideo, remoteVideo, callType, callData } = get();
         stopRingtone();
         set({ receiving: false });
-        console.log("Call ended by remote user");
         if (peerConnection) {
           peerConnection.close();
           set({ peerConnection: null });
@@ -828,22 +975,23 @@ export const useSocketStore = create<SocketStore>()(
         const recipientId = callData?.to
         if (recipientId) {
           socket?.emit("end-call", { to: recipientId });
-          if (callType) get().sendCallMessage("ended", callType, recipientId);
+          // if (callType) get().sendCallMessage("ended", callType, recipientId);
         }
         set({ callType: null, pendingIceCandidates: [], callData: null });
       });
 
-      socket.on("userStatus", ({ userId, online }: { userId: string; online: boolean }) => {
-        set((state) => ({
-          contacts: state.contacts.map((contact) =>
-            contact.id === userId ? { ...contact, online } : contact
-          ),
-          activeChat: state.activeChat?.id === userId ? { ...state.activeChat, online } : state.activeChat,
-        }));
-      });
+      // socket.on("userStatus", ({ userId, online }: { userId: string; online: boolean }) => {
+      //   set((state) => ({
+      //     contacts: state.contacts.map((contact) =>
+      //       contact.id === userId ? { ...contact, online } : contact
+      //     ),
+      //     activeChat: state.activeChat?.id === userId ? { ...state.activeChat, online } : state.activeChat,
+      //   }));
+      // });
 
       socket.on("active-users", (data: string[]) => {
-        console.log("🔥 Active Users: ", data);
+
+
         set({ activeUsers: data });
       });
 
@@ -856,11 +1004,10 @@ export const useSocketStore = create<SocketStore>()(
       });
 
       socket.on("newConnection", async (data: ConnectionsMade) => {
-        console.log("Chat sent: ", data);
         try {
           const [receiver, caller] = await Promise.all([
-            fetch(`/api/users/${data.to}`).then((res) => res.json()),
-            fetch(`/api/users/${data.from}`).then((res) => res.json()),
+            fetch(`/api/profile/get-users-by-id`, { body: data.to, method: "POST" }).then((res) => res.json()),
+            fetch(`/api/profile/get-users-by-id`, { body: data.from, method: "POST" }).then((res) => res.json()),
           ]);
           const from = receiver?.businessName || receiver?.fullName;
           const to = caller?.businessName || caller?.fullName;
@@ -871,17 +1018,14 @@ export const useSocketStore = create<SocketStore>()(
           );
         } catch (err) {
           console.error("Error fetching users for new connection:", err);
-          set({ error: "Failed to load new connection details" });
         }
       });
 
       socket.on("status-update", (data: Status) => {
-        console.log("📡 Service Status:", data);
         set({ status: data });
       });
 
       socket.on("new-notification", (notification: Notification) => {
-        console.log("📢 New Notification:", notification);
         get().addNotification({
           ...notification,
           createdAt: new Date(notification.createdAt),
@@ -909,7 +1053,7 @@ export const useSocketStore = create<SocketStore>()(
         clearInterval(statusInterval);
         socket.disconnect();
         set({ socket: null });
-      };
+      }
     },
 
     markAllNotificationsRead: async () => {
@@ -942,7 +1086,10 @@ export const useSocketStore = create<SocketStore>()(
 
     clearSocket: () => {
       const { socket, stopRingtone, peerConnection, localStream, localVideo, remoteVideo, remoteAudio } = get();
-      if (socket) socket.disconnect();
+      if (socket) {
+        socket.removeAllListeners();
+        socket.disconnect();
+      }
       stopRingtone();
       if (peerConnection) peerConnection.close();
       if (localStream) localStream.getTracks().forEach((track) => track.stop());

@@ -1,22 +1,14 @@
-import React from "react";
-import MessageStatus from "./MessageStatus";
-import { Contact, Message } from "../../../../../types";
 import { Clock, Download } from "lucide-react";
-import getCallMessageContent from "../../utils/getCallMessageContent";
-import useChat from "@/app/chat/hook/useChat";
-import formatFileSize from "@/shared/utils/formatFileSize";
+import MessageStatus from "./MessageStatus";
 import getFileIcon from "@/shared/components/composites/getFileIcon";
+import getCallMessageContent from "../../utils/getCallMessageContent";
+import { Message } from "../../../../../types";
 import { useSocketStore } from "@/shared/store/useSocketStore";
+import handleFileDownload from "../../utils/handleFileDownload";
+import ProfileImage from "@/shared/components/composites/ProfileImage";
 
-export default function MessageBubble({
-  message,
-  activeChat,
-}: {
-  message: Message;
-  activeChat: Contact | null;
-}) {
-  const { handleFileDownload } = useChat();
-
+export default function MessageBubble({ message }: { message: Message }) {
+  const { activeChat } = useSocketStore();
   return (
     <div
       className={`flex mb-3 sm:mb-4 ${
@@ -41,10 +33,13 @@ export default function MessageBubble({
             message.isOwn ? "flex-row-reverse space-x-reverse" : "flex-row"
           }`}
         >
-          <img
-            src={message.avatar}
-            alt={message.sender}
+          <ProfileImage
             className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0"
+            user={{
+              businessName: activeChat?.name,
+              fullName: activeChat?.name,
+            }}
+            logo={message.avatar}
           />
           <div
             className={`group px-3 py-2 rounded-2xl shadow-sm transition-all duration-200 ${
@@ -70,33 +65,37 @@ export default function MessageBubble({
                     />
                     <button
                       className="absolute top-2 right-2 p-1 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-opacity"
-                      onClick={() =>
-                        handleFileDownload(message.file.url, message.file.name)
-                      }
+                      onClick={() => {
+                        if (!message || !message.file) return;
+                        return handleFileDownload(
+                          message.file.url,
+                          message.file.name
+                        );
+                      }}
                     >
                       <Download className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
                   <div className="flex text-black items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                    {getFileIcon(message.file.name)}
+                    {message.file &&
+                      message &&
+                      getFileIcon({ fileName: message.file.name })}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
                         {message.file.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatFileSize(message.file.size || 0)}
                       </p>
                     </div>
                     <button className="p-1 hover:bg-gray-200 rounded flex-shrink-0">
                       <Download
                         className="w-4 h-4"
-                        onClick={() =>
-                          handleFileDownload(
+                        onClick={() => {
+                          if (!message || !message.file) return;
+                          return handleFileDownload(
                             message.file.url,
                             message.file.name
-                          )
-                        }
+                          );
+                        }}
                       />
                     </button>
                   </div>

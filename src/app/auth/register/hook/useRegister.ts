@@ -47,7 +47,9 @@ export default function useRegister() {
     };
 
     const validatePassword = (password: string): boolean => {
-        return password.length >= 8;
+        const regex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return regex.test(password);
     };
 
     const handleNestedChange = <
@@ -131,7 +133,7 @@ export default function useRegister() {
             newErrors.username = "Username must be at least 3 characters";
         if (!formData.password) newErrors.password = "Password is required";
         else if (!validatePassword(formData.password))
-            newErrors.password = "Password must be at least 8 characters";
+            newErrors.password = "Password must be at least 8 characters long, include uppercase & lowercase letters, a number, and a special character.";
         if (formData.password !== formData.confirmPassword)
             newErrors.confirmPassword = "Passwords do not match";
         if (!formData.agreedToTerms)
@@ -159,7 +161,6 @@ export default function useRegister() {
     const handleSubmit = async (e: React.FormEvent) => {
         setIssubmitting(true)
         e.preventDefault();
-        // console.log("Form submitted:", formData);
         if (validateForm()) {
             const logo_url = await uploadCloudinary(logoFile)
             const updatedFormData = { ...formData, logo: logo_url?.imageUrl };
@@ -174,15 +175,12 @@ export default function useRegister() {
 
                 if (pathname.includes("/auth/register")) {
                     useMessageModalStore.getState().onOpen({
-                        title: "Registration",
-                        message: "Registration successful! Redirecting you to the login page...",
+                        title: "Registration Successful",
+                        message: "We’ve sent a verification link to your email. Please check your inbox (and spam folder, just in case) to verify your account before logging in.",
                         type: "success",
-                        autoCloseDelay: 4000,
+                        autoClose: false,
+                        closable: false,
                     });
-                    setTimeout(() => {
-                        router.push("/auth/login")
-                    }, 4000)
-
                 } else {
 
                     useMessageModalStore.getState().onOpen({

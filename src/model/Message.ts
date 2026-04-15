@@ -35,6 +35,9 @@ const messageSchema = new mongoose.Schema(
         type: String,
         enum: ["audio", "video"],
       },
+      startedAt: { type: Date },
+      endedAt: { type: Date },
+      duration: { type: Number },
     },
     isSeen: {
       type: Boolean,
@@ -46,6 +49,8 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+messageSchema.index({ sender: 1, recipient: 1, createdAt: -1 });
 
 const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 

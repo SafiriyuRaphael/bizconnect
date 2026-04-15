@@ -39,7 +39,7 @@ export default function ResetPassword() {
 
     if (tokenParam) {
       setToken(tokenParam);
-      // Verify token validity (optional - you can skip this if you want to verify only on submit)
+      // Verify token validity
       verifyToken(tokenParam, emailParam);
     } else {
       setIsValidToken(false);
@@ -163,7 +163,7 @@ export default function ResetPassword() {
   // Show success state
   if (isPasswordReset) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 pt-28">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 ">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl mb-4">
@@ -212,7 +212,7 @@ export default function ResetPassword() {
   // Show invalid token state
   if (isValidToken === false) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 pt-28">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 ">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl mb-4">
@@ -284,7 +284,7 @@ export default function ResetPassword() {
 
   // Show reset password form
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8 pt-28">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">

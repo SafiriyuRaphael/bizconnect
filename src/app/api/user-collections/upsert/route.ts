@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ message: "Please sign in to continue." }, { status: 401 });
   }
 
   try {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     if (!refId || !type) {
       return NextResponse.json(
-        { error: "refId and type are required" },
+        { message: "refId and type are required", success: false },
         { status: 400 }
       );
     }
@@ -40,8 +40,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, action: "added", data: newEntry });
     }
   } catch (err: any) {
+    console.error('[FAVORITES_UPSERT_ERROR]', err);
     return NextResponse.json(
-      { error: err.message || "Something went wrong" },
+      { message: "Failed to toggle favorite, please try again ...", success: false },
       { status: 500 }
     );
   }

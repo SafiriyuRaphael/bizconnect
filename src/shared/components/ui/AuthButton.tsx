@@ -38,7 +38,7 @@ export default function AuthButton({ isLoggedIn, session }: Props) {
   const name = session?.user.name;
   const userId = session?.user.id;
 
-  console.log("Session bruh:", session);
+  // console.log("Session bruh:", session);
 
   const fallbackSrc = { businessName, fullName: name };
 

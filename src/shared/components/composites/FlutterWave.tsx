@@ -74,18 +74,20 @@ const FlutterwaveCheckout = ({
       callback: async (response: FlutterwaveResponse) => {
         console.log("Payment response:", response);
         setLoading(false);
-        if (response.status === "successful") {
+        if (
+          response.status === "successful" ||
+          response.status === "completed"
+        ) {
+          window.closeFlutterwaveCheckout?.();
           makePayment.mutate({
             paymentProvider: "flutterwave",
             tx_ref: response.tx_ref!,
             itemId: productItem._id!,
-            // 🛑 Don't send to Flutterwave — just send to your backend
             buyerId: session.user.id,
             sellerId: productItem.userId!,
             price: Number(productItem.price),
             quantity,
           });
-          window.closeFlutterwaveCheckout?.();
         }
       },
       onclose: () => {

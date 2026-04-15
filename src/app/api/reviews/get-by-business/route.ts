@@ -7,14 +7,14 @@ export async function POST(req: Request) {
         const { businessId } = await req.json();
 
         if (!businessId) {
-            return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
+            return NextResponse.json({ message: "Business ID is required", success: false }, { status: 400 });
         }
 
         await connectToDatabase();
         const business = await Business.findById(businessId).lean() as any;
 
         if (!business) {
-            return NextResponse.json({ error: "Business not found" }, { status: 404 });
+            return NextResponse.json({ message: "Business not found", success: false }, { status: 404 });
         }
 
         return NextResponse.json({
@@ -23,14 +23,10 @@ export async function POST(req: Request) {
         }, { status: 200 });
 
     } catch (err) {
+        console.error('BUSINESS_REVIEW_ERROR]', err);
         return NextResponse.json({
-            error: "Server error",
-            details:
-                process.env.NODE_ENV === "development"
-                    ? err instanceof Error
-                        ? err.message
-                        : String(err)
-                    : undefined,
+            message: "Failed to get business reviews",
+            success: false,
         }, { status: 500 });
     }
 }

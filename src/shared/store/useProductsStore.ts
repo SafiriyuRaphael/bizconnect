@@ -72,7 +72,7 @@ interface ProductState {
 
 export const useProductStore = create<ProductState>((set, get) => ({
     itemData: null,
-    userItemsQuery: {},
+    userItemsQuery: { page: "1", limit: "6" },
     showAddProduct: false,
     showViewProduct: false,
     showEditProduct: false,
@@ -109,7 +109,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     tagInput: '',
     editTagInput: '',
     setUserItemsQuery: (userItems) => set((state) => ({
-        userItemsQuery: { ...state.userItemsQuery, userItems }
+        userItemsQuery: { ...state.userItemsQuery, ...userItems }
     })),
     setSelectedPaymentMethod: (method) => set({ selectedPaymentMethod: method }),
     setItemData: (item) => set({ itemData: item }),

@@ -1,28 +1,45 @@
-import { Contact, Message } from "../../../../types";
+import { Message } from "../../../../types";
+import formatDuration from "./formatDuration";
 
-export default async function getCallMessageContent(msg: Message, activeChat: Contact | null) {
+export default function getCallMessageContent(msg: Message, activeChat: { name: string } | null) {
   if (msg.type !== "call" || !msg.callDetails) return "";
-  const { status, callType } = msg.callDetails;
+
+  const { status, callType, duration } = msg.callDetails;
   const isOwn = msg.isOwn;
+
+  const capCall = callType.charAt(0).toUpperCase() + callType.slice(1);
+
   switch (status) {
     case "attempted":
       return isOwn
-        ? `You attempted a ${callType} call`
-        : `${activeChat?.name} attempted a ${callType} call`;
+        ? `You tried to start a ${callType} call`
+        : `${activeChat?.name} tried to start a ${callType} call`;
+
     case "connected":
-      return `Successful ${callType} call at ${msg.displayTime}`;
+      return duration
+        ? `${capCall} call • Duration: ${formatDuration(Number(duration))}`
+        : `Successful ${callType} call at ${msg.displayTime}`;
+
     case "failed":
-      return `${callType?.charAt(0).toUpperCase() + callType?.slice(1)} call failed`;
+      return isOwn
+        ? `Your ${callType} call couldn’t connect`
+        : `Missed ${callType} call from ${activeChat?.name}`;
+
     case "unavailable":
       return isOwn
-        ? `${activeChat?.name} was offline for your ${callType} call`
-        : `You were offline for a ${callType} call from ${activeChat?.name}`;
+        ? `${capCall} call could not be completed`
+        : `Missed ${callType} call`;
+
     case "rejected":
       return isOwn
-        ? `${activeChat?.name} rejected your ${callType} call`
-        : `You rejected a ${callType} call`;
+        ? `${activeChat?.name} declined your ${callType} call`
+        : `You declined a ${callType} call`;
+
     case "ended":
-      return `${callType.charAt(0).toUpperCase() + callType.slice(1)} call ended`;
+      return duration
+        ? `${capCall} call ended • Duration: ${formatDuration(Number(duration))}`
+        : `${capCall} call ended`;
+
     default:
       return "";
   }

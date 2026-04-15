@@ -24,19 +24,12 @@ const UsersProfile = ({
     }
   }, [user]);
 
-  const { comments, selectedImageIndex, setSelectedImageIndex } =
+  const { selectedImageIndex, setSelectedImageIndex } =
     useUserDashboardStore();
 
   const { fetchInitialData } = useUserDashboardActions();
 
-
   const { itemData, showPaymentModal } = useProductStore();
-
-  const averageRating =
-    comments.length > 0
-      ? comments.reduce((acc, comment) => acc + comment.rating, 0) /
-        comments.length
-      : 0;
 
   useEffect(() => {
     fetchInitialData({ user, session });
@@ -55,21 +48,16 @@ const UsersProfile = ({
           setSelectedImageIndex={setSelectedImageIndex}
         />
       )}
-
-      {/* Header */}
-      <Header/>
+      
+      <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Main Content */}
-          <Main
-            session={session}
-          />
+        
+          <Main session={session} />
 
-          {/* Sidebar */}
-          <Sidebar
        
-          />
+          <Sidebar />
         </div>
       </div>
     </div>

@@ -12,6 +12,9 @@ import { authOptions } from '@/lib/auth/options'
 import { VerificationLog } from '@/model/VerificationLog'
 import { Verification } from '@/model/Verification'
 import { Wallet } from '@/model/Wallet'
+import { BASEURL } from '@/shared/constants/url'
+import { sendEmail } from '@/lib/auth/sendEmail'
+import createNotification from '@/lib/socket/createNotification'
 
 
 export async function POST(req: Request) {
@@ -20,6 +23,7 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions);
         const isAdmin = session?.user.userRole === "admin"
         const data = await req.json()
+
 
 
         const { email, password, username, phone, userType, businessCategory, businessName, businessDescription, fullName, agreedToTerms, businessAddress, dateOfBirth, gender, deliveryAddress, website, confirmPassword, logo, deliveryTime, displayPics, priceRange, verifiedBusiness }: RegisterData = data
@@ -44,8 +48,8 @@ export async function POST(req: Request) {
         // Check for existing email OR username
         const existingUser = await User.findOne({
             $or: [
-                { email: email.toLowerCase().trim() }, // Case-insensitive check
-                { username: username.trim() } // Exact match
+                { email: email.toLowerCase().trim() },
+                { username: username.trim() }
             ]
         });
         if (existingUser) {
@@ -150,6 +154,36 @@ export async function POST(req: Request) {
             }
         }
 
+        const token = crypto.randomUUID();
+        user.verificationToken = token;
+        user.verificationTokenExpiry = Date.now() + 1000 * 60 * 60;
+        await user.save()
+        const verifyLink = `${BASEURL}/auth/verify?token=${token}&email=${user.email}`;
+
+        const html = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color:#4F46E5;">Hey ${user.fullName} 👋, welcome aboard!</h2>
+          <p>We're excited to have you join us. Before you dive in, please confirm that this email belongs to you.</p>
+          <p>
+            Just click the button below to verify your email and activate your account:
+          </p>
+          <a href="${verifyLink}" 
+             style="display:inline-block;padding:12px 24px;
+                    background:#4F46E5;color:#fff;text-decoration:none;
+                    font-weight:bold;border-radius:8px;margin:20px 0;">
+            ✅ Verify My Email
+          </a>
+          <p>If you didn’t sign up, you can safely ignore this email.</p>
+          <p style="font-size: 12px; color: #666;">
+            (P.S. This link will expire in 1 hour ⏳)
+          </p>
+        </div>
+      `;
+
+
+        await sendEmail(user.email, "Verify your email", html);
+
+
         // A welcome message from a system user 
 
         const systemUserId = "689ba5b3f6749f2f70664c18";
@@ -167,6 +201,16 @@ export async function POST(req: Request) {
             isSeen: false,
         });
         await welcomeMessage.save();
+
+        await createNotification({
+            userId: user._id,
+            type: "SYSTEM",
+            title: "Welcome to Bizonnect 🎉",
+            message: `Hi ${fullName}, we're excited to have you join the Bizonnect community!  
+          Start exploring, connect with businesses, and let’s build something amazing together.`,
+            entityType: "SYSTEM",
+            priority: "NORMAL",
+        });
 
         return NextResponse.json({ msg: "User created", user: { fullName, email, username, userType }, status: "success" })
     }

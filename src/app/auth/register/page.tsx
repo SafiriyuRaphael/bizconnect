@@ -19,15 +19,12 @@ export default function BizconnectRegister() {
     isSubmitting,
   } = useRegister();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 sm:pt-14 via-white to-indigo-50 ">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <Header />
 
-        {/* User Type Toggle */}
         <TypeToggle userType={userType} setUserType={setUserType} />
 
-        {/* Registration Form */}
         <Form
           errors={errors}
           formData={formData}
@@ -40,7 +37,6 @@ export default function BizconnectRegister() {
           logoFile={logoFile}
         />
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

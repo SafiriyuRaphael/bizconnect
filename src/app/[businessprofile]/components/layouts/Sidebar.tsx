@@ -29,12 +29,14 @@ import handleShare from "../../utils/handleShare";
 import getRatingColor from "@/shared/utils/getRatingColor";
 import { useTailwindBreakpoints } from "@/shared/hooks/useWindowScreenSize";
 import useProductsApi from "@/app/profile/[usersId]/products/hooks/useProductsApi";
+import { useSocketStore } from "@/shared/store/useSocketStore";
 
 export default function Sidebar() {
   const { handleChatClick, handleCopy } = useUserDashboardActions();
   const { comments, copied, user, averageRating } = useUserDashboardStore();
   const { isMd } = useTailwindBreakpoints();
   const { fetchedItems } = useProductsApi();
+  const { startCall } = useSocketStore();
 
   if (!user) return null;
   return (
@@ -56,7 +58,7 @@ export default function Sidebar() {
             <>
               <button
                 className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
-                onClick={() => handleChatClick(user)}
+                onClick={() => startCall("audio", user._id)}
               >
                 <PhoneCall className="w-5 h-5" />
                 <span>Call Business</span>
@@ -129,10 +131,7 @@ export default function Sidebar() {
                 Products
               </span>
               <span className="font-semibold text-gray-900">
-                {
-                  fetchedItems?.items.filter((item) => item.type === "product")
-                    .length
-                }
+                {fetchedItems?.stats.totalProducts}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -141,10 +140,7 @@ export default function Sidebar() {
                 Services
               </span>
               <span className="font-semibold text-gray-900">
-                {
-                  fetchedItems?.items.filter((item) => item.type === "service")
-                    .length
-                }
+                {fetchedItems.stats.totalServices}
               </span>
             </div>
             <div className="flex justify-between items-center">

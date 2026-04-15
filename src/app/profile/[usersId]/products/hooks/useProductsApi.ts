@@ -9,12 +9,14 @@ import getProducts from '@/lib/products/getProducts';
 import editProductsApi from '@/lib/products/editProducts';
 import deleteProductApi from '@/lib/products/deleteProductApi';
 import getItems from '@/app/[businessprofile]/api/getItem';
+import debounce from 'lodash.debounce';
+import { useCallback } from 'react';
 // import getProductIds from '@/lib/products/getIds';
 // import getProductsById from '@/lib/products/getProductsById';
 
 export default function useProductsApi() {
     const queryClient = useQueryClient();
-    const { newProduct, setShowAddProduct, setNewProduct, setEditTagInput, setEditProduct, selectedProduct, setTagInput, setShowEditProduct, setSelectedProduct, setShowDeleteProduct, editProduct, image, setLoading, editImage, userId, userItemsQuery } = useProductStore()
+    const { newProduct, setShowAddProduct, setNewProduct, setEditTagInput, setEditProduct, selectedProduct, setTagInput, setShowEditProduct, setSelectedProduct, setShowDeleteProduct, editProduct, image, setLoading, editImage, userId, userItemsQuery, setUserItemsQuery } = useProductStore()
     const { profile } = useEditProfileStore()
 
     const { data: fetchedProducts, isLoading: queryLoading } = useQuery<ProductItemsResponse, Error>({
@@ -22,7 +24,7 @@ export default function useProductsApi() {
         queryFn: getProducts
     });
 
-    const { data: fetchedItems, isLoading: isFetchingItems } = useQuery<ProductItemsResponse, Error>({
+    const { data: fetchedItems, isFetching: isFetchingItems, } = useQuery<ProductItemsResponse, Error>({
         queryKey: ['get-items', userId, userItemsQuery],
         queryFn: () => getItems({ id: userId, params: userItemsQuery }),
         enabled: !!userId
@@ -243,5 +245,27 @@ export default function useProductsApi() {
         setShowDeleteProduct(true);
     };
 
-    return { confirmDelete, saveEditProduct, handleEditProduct, handleAddProduct, queryLoading, handleDeleteProduct, addMutation, fetchedProducts, editMutation, deleteMutation, handleToggleAvailable, fetchedItems, isFetchingItems }
+    const debouncedSetSearch = useCallback(
+        debounce((value: string) => {
+            setUserItemsQuery({ q: value, page: "1" });
+        }, 400),
+        []
+    );
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+
+        if (name === "q") {
+            debouncedSetSearch(value);
+        } else {
+            setUserItemsQuery({
+                [name]: name === "limit" || name === "page" ? Number(value) : value,
+                page: ["sortBy", "filterBy", "limit"].includes(name) ? "1" : userItemsQuery.page,
+            });
+        }
+    };
+
+    return { confirmDelete, saveEditProduct, handleEditProduct, handleAddProduct, queryLoading, handleDeleteProduct, addMutation, fetchedProducts, editMutation, deleteMutation, handleToggleAvailable, fetchedItems, isFetchingItems, handleInputChange }
 }

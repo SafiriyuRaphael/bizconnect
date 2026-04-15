@@ -1,4 +1,4 @@
-import { AllBusinessData, BusinessQueryParams } from "../../../types";
+import { AllBusinessData, BusinessQueryParams } from "../../../../types";
 
 export default async function getAllBusiness(params: BusinessQueryParams = {}) {
     const query = new URLSearchParams();

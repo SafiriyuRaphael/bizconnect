@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@paystack/inline-js": "^2.22.7",
-    "@tanstack/react-query": "^5.84.1",
+    "@tanstack/query-core": "^5.89.0",
+    "@tanstack/react-query": "^5.89.0",
     "axios": "^1.11.0",
     "axios-retry": "^4.5.0",
     "bcrypt": "^6.0.0",

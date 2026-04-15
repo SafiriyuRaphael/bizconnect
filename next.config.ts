@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       {
         source: '/',
         destination: '/marketplace',
-        permanent: true, // 308 Permanent Redirect (SEO-friendly)
+        permanent: true, 
       },
     ];
   },

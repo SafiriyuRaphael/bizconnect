@@ -18,23 +18,22 @@ import formatPrice from "@/shared/utils/formatPrice";
 import useUserDashboardActions from "../../hooks";
 import { useProductStore } from "@/shared/store/useProductsStore";
 import { useUserDashboardStore } from "../../store";
-import { useState } from "react";
 import Favorites from "@/shared/components/ui/Favorites";
 
 export default function ItemCard({ item }: { item: ProductsItem }) {
   const { handleViewItem, handleChatClick } = useUserDashboardActions();
   const { user } = useUserDashboardStore();
   const { setShowPaymentModal, setItemData } = useProductStore();
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   if (!user) return null;
 
   const itemdata = {
-    id: item._id,
+    _id: item._id,
     title: item.title,
     description: item.description,
     price: item.price,
     media: item.media,
+    userId: user._id,
     type: item.type,
     deliveryTime: item.deliveryTime,
     useEscrow: item.useEscrow,
@@ -48,13 +47,8 @@ export default function ItemCard({ item }: { item: ProductsItem }) {
     },
   };
 
-  const handleWishlistToggle = () => {
-    setIsWishlisted(!isWishlisted);
-    // Add your wishlist logic here (API call, state management, etc.)
-  };
-
   return (
-    <div className="h-full w-full flex flex-col bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-gray-300 transition-all duration-300 relative group overflow-hidden min-h-[550px] sm:min-h-[600px] lg:min-h-[650px]">
+    <div className="h-full w-full flex flex-col bg-white border border-gray-200 rounded-xl hover:shadow-lg hover:border-gray-300 transition-all duration-300 relative group overflow-hidden min-h-full sm:min-h-[600px] lg:min-h-[650px]">
       {/* Item Status Badge */}
       <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
         {item.isAvailable ? (
@@ -75,7 +69,7 @@ export default function ItemCard({ item }: { item: ProductsItem }) {
       {/* Wishlist Button */}
       <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10">
         <Favorites
-          businessId={itemdata.id}
+          businessId={itemdata._id}
           showText={false}
           type="wishlist"
           variant="compact"
@@ -124,7 +118,7 @@ export default function ItemCard({ item }: { item: ProductsItem }) {
             ) : (
               <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5" />
             )}
-            <span className="hidden sm:inline">
+            <span className=" sm:inline">
               {item.type === "product" ? "Product" : "Service"}
             </span>
             <span className="sm:hidden">
@@ -206,7 +200,7 @@ export default function ItemCard({ item }: { item: ProductsItem }) {
         {/* Action Buttons - Responsive Stack */}
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
           <button
-            onClick={() => handleViewItem(item._id)}
+            onClick={() => handleViewItem(item._id, item.title)}
             className="w-full sm:flex-1 border-2 border-gray-200 text-gray-700 px-3 py-2 sm:px-4 sm:py-3 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-xs sm:text-sm font-medium flex items-center justify-center group-hover:border-gray-400"
           >
             <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
