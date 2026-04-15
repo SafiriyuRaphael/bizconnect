@@ -14,14 +14,14 @@ type Params = {
   params: Promise<{ slugAndId: string }>;
 };
 
-export async function generateStaticParams() {
-  const productIds = await getProductIds({});
-  return productIds?.ids.map(
-    ({ id, title }: { id: string; title: string }) => ({
-      slugAndId: `${slugify(title)}-${id}`,
-    })
-  );
-}
+// export async function generateStaticParams() {
+//   const productIds = await getProductIds({});
+//   return productIds?.ids.map(
+//     ({ id, title }: { id: string; title: string }) => ({
+//       slugAndId: `${slugify(title)}-${id}`,
+//     }),
+//   );
+// }
 
 export async function generateMetadata({ params }: Params) {
   const slugAndId = (await params).slugAndId;
@@ -75,16 +75,16 @@ export async function generateMetadata({ params }: Params) {
 }
 
 export default async function page({ params }: Params) {
-  const session = await getServerSession(authOptions);
+  // const session = await getServerSession(authOptions);
 
   const slugAndId = (await params).slugAndId;
   const id = slugAndId.split("-").pop()!;
 
-  if (!session?.user) {
-    redirect(
-      `/auth/login?callbackUrl=${encodeURIComponent(`/items/${slugAndId}`)}`
-    );
-  }
+  // if (!session?.user) {
+  //   redirect(
+  //     `/auth/login?callbackUrl=${encodeURIComponent(`/items/${slugAndId}`)}`
+  //   );
+  // }
 
   const item = await getProductsById({ id });
 
@@ -148,7 +148,7 @@ export default async function page({ params }: Params) {
                         productItem.user.fullName,
                     },
                   },
-                }
+                },
           ),
         }}
       />

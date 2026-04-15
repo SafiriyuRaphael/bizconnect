@@ -66,12 +66,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 // export const dynamic = "force-dynamic";
 
-export async function generateStaticParams() {
-  const usernames = await getAllUsername();
-  return usernames.usernames.map((username: string) => ({
-    username,
-  }));
-}
+// export async function generateStaticParams() {
+//   const usernames = await getAllUsername();
+//   return usernames.usernames.map((username: string) => ({
+//     businessprofile: username,
+//   }));
+// }
 
 export default async function page({ params }: Params) {
   const session = await getServerSession(authOptions);
