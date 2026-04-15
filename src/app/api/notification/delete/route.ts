@@ -1,7 +1,6 @@
 // app/api/notifications/delete/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import Notification from "@/model/Notification";
 
@@ -9,7 +8,7 @@ export async function POST(req: Request) {
     await connectToDatabase()
 
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user?.id) {
             return NextResponse.json(
@@ -27,7 +26,7 @@ export async function POST(req: Request) {
             );
         }
 
-       
+
         const result = await Notification.deleteMany({
             _id: { $in: ids },
             userId: session.user.id,

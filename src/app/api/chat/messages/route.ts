@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import Message from "@/model/Message";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 
 // /api/messages?recipientId=123
 export async function GET(req: Request) {
     await connectToDatabase();
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

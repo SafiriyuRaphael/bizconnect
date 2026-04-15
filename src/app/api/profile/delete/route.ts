@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import User from "@/model/User";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { compare } from "bcrypt";
 
 export async function DELETE(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session?.user) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }

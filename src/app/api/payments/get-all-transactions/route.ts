@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { WalletTransaction } from "@/model/WalletTransaction";
 import User from "@/model/User";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import mongoose from "mongoose";
 
 type TransactionType =
@@ -25,7 +24,7 @@ interface TransactionFilter {
 export async function GET(req: NextRequest) {
     await connectToDatabase();
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user?.id) {
         return NextResponse.json(

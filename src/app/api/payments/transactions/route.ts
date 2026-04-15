@@ -1,7 +1,6 @@
 // app/api/analytics/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import mongoose from "mongoose";
 import { Escrow } from "@/model/Escrow";
@@ -568,7 +567,7 @@ function validateQueryParams(url: URL) {
 export async function GET(req: Request) {
     try {
         // Authentication
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         const sessionUserId = session?.user?.id;
 
         if (!sessionUserId) {

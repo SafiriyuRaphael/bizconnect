@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongo/initDB"
 import { UserCollection } from "@/model/UserCollection"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth/options"
+import { auth } from "@/auth";
 
 export async function GET(
     req: NextRequest
@@ -10,7 +9,7 @@ export async function GET(
     try {
         await connectToDatabase()
 
-        const session = await getServerSession(authOptions)
+        const session = await auth();
         if (!session) return NextResponse.json({ message: "Unauthorized", success: false }, { status: 401 });
 
         const userId = session?.user.id

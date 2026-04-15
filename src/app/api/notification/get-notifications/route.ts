@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import Notification from "@/model/Notification";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 
 export async function GET(req: Request) {
-    const user = await getServerSession(authOptions)
+    const user = await auth();
     const userId = user?.user.id
     if (!userId) {
         return NextResponse.json({ error: "userId is required" }, { status: 400 });

@@ -1,13 +1,13 @@
 // /api/items/overview/route.ts
-import { authOptions } from "@/lib/auth/options";
+
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Business } from "@/model/Business";
 import { Item } from "@/model/Item";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userId = session?.user?.id;
 
     if (!userId) {

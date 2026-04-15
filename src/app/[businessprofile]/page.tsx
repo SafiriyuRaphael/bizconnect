@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 import getUserByUsername from "@/app/[businessprofile]/api/getUsersByUsername";
 import UsersProfile from "./components";
@@ -74,7 +73,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 // }
 
 export default async function page({ params }: Params) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const username = (await params).businessprofile;
 
   if (!session?.user) {

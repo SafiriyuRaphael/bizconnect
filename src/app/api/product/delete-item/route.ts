@@ -1,8 +1,7 @@
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { NextRequest, NextResponse } from 'next/server';
 import { Item } from '@/model/Item';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/options';
+import { auth } from "@/auth";
 import { deleteFromCloudinary } from '@/lib/cloudinary/deleteFromCloudinary';
 import { BusinessDisplayPicsProps } from '../../../../../types';
 
@@ -10,7 +9,7 @@ export async function DELETE(req: NextRequest) {
     try {
         await connectToDatabase();
 
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

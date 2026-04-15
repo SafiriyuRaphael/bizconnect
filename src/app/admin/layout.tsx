@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Header from "./components/Header";
 import Navigation from "./components/Navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -15,7 +14,7 @@ export default async function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (session?.user.userRole !== "admin") {
     redirect("/unauthorized");
   }

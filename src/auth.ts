@@ -1,14 +1,14 @@
 // src/lib/auth/options.ts
-import { AuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import User from '@/model/User';
 import { compare } from "bcrypt";
 import { BASEURL } from "@/shared/constants/url";
-import { sendEmail } from "./sendEmail";
+import { sendEmail } from "@/lib/auth/sendEmail";
 
-export const authOptions: AuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -140,4 +140,4 @@ export const authOptions: AuthOptions = {
             return session;
         },
     },
-};
+});

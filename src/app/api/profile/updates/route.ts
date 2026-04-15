@@ -4,14 +4,13 @@ import User from "@/model/User";
 import { Business } from "@/model/Business";
 import { Customer } from "@/model/Customer";
 import { hash } from 'bcrypt'
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 
 export async function PUT(req: Request) {
 
 
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session) {
             return NextResponse.json(

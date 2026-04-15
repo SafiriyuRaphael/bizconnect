@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import getUserById from "@/lib/profile/getUserById";
 import UserInitializer from "../components/layout/SetUserStore";
@@ -18,7 +17,7 @@ type Params = {
 export const dynamic = "force-dynamic";
 
 export default async function ProfileLayout({ children, params }: Params) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   if (!session?.user) {
     redirect("/auth/login");

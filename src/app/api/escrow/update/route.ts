@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Escrow } from "@/model/Escrow";
 import { Wallet } from "@/model/Wallet";
@@ -14,7 +13,7 @@ import { AllBusinessProps } from "../../../../../types";
 type UpdateAction = "delivered" | "released";
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userIdStr = session?.user?.id;
 
     if (!userIdStr) {

@@ -3,8 +3,7 @@ import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Escrow } from '@/model/Escrow';
 import { Wallet } from '@/model/Wallet';
 import { WalletTransaction } from '@/model/WalletTransaction';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/options';
+import { auth } from "@/auth";
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
 import User from '@/model/User';
@@ -15,7 +14,7 @@ import { Item } from '@/model/Item';
 export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session || !session.user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

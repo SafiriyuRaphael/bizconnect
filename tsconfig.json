@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -19,12 +23,29 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "~/*": ["../*"] ,
-      "@ui/*": ["./src/shared/components/ui/*"],
-      "@modals/*": ["./src/shared/components/modal/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "~/*": [
+        "../*"
+      ],
+      "@ui/*": [
+        "./src/shared/components/ui/*"
+      ],
+      "@modals/*": [
+        "./src/shared/components/modal/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/payments/escrow-payment"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/api/payments/escrow-payment",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

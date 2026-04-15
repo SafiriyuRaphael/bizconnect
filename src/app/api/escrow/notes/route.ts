@@ -3,14 +3,13 @@ import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Escrow } from "@/model/Escrow";
 import mongoose from "mongoose";
 import createNotification from "@/lib/socket/createNotification";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 
 export async function PATCH(req: Request) {
   try {
     await connectToDatabase();
 
-    const session = await getServerSession(authOptions)
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json(

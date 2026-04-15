@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import mongoose from "mongoose";
 import { Escrow } from "@/model/Escrow";
@@ -22,7 +21,7 @@ type RespondPayload = {
 };
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userIdStr = session?.user?.id;
 
     if (!userIdStr) {

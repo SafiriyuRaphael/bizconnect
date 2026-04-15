@@ -3,7 +3,7 @@ import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Business } from '@/model/Business';
 import { Item } from '@/model/Item';
 import User from '@/model/User';
-import { getServerSession } from "next-auth"; // if you’re using next-auth
+import { auth } from "@/auth";
 import { AnyUser } from '../../../../../types';
 
 export async function GET(req: Request) {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
 
         // Session / logged-in user
-        const session = await getServerSession();
+        const session = await auth();
         let userLocation: string | null = null;
 
         if (session?.user?.email) {

@@ -1,12 +1,11 @@
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Item } from '@/model/Item';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/options';
+import { auth } from "@/auth";
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         const user = session?.user?.id;
 
         if (!user) {

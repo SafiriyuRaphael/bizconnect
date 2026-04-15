@@ -11,8 +11,7 @@ import QueryErrorHandler from "../shared/components/composites/QueryErrorHandler
 import Footer from "../shared/components/layout/Footer";
 import { BASEURL } from "@/shared/constants/url";
 import Script from "next/script";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -129,7 +128,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   return (
     <html lang="en">
       <Script

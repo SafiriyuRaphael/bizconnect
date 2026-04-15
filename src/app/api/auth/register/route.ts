@@ -7,8 +7,7 @@ import { Business } from '@/model/Business'
 import { RegisterData } from '../../../../../types'
 import Message from '@/model/Message'
 import mongoose from 'mongoose'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/options'
+import { auth } from "@/auth";
 import { VerificationLog } from '@/model/VerificationLog'
 import { Verification } from '@/model/Verification'
 import { Wallet } from '@/model/Wallet'
@@ -20,7 +19,7 @@ import createNotification from '@/lib/socket/createNotification'
 export async function POST(req: Request) {
 
     try {
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         const isAdmin = session?.user.userRole === "admin"
         const data = await req.json()
 

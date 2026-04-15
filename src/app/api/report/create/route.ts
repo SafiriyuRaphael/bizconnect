@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth/options"
+import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/mongo/initDB"
 import Report from "@/model/Reports"
 
 export async function POST(req: NextRequest) {
     try {
         await connectToDatabase()
-        const session = await getServerSession(authOptions)
+        const session = await auth();
 
         if (!session) {
             return NextResponse.json(

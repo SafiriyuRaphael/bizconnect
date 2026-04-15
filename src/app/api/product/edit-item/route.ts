@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongo/initDB';
 import { Item } from '@/model/Item';
 import { Business } from '@/model/Business';
-import { authOptions } from '@/lib/auth/options';
-import { getServerSession } from 'next-auth';
+import { auth } from "@/auth";
 import { redirect } from 'next/navigation';
 
 export async function PATCH(req: NextRequest) {
     try {
         await connectToDatabase();
-        const session = await getServerSession(authOptions);
+        const session = await auth();
 
         if (!session?.user) {
             redirect("/auth/login");

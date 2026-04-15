@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 import ItemPage from "../components/ItemPage";
 import getProductIds from "@/lib/products/getIds";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import Script from "next/script";
 import { ProductsItemsPageProps } from "../../../../types";
 import slugify from "@/shared/utils/slugify";
@@ -75,7 +74,7 @@ export async function generateMetadata({ params }: Params) {
 }
 
 export default async function page({ params }: Params) {
-  // const session = await getServerSession(authOptions);
+  // const session = await auth();
 
   const slugAndId = (await params).slugAndId;
   const id = slugAndId.split("-").pop()!;

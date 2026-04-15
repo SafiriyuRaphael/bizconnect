@@ -1,14 +1,13 @@
 import { connectToDatabase } from "@/lib/mongo/initDB";
 import { Verification } from "@/model/Verification";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { VerificationLog } from "@/model/VerificationLog";
 
 export async function POST(req: Request) {
     try {
         await connectToDatabase();
-        const session = await getServerSession(authOptions);
+        const session = await auth();
         if (!session) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
         const user = session.user;
