@@ -75,7 +75,6 @@ export default function useLogin() {
                     redirect: false,
                 };
 
-
                 const res = await signIn("credentials", {
                     emailOrUsername: loginData.emailOrUsername,
                     password: loginData.password,
