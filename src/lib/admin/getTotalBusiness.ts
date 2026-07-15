@@ -19,7 +19,8 @@ export default async function getTotalBusiness() {
 
     } catch (err: any) {
         console.error("getConnectionsAnalytics error:", err.message || err);
-        throw new Error("Something went wrong while fetching connections analytics.");
+        throw err
+        // throw new Error("Something went wrong while fetching connections analytics.");
     }
 
 }
